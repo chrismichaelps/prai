@@ -1,4 +1,5 @@
 import { Effect, Ref, Stream, Schema } from "effect"
+import type { SearchResult } from "@/types/chat"
 import { OpenRouter } from "./services/OpenRouter"
 import { ConfigService } from "./services/Config"
 import { Redux } from "./services/Redux"
@@ -48,41 +49,36 @@ export const sendChatMessage = (content: string) => Effect.gen(function* () {
   yield* Redux.dispatch(setSuggestions([]))
   yield* Redux.dispatch(setActiveAdaptiveData([]))
 
-  const state = yield* Redux.getState()
-  const messages = state.chat.messages
+  const messages = yield* Redux.getState().pipe(Effect.map((s) => s.chat.messages))
   const stream = openRouter.chat(messages)
 
   yield* Redux.dispatch(addMessage({ role: "assistant" as const, content: "" }))
 
   /** @Logic.Chat.Ref */
   const assistantContentRef = yield* Ref.make("")
-  const pendingBufferRef = yield* Ref.make("")
+  const thoughtContentRef = yield* Ref.make("")
+  const isThoughtRef = yield* Ref.make(false)
   const thoughtStartTimeRef = yield* Ref.make(0)
+  const extractedSourcesRef = yield* Ref.make<SearchResult[]>([])
 
   /** @Logic.Chat.StreamConsumption */
   yield* Stream.runForEach(stream, (chunk: string) =>
     Effect.gen(function* () {
-      const pending = yield* Ref.get(pendingBufferRef)
-      let remaining = pending + chunk
-      yield* Ref.set(pendingBufferRef, "")
-
-      const lines = remaining.split("\n")
-      /** @Logic.Chat.PartialChunk */
-      if (!remaining.endsWith("\n")) {
-        const incomplete = lines.pop() || ""
-        yield* Ref.set(pendingBufferRef, incomplete)
-      }
+      const lines = chunk.split("\n")
 
       for (const line of lines) {
         const trimmed = line.trim()
-        if (!trimmed || trimmed.startsWith(":")) continue
+        if (!trimmed) continue
 
         if (trimmed.startsWith("data: ")) {
           const dataStr = trimmed.substring(6)
           if (dataStr === "[DONE]") break
 
           const parseResult = yield* Effect.try({
-            try: () => JSON.parse(dataStr) as { choices?: Array<{ delta?: { reasoning?: string; reasoning_details?: Array<{ text: string }>; content?: string } }> },
+            try: () => JSON.parse(dataStr) as { 
+              choices?: Array<{ delta?: { reasoning?: string; reasoning_details?: Array<{ text: string }>; content?: string } }>,
+              citations?: string[]
+            },
             catch: (e) => ({ _tag: "ParseError" as const, cause: e, raw: dataStr })
           }).pipe(Effect.option)
 
@@ -90,44 +86,84 @@ export const sendChatMessage = (content: string) => Effect.gen(function* () {
 
           const json = parseResult.value
           const delta = json.choices?.[0]?.delta
+          
+          /** @Logic.Chat.Citations */
+          if (json.citations && json.citations.length > 0) {
+            const chatState = (yield* Redux.getState()).chat.messages
+            const lastMessage = chatState[chatState.length - 1]
+            const existingSources = lastMessage?.metadata?.sources || []
+            
+            const newSources = json.citations.map(url => {
+              try {
+                const domain = new URL(url).hostname.replace('www.', '')
+                return { title: domain, url, source: domain, verified: true }
+              } catch (e) {
+                return { title: url, url, verified: false }
+              }
+            })
+            
+            const allSources = [...existingSources, ...newSources]
+            const uniqueSources = Array.from(new Map(allSources.map(s => [s.url, s])).values())
+
+            yield* Redux.dispatch(updateLastMessage({
+              metadata: { sources: uniqueSources }
+            }))
+          }
+
           if (!delta) continue
 
           /** @Logic.Chat.Reasoning */
-          if (delta.reasoning || delta.reasoning_details) {
-            const reasoningText = delta.reasoning ||
-              delta.reasoning_details?.map((d) => d.text).join("") || ""
-
-            if (reasoningText) {
-              const current = yield* Ref.get(thoughtStartTimeRef)
-              if (current === 0) yield* Ref.set(thoughtStartTimeRef, Date.now())
-
-              const chatState = (yield* Redux.getState()).chat.messages
-              const lastMessage = chatState[chatState.length - 1]
-              const currentThought = lastMessage?.metadata?.thought || ""
-              const newThought = currentThought + reasoningText
-
-              yield* Redux.dispatch(updateLastMessage({
-                metadata: {
-                  thought: newThought,
-                  thoughtDuration: `status:${getThinkingStatus(newThought.length)}`
-                }
+          if (delta.reasoning || (delta.reasoning_details && delta.reasoning_details.length > 0)) {
+            const isThought = yield* Ref.get(isThoughtRef)
+            if (!isThought) {
+              yield* Ref.set(isThoughtRef, true)
+              yield* Ref.set(thoughtStartTimeRef, Date.now())
+              yield* Redux.dispatch(updateLastMessage({ 
+                metadata: { thought: "", isThinking: true } 
               }))
             }
-          }
 
-          /** @Logic.Chat.Content */
-          if (delta.content) {
-            const startTime = yield* Ref.get(thoughtStartTimeRef)
-            if (startTime > 0) {
-              const duration = ((Date.now() - startTime) / 1000).toFixed(1)
-              yield* Redux.dispatch(updateLastMessage({
-                metadata: { thoughtDuration: `completed:${duration}s` }
+            const reasoningText = delta.reasoning || delta.reasoning_details?.map(d => d.text).join("") || ""
+            yield* Ref.update(thoughtContentRef, (prev) => prev + reasoningText)
+            const currentThought = yield* Ref.get(thoughtContentRef)
+            yield* Redux.dispatch(updateLastMessage({ metadata: { thought: currentThought } }))
+          } else if (delta.content) {
+            const isThought = yield* Ref.get(isThoughtRef)
+            if (isThought) {
+              const start = yield* Ref.get(thoughtStartTimeRef)
+              const duration = ((Date.now() - start) / 1000).toFixed(1)
+              yield* Ref.set(isThoughtRef, false)
+              yield* Redux.dispatch(updateLastMessage({ 
+                metadata: { 
+                  thoughtTime: duration, 
+                  isThinking: false 
+                } 
               }))
-              yield* Ref.set(thoughtStartTimeRef, 0)
             }
+
             yield* Ref.update(assistantContentRef, (prev) => prev + delta.content!)
             const current = yield* Ref.get(assistantContentRef)
             yield* Redux.dispatch(updateLastMessage({ content: current }))
+
+            /** @Logic.Chat.RealtimeUrlExtraction */
+            const urlMatches = current.match(/(https?:\/\/[^\s)<>"]+)/g) || []
+            if (urlMatches.length > 0) {
+              const existing = yield* Ref.get(extractedSourcesRef)
+              const newSources: SearchResult[] = urlMatches
+                .filter(url => { try { new URL(url); return true } catch { return false } })
+                .filter(url => !existing.some(s => s.url === url))
+                .map(url => {
+                  const domain = new URL(url).hostname.replace('www.', '')
+                  return { title: domain, url, source: domain as string, verified: false }
+                })
+              if (newSources.length > 0) {
+                const allSources: SearchResult[] = [...existing, ...newSources]
+                yield* Ref.set(extractedSourcesRef, allSources)
+                yield* Redux.dispatch(updateLastMessage({
+                  metadata: { sources: allSources }
+                }))
+              }
+            }
           }
         }
       }
@@ -135,27 +171,20 @@ export const sendChatMessage = (content: string) => Effect.gen(function* () {
   )
 
   /** @Logic.Chat.PostStream */
-  yield* Redux.dispatch(setActiveAdaptiveData([]))
-
   const assistantContent = yield* Ref.get(assistantContentRef)
-
-  const matches = [...assistantContent.matchAll(/```json\n([\s\S]*?)\n```/g)]
+  const matches = [...assistantContent.matchAll(/```json\n([\s\S]*?)\n```\n/g)]
 
   const results = yield* Effect.forEach(matches, (match) =>
     Effect.gen(function* () {
-      const rawMatch = match[0]
-      const rawJson = match[1]
-      if (!rawMatch || !rawJson) return null
-      const decoded = yield* Effect.try({
-        try: () => {
-          const parsed = JSON.parse(rawJson) as unknown
-          return Schema.decodeUnknownSync(AdaptiveBlock)(parsed)
-        },
-        catch: () => null
-      })
-      return decoded ? { block: decoded, raw: rawMatch } : null
-    }),
-    { concurrency: "unbounded" }
+      const raw = match[0]
+      const jsonStr = match[1]
+      try {
+        const block = JSON.parse(jsonStr as string)
+        return { block, raw }
+      } catch (e) {
+        return null
+      }
+    })
   )
 
   const jsonBlocks = results.filter((r): r is { block: typeof r extends { block: infer B } ? B : never; raw: string } => r !== null)
@@ -165,8 +194,50 @@ export const sendChatMessage = (content: string) => Effect.gen(function* () {
     for (const { raw } of jsonBlocks) {
       processedContent = processedContent.replace(raw, "").trim()
     }
+    
+    /** @Logic.Chat.AdaptiveExtraction */
+    const adaptiveBlocks = jsonBlocks.map(b => b.block as { type: string; data: unknown })
+    const suggestionItems = adaptiveBlocks
+      .filter(block => block.type === "suggestions")
+      .flatMap(block => (block.data as { items?: Array<{ label: string; action: string }> }).items || [])
+    
+    if (suggestionItems.length > 0) {
+      yield* Redux.dispatch(setSuggestions(suggestionItems))
+    }
+    
     yield* Redux.dispatch(setActiveAdaptiveData(jsonBlocks.map(b => b.block)))
-    yield* Redux.dispatch(updateLastMessage({ content: processedContent }))
+    const finalSources = yield* Ref.get(extractedSourcesRef)
+    yield* Redux.dispatch(updateLastMessage({ 
+      content: processedContent,
+      metadata: { 
+        sources: finalSources,
+        searchQuery: assistantContent.match(/Buscando\s+"([^"]+)"/i)?.[1] || undefined
+      }
+    }))
+  } else {
+    /** @Logic.Chat.SourceExtraction.NoBlocks */
+    const realtimeSources = yield* Ref.get(extractedSourcesRef)
+    
+    if (realtimeSources.length === 0) {
+      const latestState = yield* Redux.getState()
+      const lastMessage = latestState.chat.messages[latestState.chat.messages.length - 1]
+      const thoughtContent = lastMessage?.metadata?.thought || ""
+      const allContent = assistantContent + " " + thoughtContent
+      const urlRegex = /(https?:\/\/[^\s)<>"]+)/g
+      const matches = allContent.match(urlRegex) || []
+      const uniqueUrls = Array.from(new Set(matches))
+      const postSources: SearchResult[] = uniqueUrls.map(url => {
+        try {
+          const domain = new URL(url).hostname.replace('www.', '')
+          return { title: domain, url, source: domain, verified: false }
+        } catch (e) {
+          return { title: url, url, verified: false }
+        }
+      })
+      if (postSources.length > 0) {
+        yield* Redux.dispatch(updateLastMessage({ metadata: { sources: postSources } }))
+      }
+    }
   }
 
   yield* Redux.dispatch(setLoading(false))
