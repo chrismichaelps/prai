@@ -12,6 +12,8 @@ import {
   Utensils,
   ExternalLink,
   Search,
+  Video,
+  Image as ImageIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type {
@@ -24,9 +26,10 @@ import type {
   SearchLocation,
   DiningContent,
   ItineraryContent,
+  MediaSearchContent,
 } from '../../lib/effect/schemas/AdaptiveCardsSchema'
-
 import { ADAPTIVE_CARD_TYPES } from '../../lib/effect/constants/AdaptiveCardConstants'
+import { actionToNaturalMessage } from '@/lib/actions/actionToNaturalMessage'
 
 /** @Namespace.AdaptiveCard.Context */
 type AdaptiveCardContextValue = {
@@ -56,7 +59,13 @@ interface AdaptiveCardProps {
 }
 
 /** @Namespace.AdaptiveCard.Root */
-const Root = ({ type, data, onAction, children, className }: AdaptiveCardProps) => {
+const Root = ({
+  type,
+  data,
+  onAction,
+  children,
+  className,
+}: AdaptiveCardProps) => {
   return (
     <AdaptiveCardContext.Provider value={{ type, data, onAction }}>
       <motion.div
@@ -103,32 +112,71 @@ const Media = () => {
   }, [type, data, tourismData.images, photosData.images])
 
   if (type === ADAPTIVE_CARD_TYPES.VIDEO) {
-    const isYoutube =
-      videoData.provider === 'youtube' ||
-      videoData.videoUrl.includes('youtube.com') ||
-      videoData.videoUrl.includes('youtu.be')
-    let embedUrl = videoData.videoUrl
-
-    if (isYoutube) {
-      const videoId = videoData.videoUrl.match(
-        /(?:v=|\/embed\/|\/watch\?v=|\/.be\/)([a-zA-Z0-9_-]{11})/,
-      )?.[1]
-      if (videoId) {
-        embedUrl = `https://www.youtube.com/embed/${videoId}`
-      }
+    if (!videoData.videoUrl && videoData.media_search_terms) {
+      return (
+        <div className="aspect-video relative overflow-hidden group rounded-[1.5rem] bg-slate-900 border border-white/10 m-2">
+          <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-8 text-center">
+            <div className="max-w-xs space-y-4">
+              <Search className="w-10 h-10 text-primary mx-auto opacity-50 transition-colors" />
+              <div className="space-y-1">
+                <p className="text-white font-bold">{t('chat.no_video')}</p>
+                <p className="text-white/40 text-xs leading-relaxed">
+                  {t('chat.google_search_hint')}
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-1.5 justify-center">
+                {videoData.media_search_terms.map((term: string) => (
+                  <button
+                    key={term}
+                    onClick={() =>
+                      window.open(
+                        `https://www.youtube.com/results?search_query=${encodeURIComponent(term)}`,
+                        '_blank',
+                      )
+                    }
+                    className="px-3 py-1.5 bg-white/5 hover:bg-white/10 rounded-lg border border-white/10 text-[10px] text-white/60 hover:text-white transition-all flex items-center gap-2 group/term"
+                  >
+                    {term}
+                    <ExternalLink className="w-3 h-3 opacity-0 group-hover/term:opacity-100" />
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )
     }
 
-    return (
-      <div className="aspect-video relative group">
-        <iframe
-          src={embedUrl}
-          className="w-full h-full border-0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-          title={videoData.title}
-        />
-      </div>
-    )
+    if (videoData.videoUrl) {
+      const isYoutube =
+        videoData.provider === 'youtube' ||
+        videoData.videoUrl.includes('youtube.com') ||
+        videoData.videoUrl.includes('youtu.be')
+      let embedUrl = videoData.videoUrl
+
+      if (isYoutube) {
+        const videoId = videoData.videoUrl.match(
+          /(?:v=|\/embed\/|\/watch\?v=|\/.be\/)([a-zA-Z0-9_-]{11})/,
+        )?.[1]
+        if (videoId) {
+          embedUrl = `https://www.youtube.com/embed/${videoId}`
+        }
+      }
+
+      return (
+        <div className="aspect-video relative group">
+          <iframe
+            src={embedUrl}
+            className="w-full h-full border-0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            title={videoData.title}
+          />
+        </div>
+      )
+    }
+
+    return null
   }
 
   if (type === ADAPTIVE_CARD_TYPES.PHOTOS) {
@@ -156,9 +204,61 @@ const Media = () => {
     type === ADAPTIVE_CARD_TYPES.TOURISM ||
     type === ADAPTIVE_CARD_TYPES.DINING ||
     type === ADAPTIVE_CARD_TYPES.ACTIVITY ||
-    type === ADAPTIVE_CARD_TYPES.EVENT
+    type === ADAPTIVE_CARD_TYPES.EVENT ||
+    type === ADAPTIVE_CARD_TYPES.MEDIA_SEARCH
   ) {
     const displayData = data as any
+    const mediaSearchData = data as MediaSearchContent
+
+    if (type === ADAPTIVE_CARD_TYPES.MEDIA_SEARCH) {
+      return (
+        <div className="aspect-video relative overflow-hidden group rounded-[1.5rem] bg-slate-900 border border-white/10 m-2">
+          <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-8 text-center">
+            <div className="max-w-xs space-y-4">
+              {mediaSearchData.type === 'video' ? (
+                <Video className="w-10 h-10 text-primary mx-auto opacity-50 transition-colors" />
+              ) : mediaSearchData.type === 'images' ? (
+                <ImageIcon className="w-10 h-10 text-primary mx-auto opacity-50 transition-colors" />
+              ) : (
+                <Search className="w-10 h-10 text-primary mx-auto opacity-50 transition-colors" />
+              )}
+              <div className="space-y-1">
+                <p className="text-white font-bold">{mediaSearchData.title}</p>
+                {mediaSearchData.description && (
+                  <p className="text-white/40 text-xs leading-relaxed">
+                    {mediaSearchData.description}
+                  </p>
+                )}
+              </div>
+              <div className="flex flex-wrap gap-1.5 justify-center">
+                {mediaSearchData.media_search_terms.map((term: string) => (
+                  <button
+                    key={term}
+                    onClick={() => {
+                      const baseUrl =
+                        mediaSearchData.type === 'video'
+                          ? 'https://www.youtube.com/results?search_query='
+                          : mediaSearchData.type === 'images'
+                            ? 'https://www.google.com/search?tbm=isch&q='
+                            : 'https://www.google.com/search?q='
+                      window.open(
+                        `${baseUrl}${encodeURIComponent(term)}`,
+                        '_blank',
+                      )
+                    }}
+                    className="px-3 py-1.5 bg-white/5 hover:bg-white/10 rounded-lg border border-white/10 text-[10px] text-white/60 hover:text-white transition-all flex items-center gap-2 group/term"
+                  >
+                    {term}
+                    <ExternalLink className="w-3 h-3 opacity-0 group-hover/term:opacity-100" />
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
     const displayImage =
       mainImage || (displayData.images && displayData.images[0])
 
@@ -279,6 +379,7 @@ const Header = () => {
     photosData.title ||
     videoData.title ||
     suggestionsData.title ||
+    (data as MediaSearchContent).title ||
     (data.type === ADAPTIVE_CARD_TYPES.SEARCH_LOCATION
       ? `${t('chat.search_for')} "${data.search}"`
       : null) ||
@@ -406,9 +507,7 @@ const Content = () => {
               <div className="text-[10px] font-black uppercase tracking-widest text-white/20">
                 {t('chat.difficulty')}
               </div>
-              <div
-                className="text-sm text-white/70 font-bold capitalize"
-              >
+              <div className="text-sm text-white/70 font-bold capitalize">
                 {(data as any).difficulty}
               </div>
             </div>
@@ -452,7 +551,10 @@ const Actions = ({ onAction }: { onAction?: (action: string) => void }) => {
         {suggestionsData.items.map((item, i) => (
           <button
             key={i}
-            onClick={() => onAction?.(item.action)}
+            onClick={() => {
+              const message = actionToNaturalMessage(item.action, item.params)
+              onAction?.(message)
+            }}
             className={cn(
               'flex items-center justify-between text-left px-5 py-4 rounded-xl bg-white/[0.03] border border-white/[0.08] text-white/70',
               'hover:bg-white/[0.08] hover:text-white hover:border-white/[0.15] transition-all duration-300 group shadow-sm active:scale-95',
@@ -506,6 +608,28 @@ const Actions = ({ onAction }: { onAction?: (action: string) => void }) => {
           <Utensils className="w-5 h-5 group-hover:rotate-12 transition-transform opacity-50 group-hover:opacity-100" />
           <span className="opacity-80 group-hover:opacity-100 italic font-medium tracking-tight">
             {t('chat.view_menu')}
+          </span>
+        </button>
+      </div>
+    )
+  }
+
+  if (type === ADAPTIVE_CARD_TYPES.MEDIA_SEARCH) {
+    const mediaSearchData = data as MediaSearchContent
+    return (
+      <div className="pt-4 px-8 pb-8 md:px-10 md:pb-10">
+        <button
+          onClick={() =>
+            window.open(
+              `https://www.google.com/search?q=${encodeURIComponent(mediaSearchData.title + ' ' + (mediaSearchData.media_search_terms?.[0] || 'Puerto Rico'))}`,
+              '_blank',
+            )
+          }
+          className="w-full lg:w-auto px-10 py-5 bg-white/[0.05] hover:bg-white/[0.1] text-white rounded-2xl font-bold flex items-center justify-center space-x-3 transition-all border border-white/[0.08] hover:border-white/20 shadow-2xl active:scale-95 group backdrop-blur-md"
+        >
+          <Search className="w-5 h-5 group-hover:rotate-12 transition-transform opacity-50 group-hover:opacity-100" />
+          <span className="opacity-80 group-hover:opacity-100 italic font-medium tracking-tight">
+            {t('chat.view_more_results')}
           </span>
         </button>
       </div>
