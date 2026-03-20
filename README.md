@@ -24,7 +24,7 @@ PR/AI is a tool in its experimental stage. While the project strives for technic
 
 ### Additional Documentation
 
-Detailed information regarding contribution standards, security protocols, and administrative policies is available in the respective documentation files within the repository.
+Detailed information regarding contribution standards, security protocols, and administrative policies is available in the [Technical Documentation](./docs/README.md).
 
 ---
 
