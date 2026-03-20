@@ -1,21 +1,16 @@
-'use client'
-
-/** @UI.Layout.TopAppBar */
-
-import React from 'react'
+import React, { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { motion } from 'framer-motion'
-import { ChevronDown, ArrowRight, Info } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { ChevronDown, ArrowRight, Info, Menu, X } from 'lucide-react'
 import { PraiLogo } from '@/components/brand/PraiLogo'
 import { useI18n } from '@/lib/effect/I18nProvider'
+import { useBuildInfo } from '@/lib/effect/hooks/useBuildInfo'
 import { cn } from '@/lib/utils'
 import { useAppDispatch } from '@/store/hooks'
 import { setModelInfoVisible } from '@/store/slices/uiSlice'
 
 /** @UI.Layout.Header */
-import { GITHUB_REPO_URL } from '@/lib/constants'
-
 export function Header({
   className,
   transparent = true,
@@ -28,10 +23,24 @@ export function Header({
   const router = useRouter()
   const { t } = useI18n()
   const dispatch = useAppDispatch()
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const buildHash = useBuildInfo()
 
-  const navLinks = [
-    { label: t('nav.about'), key: 'about', href: '/about' },
-  ]
+  // Lock scroll when menu is open
+  React.useEffect(() => {
+    if (isMenuOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = 'unset'
+    }
+    return () => {
+      document.body.style.overflow = 'unset'
+    }
+  }, [isMenuOpen])
+
+  const navLinks = [{ label: t('nav.about'), key: 'about', href: '/about' }]
+
+  const toggleMenu = () => setIsMenuOpen(!isMenuOpen)
 
   return (
     <motion.header
@@ -39,9 +48,8 @@ export function Header({
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.5 }}
       className={cn(
-        'flex items-center justify-between px-6 md:px-10 py-5 w-full z-50',
-        !transparent &&
-          'bg-white/70 backdrop-blur-xl border-b border-white/10',
+        'flex items-center justify-between px-6 md:px-10 py-5 w-full z-[100]',
+        !transparent && 'bg-white/70 backdrop-blur-xl border-b border-white/10',
         className,
       )}
     >
@@ -94,22 +102,152 @@ export function Header({
             </div>
           ) : (
             <>
+              {/* Desktop Button */}
+              <div className="hidden md:block">
+                <button
+                  onClick={() => router.push('/chat')}
+                  className={cn(
+                    'flex items-center gap-2 px-5 py-2.5 text-sm font-bold border rounded-xl transition-all shadow-xl',
+                    transparent
+                      ? 'text-primary-foreground border-primary-foreground/30 hover:bg-white/10'
+                      : 'text-white bg-brand-blue border-transparent hover:scale-105 active:scale-95',
+                  )}
+                >
+                  {t('nav.open_chat')}
+                  <ChevronDown className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              {/* Mobile Hamburger Toggle */}
               <button
-                onClick={() => router.push('/chat')}
+                onClick={toggleMenu}
                 className={cn(
-                  'flex items-center gap-2 px-5 py-2.5 text-sm font-bold border rounded-xl transition-all shadow-xl',
-                  transparent
-                    ? 'text-primary-foreground border-primary-foreground/30 hover:bg-white/10'
-                    : 'text-white bg-brand-blue border-transparent hover:scale-105 active:scale-95',
+                  'md:hidden p-2 rounded-xl transition-all active:scale-90 z-[120]',
+                  transparent || isMenuOpen
+                    ? 'text-white hover:bg-white/10'
+                    : 'text-slate-900 hover:bg-slate-100',
                 )}
               >
-                {t('nav.open_chat')}
-                <ChevronDown className="w-3.5 h-3.5" />
+                <AnimatePresence mode="wait">
+                  {isMenuOpen ? (
+                    <motion.div
+                      key="close"
+                      initial={{ scale: 0.5, rotate: -90, opacity: 0 }}
+                      animate={{ scale: 1, rotate: 0, opacity: 1 }}
+                      exit={{ scale: 0.5, rotate: 90, opacity: 0 }}
+                      transition={{ type: 'spring', damping: 15 }}
+                    >
+                      <X className="w-8 h-8" />
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="menu"
+                      initial={{ scale: 0.5, rotate: 90, opacity: 0 }}
+                      animate={{ scale: 1, rotate: 0, opacity: 1 }}
+                      exit={{ scale: 0.5, rotate: -90, opacity: 0 }}
+                      transition={{ type: 'spring', damping: 15 }}
+                    >
+                      <Menu className="w-8 h-8" />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </button>
             </>
           )}
         </div>
       </nav>
+
+      {/* Mobile Menu Overlay */}
+      <AnimatePresence>
+        {isMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, x: '100%' }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: '100%' }}
+            transition={{ type: 'spring', damping: 30, stiffness: 200 }}
+            className="fixed inset-0 z-[100] md:hidden flex flex-col"
+          >
+            {/* Background Layer */}
+            <div className="absolute inset-0 bg-[#090909] z-[-1]" />
+            <div className="absolute inset-0 bg-gradient-to-b from-primary/80 via-primary/60 to-accent/70 opacity-40 z-[-1]" />
+            <div className="absolute inset-0 backdrop-blur-3xl z-[-1]" />
+
+            {/* Header Mirror for Mobile Open State */}
+            <div className="flex items-center justify-between px-6 py-5 border-b border-white/10">
+              <PraiLogo white={true} animate={false} />
+              {/* Note: The close (X) icon is provided by the main toggle button (z-120) */}
+              <div className="w-10 h-10" />
+            </div>
+
+            <div className="flex-1 flex flex-col justify-center px-10 gap-16 overflow-y-auto py-10">
+              <div className="flex flex-col gap-8">
+                <span className="text-xs font-black uppercase tracking-[0.4em] text-white/30 font-display">
+                  {t('nav.menu')}
+                </span>
+
+                <div className="flex flex-col gap-4">
+                  {navLinks.map((link) => (
+                    <motion.div
+                      key={link.key}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.1 }}
+                    >
+                      <Link
+                        href={link.href}
+                        onClick={toggleMenu}
+                        className="group flex items-end gap-4"
+                      >
+                        <span className="text-6xl sm:text-7xl font-display font-bold text-white leading-[1.05] tracking-tighter group-hover:text-primary transition-colors">
+                          {link.label}
+                        </span>
+                        <div className="mb-3 h-0.5 w-0 group-hover:w-12 bg-primary transition-all duration-500" />
+                      </Link>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="space-y-8"
+              >
+                <span className="text-xs font-black uppercase tracking-[0.4em] text-white/30 font-display">
+                  {t('nav.actions')}
+                </span>
+
+                <button
+                  onClick={() => {
+                    toggleMenu()
+                    router.push('/chat')
+                  }}
+                  className="group flex items-center gap-3 text-white text-3xl font-display font-bold hover:opacity-80 transition-opacity relative w-fit"
+                >
+                  {t('nav.open_chat')}
+                  <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
+                  <span className="block h-[2px] w-full bg-white/50 absolute -bottom-2 left-0" />
+                </button>
+              </motion.div>
+            </div>
+
+            <div className="p-10 border-t border-white/10 flex items-center justify-between">
+              <div className="flex flex-col gap-1">
+                <span className="text-white/20 text-[10px] font-medium uppercase tracking-[0.2em]">
+                  © {new Date().getFullYear()} {t('brand.name')}
+                </span>
+                {buildHash && (
+                  <span className="text-white/10 text-[10px] font-medium">
+                    Build: {buildHash}
+                  </span>
+                )}
+              </div>
+              <PraiLogo white={true} animate={false} size={24} />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.header>
   )
 }

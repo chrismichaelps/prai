@@ -9,16 +9,23 @@ interface PraiLogoProps {
   className?: string;
   white?: boolean;
   animate?: boolean;
+  size?: number | string;
 }
 
 /** @Component.PraiLogo */
-export function PraiLogo({ className, white = false, animate = false }: PraiLogoProps) {
+export function PraiLogo({ className, white = false, animate = false, size }: PraiLogoProps) {
+  const sizeStyle = size ? { fontSize: typeof size === 'number' ? `${size}px` : size } : {};
+
   return (
-    <div className={cn(
-      "flex items-center select-none font-display font-black text-2xl tracking-tighter uppercase",
-      white ? "text-white" : "text-slate-900 dark:text-white",
-      className
-    )}>
+    <div 
+      style={sizeStyle}
+      className={cn(
+        "flex items-center select-none font-display font-black tracking-tighter uppercase",
+        !size && "text-2xl",
+        white ? "text-white" : "text-slate-900 dark:text-white",
+        className
+      )}
+    >
       <motion.span
         initial={animate ? { clipPath: 'inset(0 100% 0 0)', opacity: 0 } : { clipPath: 'inset(0 0% 0 0)', opacity: 1 }}
         animate={{ clipPath: 'inset(0 0% 0 0)', opacity: 1 }}

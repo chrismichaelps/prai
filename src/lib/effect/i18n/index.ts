@@ -17,6 +17,8 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "nav.export": "Exporta",
     "nav.share": "Compartir",
     "nav.info": "Info del Modelo",
+    "nav.menu": "Menú",
+    "nav.actions": "Explora",
     
     // Hero
     "hero.cta_chat": "Empezar a chatear",
@@ -147,6 +149,8 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "nav.export": "Export",
     "nav.share": "Share",
     "nav.info": "Model Info",
+    "nav.menu": "Menu",
+    "nav.actions": "Explore",
     
     // Hero
     "hero.cta_chat": "Start chatting",
