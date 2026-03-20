@@ -164,14 +164,42 @@ const Media = () => {
       }
 
       return (
-        <div className="aspect-video relative group">
-          <iframe
-            src={embedUrl}
-            className="w-full h-full border-0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            title={videoData.title}
-          />
+        <div className="space-y-4">
+          <div className="aspect-video relative group overflow-hidden rounded-[1.5rem] border border-white/10 mx-2 mt-2">
+            <iframe
+              src={embedUrl}
+              className="w-full h-full border-0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              title={videoData.title}
+            />
+          </div>
+          {videoData.media_search_terms && videoData.media_search_terms.length > 0 && (
+            <div className="px-4 pb-2">
+              <div className="flex items-center gap-2 mb-3 text-white/30 text-[10px] font-bold uppercase tracking-widest">
+                <Search className="w-3 h-3" />
+                <span>{t('chat.google_search_hint')}</span>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {videoData.media_search_terms.map((term: string) => (
+                  <button
+                    key={term}
+                    onClick={() =>
+                      window.open(
+                        `https://www.youtube.com/results?search_query=${encodeURIComponent(term)}`,
+                        '_blank',
+                      )
+                    }
+                    className="px-3 py-1.5 bg-white/5 hover:bg-white/10 rounded-lg border border-white/10 text-[10px] text-white/60 hover:text-white transition-all flex items-center gap-2 group/term shadow-sm"
+                  >
+                    <Video className="w-3 h-3 text-red-500/50 group-hover:text-red-500 transition-colors" />
+                    {term}
+                    <ExternalLink className="w-3 h-3 opacity-0 group-hover/term:opacity-100" />
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )
     }
