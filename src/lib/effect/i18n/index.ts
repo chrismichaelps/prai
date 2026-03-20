@@ -60,8 +60,8 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "footer.explore": "Explorar",
     
     // Cookies
-    "cookies.title": "¿Todo nítido con las cookies?",
-    "cookies.desc": "Usamos cookies para que tu experiencia sea tan nítida como un día en la playa. Tú decides qué permites.",
+    "cookies.title": "Control de Cookies",
+    "cookies.desc": "Utilizamos cookies para mejorar tu experiencia de navegación y analizar nuestro tráfico. Tú decides qué permites.",
     "cookies.accept": "Aceptar",
     "cookies.decline": "Rechazar",
     "cookies.view": "Ver Política de Cookies",
@@ -179,8 +179,8 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "footer.explore": "Explore",
     
     // Cookies
-    "cookies.title": "Everything clear with cookies?",
-    "cookies.desc": "We use cookies to make your experience as clear as a day at the beach. You decide what to allow.",
+    "cookies.title": "Cookie Settings",
+    "cookies.desc": "We use cookies to enhance your browsing experience and analyze our traffic. You decide what to allow.",
     "cookies.accept": "Accept",
     "cookies.decline": "Decline",
     "cookies.view": "View Cookies Policy",
