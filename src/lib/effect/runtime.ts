@@ -6,6 +6,7 @@ import { Redux } from "./services/Redux";
 import { PromptBuilderService } from "./services/PromptBuilder";
 import { VoiceServiceLive } from "./services/Voice";
 import { I18nLive } from "./i18n";
+import { BuildInfoService } from "./services/BuildInfo";
 
 /** @Logic.Effect.Runtime */
 const BaseLayer = Layer.mergeAll(
@@ -32,6 +33,7 @@ const MainLayer = Layer.mergeAll(
   ConfigLayer,
   VoiceServiceLive,
   I18nLive,
+  BuildInfoService.Default,
   OpenRouter.Default.pipe(
     Layer.provideMerge(ConfigLayer),
     Layer.provideMerge(BaseLayer)

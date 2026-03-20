@@ -1,0 +1,2 @@
+/** @Config.Next */
+export default {}
