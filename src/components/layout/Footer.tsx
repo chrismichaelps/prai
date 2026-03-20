@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { Github } from 'lucide-react'
 import { PraiLogo } from '@/components/brand/PraiLogo'
 import { useI18n } from '@/lib/effect/I18nProvider'
+import { useBuildInfo } from '@/lib/effect/hooks/useBuildInfo'
 import { cn } from '@/lib/utils'
 import { GITHUB_REPO_URL } from '@/lib/constants'
 
@@ -14,6 +15,7 @@ interface FooterProps {
 /** @UI.Layout.Footer */
 export function Footer({ className = "" }: FooterProps) {
   const { t, locale, setLocale } = useI18n();
+  const buildHash = useBuildInfo();
 
   return (
     <footer className={cn("w-full bg-slate-900 text-white/70 py-16 px-6 md:px-10 lg:px-16 border-t border-white/5", className)}>
@@ -74,9 +76,16 @@ export function Footer({ className = "" }: FooterProps) {
 
         {/* @UI.Layout.Footer.Bottom */}
         <div className="mt-16 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
-          <p className="text-white/30 text-sm">
-            © {new Date().getFullYear()} PR\AI. {t('footer.rights')}
-          </p>
+          <div className="flex flex-col items-center md:items-start gap-1">
+            <p className="text-white/30 text-sm">
+              © {new Date().getFullYear()} PR\AI. {t('footer.rights')}
+            </p>
+            {buildHash && (
+              <p className="text-white/20 text-xs">
+                Build: {buildHash}
+              </p>
+            )}
+          </div>
 
           <div className="flex items-center gap-6">
             {/* Locale Switcher */}
