@@ -31,10 +31,26 @@ export const Chat = {
   }) => (
     <main
       className={cn(
-        'flex-1 flex flex-col min-h-0 bg-transparent relative overflow-hidden',
+        'flex-1 flex flex-col min-h-0 relative overflow-hidden',
         className,
       )}
     >
+      {/* @UI.Chat.Glow.Top */}
+      <div 
+        className="absolute top-0 left-0 w-full h-[800px] pointer-events-none z-0 opacity-40"
+        style={{
+          background: 'radial-gradient(circle at 50% 0%, hsla(30, 95%, 52%, 0.12) 0%, transparent 80%)'
+        }}
+      />
+      
+      {/* @UI.Chat.Glow.Bottom */}
+      <div 
+        className="absolute bottom-0 left-0 w-full h-[600px] pointer-events-none z-0 opacity-30"
+        style={{
+          background: 'radial-gradient(circle at 50% 100%, hsla(30, 95%, 52%, 0.08) 0%, transparent 80%)'
+        }}
+      />
+
       {children}
     </main>
   ),
@@ -55,13 +71,13 @@ export const Chat = {
       ref={scrollAreaRef as React.RefObject<HTMLDivElement>}
       onScroll={onScroll}
       className={cn(
-        'flex-1 overflow-y-auto px-6 py-10 custom-scrollbar',
+        'flex-1 overflow-y-auto relative z-20',
         className,
       )}
     >
       <div
         ref={innerRef as React.RefObject<HTMLDivElement>}
-        className="w-full max-w-4xl mx-auto space-y-12 md:space-y-20 pb-20"
+        className="w-full max-w-4xl mx-auto space-y-12 md:space-y-20 px-6 py-10 pb-20"
       >
         {children}
       </div>
