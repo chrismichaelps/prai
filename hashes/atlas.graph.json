@@ -1,0 +1,147 @@
+{
+  "graph_version": "1.0",
+  "state_anchor": "BigInt:0x1",
+  "description": "Directional dependency edges. Upstream node change → downstream nodes flagged DIRTY.",
+  "grammar_refs": {
+    "effect": "@root/hashes/grammar/effect.hash.md",
+    "next": "@root/hashes/grammar/next.hash.md",
+    "typescript": "@root/hashes/grammar/typescript.hash.md",
+    "prai": "@root/hashes/grammar/prai.hash.md"
+  },
+  "edges": [
+    {
+      "from": "@root/src/lib/effect/services/PromptBuilder",
+      "to": "@root/src/lib/effect/services/Config",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "ConfigService.Default lists PromptBuilderService.Default as a dependency"
+    },
+    {
+      "from": "@root/src/lib/effect/services/Config",
+      "to": "@root/src/lib/effect/services/OpenRouter",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "OpenRouter reads apiKey, modelName, openRouterBaseUrl from ConfigService"
+    },
+    {
+      "from": "@root/src/lib/effect/services/Config",
+      "to": "@root/src/lib/effect/chat",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "chat.ts yields ConfigService for systemPrompt and errorMessages"
+    },
+    {
+      "from": "@root/src/lib/effect/services/OpenRouter",
+      "to": "@root/src/lib/effect/chat",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "sendChatMessage yields OpenRouter.chat() stream"
+    },
+    {
+      "from": "@root/src/lib/effect/errors",
+      "to": "@root/src/lib/effect/services/OpenRouter",
+      "type": "SCHEMA_CONTRACT",
+      "impact": "HIGH",
+      "reason": "OpenRouter imports OpenRouterError from errors.ts"
+    },
+    {
+      "from": "@root/src/store",
+      "to": "@root/src/lib/effect/services/Redux",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Redux service wraps the singleton Redux store"
+    },
+    {
+      "from": "@root/src/lib/effect/services/Redux",
+      "to": "@root/src/lib/effect/chat",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "chat.ts dispatches all UI state changes via Redux service"
+    },
+    {
+      "from": "@root/src/lib/effect/runtime",
+      "to": "@root/src/lib/effect/ChatProvider",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "ChatProvider calls runtime.runPromise to bridge Effect → React"
+    },
+    {
+      "from": "@root/src/lib/effect/chat",
+      "to": "@root/src/lib/effect/ChatProvider",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "ChatProvider imports initChat and sendChatMessage from chat.ts"
+    },
+    {
+      "from": "@root/src/lib/effect/ChatProvider",
+      "to": "@root/src/components/chat/ChatContainer",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "ChatContainer consumes useChatActions() from ChatProvider context"
+    },
+    {
+      "from": "@root/src/lib/effect/i18n",
+      "to": "@root/src/lib/effect/I18nProvider",
+      "type": "SCHEMA_CONTRACT",
+      "impact": "MEDIUM",
+      "reason": "I18nProvider uses I18nLive layer and translate function from i18n/index.ts"
+    },
+    {
+      "from": "@root/src/lib/effect/services/I18n",
+      "to": "@root/src/lib/effect/I18nProvider",
+      "type": "SCHEMA_CONTRACT",
+      "impact": "MEDIUM",
+      "reason": "I18nProvider yields I18n service tag for locale operations"
+    },
+    {
+      "from": "@root/src/lib/effect/schemas/AdaptiveCardsSchema",
+      "to": "@root/src/lib/effect/chat",
+      "type": "SCHEMA_CONTRACT",
+      "impact": "MEDIUM",
+      "reason": "chat.ts decodes AdaptiveBlock from AdaptiveCardsSchema"
+    },
+    {
+      "from": "@root/src/lib/effect/schemas/ConfigSchema",
+      "to": "@root/src/lib/effect/services/Config",
+      "type": "SCHEMA_CONTRACT",
+      "impact": "HIGH",
+      "reason": "Config.ts decodes environment variables using ConfigSchema"
+    },
+    {
+      "from": "@root/src/lib/effect/constants/ChatConstants",
+      "to": "@root/src/lib/effect/chat",
+      "type": "SCHEMA_CONTRACT",
+      "impact": "LOW",
+      "reason": "chat.ts imports THINKING_PHASES and DEFAULT_THINKING_STATUS"
+    },
+    {
+      "from": "@root/src/store/slices/chatSlice",
+      "to": "@root/src/lib/effect/chat",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "chat.ts imports all Redux chat action creators"
+    },
+    {
+      "from": "@root/src/lib/constants",
+      "to": "@root/src/components/layout/Header",
+      "type": "SCHEMA_CONTRACT",
+      "impact": "LOW",
+      "reason": "Header imports GITHUB_REPO_URL constant"
+    },
+    {
+      "from": "@root/src/lib/constants",
+      "to": "@root/src/components/layout/Footer",
+      "type": "SCHEMA_CONTRACT",
+      "impact": "LOW",
+      "reason": "Footer imports GITHUB_REPO_URL constant"
+    },
+    {
+      "from": "@root/src/lib/constants",
+      "to": "@root/src/app/about/page",
+      "type": "SCHEMA_CONTRACT",
+      "impact": "LOW",
+      "reason": "About page imports GITHUB_REPO_URL constant"
+    }
+  ],
+  "dirty_propagation_rule": "When a node fidelity_level changes to DIRTY, recursively mark all nodes reachable via outgoing edges as DIRTY"
+}
