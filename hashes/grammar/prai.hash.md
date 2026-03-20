@@ -20,6 +20,12 @@ Grammar_Lock: "@root/hashes/grammar/prai.hash.md"
 - **Animation**: `framer-motion` (initial fade-in/y-offset).
 - **Styling**: Tailwind CSS + `cn` utility.
 - **DNA_Anchor**: `@Component.AdaptiveCard`
+23: 
+24: ### [SourcesSidebar.tsx]
+25: - **Pattern**: Animated Drawer (`framer-motion`).
+26: - **Logic**: Displays searchable source cards with snippets and favicons.
+27: - **Trigger**: Dispatched via `openSources` action from `MessageBubble`.
+28: - **DNA_Anchor**: `@Component.SourcesSidebar`
 
 ## [Namespace.Effect]
 
@@ -37,7 +43,7 @@ Grammar_Lock: "@root/hashes/grammar/prai.hash.md"
 
 ## [Namespace.State] (Redux)
 - **Store**: Standard Toolkit `configureStore` wrapped by the Effect Execution Graph.
-- **Slices**: `chatSlice` (message history and streaming chunks), `uiSlice` (menus, theme, tooltips), `passportSlice` (user auth state).
+- **Slices**: `chatSlice` (message history, streaming chunks, and research sources), `uiSlice` (menus, theme, tooltips), `passportSlice` (user auth state).
 
 ## [Architectural_Laws]
 
