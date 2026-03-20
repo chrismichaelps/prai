@@ -9,6 +9,7 @@ import { useChatActions } from '@/lib/effect/ChatProvider'
 import { DiscoveryLoader } from './DiscoveryLoader'
 import { useI18n } from '@/lib/effect/I18nProvider'
 import { MemoizedMessageBubble } from './MessageBubble'
+import { SourcesSidebar } from './SourcesSidebar'
 import { ArrowDown, AlertCircle, Loader2, Plus, Mic } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -109,11 +110,11 @@ export const Chat = {
           <div className="flex flex-wrap justify-center gap-3 pointer-events-auto animate-in fade-in slide-in-from-bottom-4 duration-1000">
             {suggestions.map((suggestion: any, idx: number) => (
               <button
-                key={suggestion.id || idx}
-                onClick={() => onSend(suggestion.text)}
+                key={suggestion.label + idx}
+                onClick={() => onSend(suggestion.action || suggestion.label)}
                 className="px-5 py-2.5 rounded-2xl bg-[#1a1a1a] border border-white/[0.08] text-xs font-bold text-white/40 hover:bg-white/5 hover:text-white transition-all shadow-xl flex items-center gap-3 group"
               >
-                <span>{suggestion.text}</span>
+                <span>{suggestion.label}</span>
                 <ArrowDown className="w-3 h-3 -rotate-90 opacity-0 group-hover:opacity-100 transition-all transform translate-x-[-2px] group-hover:translate-x-0" />
               </button>
             ))}
@@ -290,9 +291,12 @@ export const ChatContainer: React.FC = () => {
       handleMicClick()
     }
     const finalContent = text || userInput
-    if (!finalContent.trim() || isLoading) return
+    if (!finalContent.trim()) return
+    if (!text && isLoading) return
 
-    setUserInput('')
+    if (!text) {
+      setUserInput('')
+    }
     setIsLockedToBottom(true)
     await sendMessage(finalContent)
     scrollToBottom('smooth')
@@ -368,6 +372,7 @@ export const ChatContainer: React.FC = () => {
         onMicClick={handleMicClick}
         t={t}
       />
+      <SourcesSidebar />
     </Chat.Root>
   )
 }
