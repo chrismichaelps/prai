@@ -2,6 +2,19 @@
   "name": "prai",
   "version": "1.0.0",
   "private": true,
+  "description": "PR\\AI is your smart assistant to discover the best of Puerto Rico. From hidden beaches to the best local cuisine.",
+  "keywords": [
+    "ai",
+    "tourism",
+    "discovery",
+    "travel",
+    "assistant",
+    "puerto-rico",
+    "gastronomy",
+    "travel-guide",
+    "tourism-ai",
+    "boricua"
+  ],
   "type": "module",
   "scripts": {
     "dev": "next dev",
