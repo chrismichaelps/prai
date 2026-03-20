@@ -43,10 +43,10 @@ export type PhotosContent = Schema.Schema.Type<typeof PhotosContentSchema>
 
 export const VideoContentSchema = Schema.Struct({
   title: Schema.String,
-  videoUrl: Schema.String,
-  provider: Schema.Literal("youtube", "vimeo", "direct", "tiktok", "instagram"),
+  videoUrl: Schema.optional(Schema.NullOr(Schema.String)),
+  provider: Schema.optional(Schema.NullOr(Schema.Literal("youtube", "vimeo", "direct", "tiktok", "instagram"))),
   description: Schema.optional(Schema.String),
-  thumbnail: Schema.optional(Schema.String),
+  thumbnail: Schema.optional(Schema.NullOr(Schema.String)),
   media_search_terms: Schema.optional(Schema.Array(Schema.String)),
 })
 
@@ -55,7 +55,7 @@ export type VideoContent = Schema.Schema.Type<typeof VideoContentSchema>
 
 export const SuggestionItemSchema = Schema.Struct({
   label: Schema.String,
-  action: Schema.Literal("suggest_actions"),
+  action: Schema.String,
   params: Schema.Record({ key: Schema.String, value: Schema.String })
 })
 
@@ -145,6 +145,16 @@ export const RadioContentSchema = Schema.Struct({
 /** @Type.Effect.AdaptiveCards.Radio */
 export type RadioContent = Schema.Schema.Type<typeof RadioContentSchema>
 
+export const MediaSearchContentSchema = Schema.Struct({
+  title: Schema.String,
+  description: Schema.optional(Schema.String),
+  media_search_terms: Schema.Array(Schema.String),
+  type: Schema.optional(Schema.Literal("video", "images", "general"))
+})
+
+/** @Type.Effect.AdaptiveCards.MediaSearch */
+export type MediaSearchContent = Schema.Schema.Type<typeof MediaSearchContentSchema>
+
 export const EventContentSchema = Schema.Struct({
   title: Schema.String,
   date: Schema.String,
@@ -171,6 +181,7 @@ export const AdaptiveBlock = Schema.Union(
   Schema.Struct({ type: Schema.Literal("event"), data: EventContentSchema }),
   Schema.Struct({ type: Schema.Literal("news"), data: NewsContentSchema }),
   Schema.Struct({ type: Schema.Literal("radio"), data: RadioContentSchema }),
+  Schema.Struct({ type: Schema.Literal("media_search"), data: MediaSearchContentSchema }),
 )
 
 export type AdaptiveBlock = Schema.Schema.Type<typeof AdaptiveBlock>
@@ -188,7 +199,8 @@ export const AdaptiveCardTypeSchema = Schema.Literal(
   "itinerary",
   "dining",
   "activity",
-  "event"
+  "event",
+  "media_search"
 )
 
 export type CardType = Schema.Schema.Type<typeof AdaptiveCardTypeSchema>

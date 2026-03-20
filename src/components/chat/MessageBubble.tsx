@@ -8,7 +8,14 @@ import MarkdownIt from 'markdown-it'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import type { ChatMessage } from '@/types/chat'
-import { Copy, ChevronRight, FileText, CheckCircle2, Search } from 'lucide-react'
+import {
+  Copy,
+  ChevronRight,
+  FileText,
+  CheckCircle2,
+  Search,
+  Globe,
+} from 'lucide-react'
 
 const md = new MarkdownIt({
   html: true,
@@ -32,21 +39,53 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
   const isUser = message.role === 'user'
   const [isThoughtOpen, setIsThoughtOpen] = useState(false)
 
-  const htmlContent = useMemo(() => {
+  const [isCopied, setIsCopied] = useState(false)
+
+  const strippedContent = useMemo(() => {
     /** @UI.Chat.StripJson */
-    const strippedContent = message.content.replace(/```json[\s\S]*?(?:```|$)/g, '').trim()
-    return { __html: md.render(strippedContent) }
+    return message.content.replace(/```json[\s\S]*?(?:```|$)/g, '').trim()
   }, [message.content])
 
+  const htmlContent = useMemo(() => {
+    return { __html: md.render(strippedContent) }
+  }, [strippedContent])
+
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(message.content)
+    navigator.clipboard.writeText(strippedContent)
+    setIsCopied(true)
+    setTimeout(() => setIsCopied(false), 2000)
   }
+
+  const thoughtUrls = useMemo(() => {
+    if (!message.metadata?.thought) return []
+    const urlRegex = /(https?:\/\/[^\s)<>"]+)/g
+    const matches = message.metadata.thought.match(urlRegex)
+    return Array.from(new Set(matches || []))
+  }, [message.metadata?.thought])
+
+  const responseMedia = useMemo(() => {
+    if (isUser) return { videos: 0, web: 0 }
+    const urlRegex = /(https?:\/\/[^\s)<>"]+)/g
+    const matches = strippedContent.match(urlRegex) || []
+    const uniqueUrls = Array.from(new Set(matches))
+
+    const videos = uniqueUrls.filter(
+      (url) =>
+        url.includes('youtube.com') ||
+        url.includes('youtu.be') ||
+        url.includes('vimeo.com'),
+    ).length
+
+    const web = uniqueUrls.length - videos
+
+    return { videos, web }
+  }, [isUser, strippedContent])
 
   return (
     <div
       className={cn(
         'group relative w-full mb-8 animate-in fade-in slide-in-from-bottom-2 duration-500',
-        isUser ? 'flex flex-col items-end' : 'flex flex-col items-start'
+        isUser ? 'flex flex-col items-end' : 'flex flex-col items-start',
       )}
     >
       {/* @UI.Chat.Bubble.Content */}
@@ -58,8 +97,17 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
               onClick={copyToClipboard}
               className="pointer-events-auto px-2 py-1 flex items-center gap-1.5 text-white/20 hover:text-white/60 transition-all rounded-lg hover:bg-white/5 active:scale-95 text-[11px] font-bold uppercase tracking-widest"
             >
-              <Copy className="w-3.5 h-3.5" />
-              {t('chat.copy')}
+              {isCopied ? (
+                <>
+                  <CheckCircle2 className="w-3.5 h-3.5 text-white/90" />
+                  <span className="text-white/90">{t('chat.copied')}</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-3.5 h-3.5" />
+                  {t('chat.copy')}
+                </>
+              )}
             </button>
           </div>
         )}
@@ -67,7 +115,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
         {/* @UI.Chat.Bubble.User */}
         {isUser && (
           <div className="flex flex-col items-end">
-             <div className="bg-[#1a1a1a] border border-white/[0.05] rounded-[2rem] px-6 py-4 text-white/90 text-[17px] font-normal shadow-2xl inline-block max-w-2xl">
+            <div className="bg-[#1a1a1a] border border-white/[0.05] rounded-[2rem] px-6 py-4 text-white/90 text-[17px] font-normal shadow-2xl inline-block max-w-2xl">
               {message.content}
             </div>
           </div>
@@ -113,8 +161,44 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
                         exit={{ height: 0, opacity: 0 }}
                         className="overflow-hidden"
                       >
-                         <div className="ml-6 py-3 pb-5 text-white/30 text-[14px] leading-relaxed font-light border-l border-white/10 pl-5 italic">
-                          {message.metadata.thought}
+                        <div className="ml-6 py-3 pb-5 border-l border-white/10 pl-5">
+                          {/* Render Thought Text */}
+                          <div className="text-white/40 text-[14px] leading-relaxed font-light italic whitespace-pre-wrap">
+                            {message.metadata.thought}
+                          </div>
+
+                          {/* Render URL Bubbles */}
+                          {thoughtUrls.length > 0 && (
+                            <div className="mt-4 pt-4 border-t border-white/5">
+                              <div className="flex items-center gap-2 text-white/30 text-[12px] uppercase tracking-wider font-bold mb-3">
+                                <Search className="w-3.5 h-3.5" />
+                                <span>{t('chat.sources')}</span>
+                              </div>
+                              <div className="flex flex-wrap gap-2">
+                                {thoughtUrls.map((url, i) => {
+                                  try {
+                                    const domain = new URL(
+                                      url,
+                                    ).hostname.replace('www.', '')
+                                    return (
+                                      <a
+                                        key={i}
+                                        href={url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-[12px] font-medium text-white/50 hover:text-white transition-all hover:scale-105 active:scale-95"
+                                      >
+                                        <Globe className="w-3 h-3" />
+                                        <span>{domain}</span>
+                                      </a>
+                                    )
+                                  } catch (e) {
+                                    return null
+                                  }
+                                })}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </motion.div>
                     )}
@@ -124,17 +208,25 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
 
               {/* @UI.Chat.Bubble.Status */}
               {message.metadata?.steps?.map((step, idx) => (
-                <div 
-                  key={idx} 
+                <div
+                  key={idx}
                   className="flex items-center gap-3 text-white/60 font-medium text-[15px] pl-1 animate-in slide-in-from-left-2 duration-500"
                   style={{ animationDelay: `${idx * 150}ms` }}
                 >
                   <div className="w-5 h-5 flex items-center justify-center">
-                    {step.type === 'analyzed' && <CheckCircle2 className="w-4 h-4 text-white/30" />}
-                    {step.type === 'plan' && <FileText className="w-4 h-4 text-white/30" />}
-                    {step.type === 'search' && <Search className="w-4 h-4 text-white/30" />}
+                    {step.type === 'analyzed' && (
+                      <CheckCircle2 className="w-4 h-4 text-white/30" />
+                    )}
+                    {step.type === 'plan' && (
+                      <FileText className="w-4 h-4 text-white/30" />
+                    )}
+                    {step.type === 'search' && (
+                      <Search className="w-4 h-4 text-white/30" />
+                    )}
                   </div>
-                  <span className="text-[14px] tracking-tight">{step.label}</span>
+                  <span className="text-[14px] tracking-tight">
+                    {step.label}
+                  </span>
                 </div>
               ))}
             </div>
@@ -151,6 +243,32 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
               )}
               dangerouslySetInnerHTML={htmlContent}
             />
+
+            {/* @UI.Chat.Bubble.MediaSummary */}
+            {!isUser && (responseMedia.videos > 0 || responseMedia.web > 0) && (
+              <div className="flex flex-wrap gap-2 pt-4 mt-2 border-t border-white/[0.03]">
+                {responseMedia.videos > 0 && (
+                  <div className="flex items-center gap-2 px-3 py-1.5 bg-[#ff0000]/10 border border-[#ff0000]/20 rounded-full text-[13px] font-medium text-white/80 transition-all hover:bg-[#ff0000]/20 cursor-default">
+                    <div className="w-5 h-5 bg-[#ff0000] rounded-full flex items-center justify-center">
+                      <ChevronRight className="w-3 h-3 text-white fill-white" />
+                    </div>
+                    <span>
+                      {responseMedia.videos} {t('chat.videos_found')}
+                    </span>
+                  </div>
+                )}
+                {responseMedia.web > 0 && (
+                  <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 rounded-full text-[13px] font-medium text-white/80 transition-all hover:bg-white/10 cursor-default">
+                    <div className="w-5 h-5 bg-white/10 rounded-full flex items-center justify-center">
+                      <Globe className="w-3 h-3 text-white/60" />
+                    </div>
+                    <span>
+                      {responseMedia.web} {t('chat.web_pages')}
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
       </div>

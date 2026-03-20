@@ -52,7 +52,7 @@
   }
 
   .dark {
-    --background: 20 15% 8%;
+    --background: 0 0% 0%;
     --foreground: 30 15% 92%;
 
     --card: 20 15% 10%;
@@ -76,14 +76,14 @@
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 20 12% 18%;
-    --input: 20 12% 18%;
+    --border: 0 0% 10%;
+    --input: 0 0% 10%;
     --ring: 30 95% 52%;
 
-    --sidebar-bg: 20 15% 6%;
+    --sidebar-bg: 0 0% 5%;
     --sidebar-fg: 30 15% 85%;
-    --sidebar-border: 20 12% 14%;
-    --sidebar-hover: 20 12% 12%;
+    --sidebar-border: 0 0% 10%;
+    --sidebar-hover: 0 0% 8%;
     --sidebar-active: 30 95% 52%;
   }
 }
@@ -95,10 +95,37 @@
 
   body {
     @apply bg-background text-foreground font-body antialiased min-h-screen w-full;
+    color-scheme: dark;
   }
 
   h1, h2, h3, h4, h5, h6 {
     @apply font-display;
+  }
+
+  /* Premium Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    transition: background 0.2s ease;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  /* Firefox support */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
   }
 }
 
