@@ -7,7 +7,9 @@ import { useI18n } from '@/lib/effect/I18nProvider'
 import MarkdownIt from 'markdown-it'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
-import type { ChatMessage } from '@/types/chat'
+import { useAppDispatch } from '@/store/hooks'
+import { openSources } from '@/store/slices/chatSlice'
+import type { ChatMessage, SearchResult } from '@/types/chat'
 import {
   Copy,
   ChevronRight,
@@ -29,6 +31,8 @@ interface MessageBubbleProps {
       thought?: string
       thoughtDuration?: string
       steps?: { type: 'analyzed' | 'plan' | 'search'; label: string }[]
+      sources?: SearchResult[]
+      searchQuery?: string
     }
   }
 }
@@ -39,6 +43,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
   const isUser = message.role === 'user'
   const [isThoughtOpen, setIsThoughtOpen] = useState(false)
 
+  const dispatch = useAppDispatch()
   const [isCopied, setIsCopied] = useState(false)
 
   const strippedContent = useMemo(() => {
@@ -62,24 +67,6 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
     const matches = message.metadata.thought.match(urlRegex)
     return Array.from(new Set(matches || []))
   }, [message.metadata?.thought])
-
-  const responseMedia = useMemo(() => {
-    if (isUser) return { videos: 0, web: 0 }
-    const urlRegex = /(https?:\/\/[^\s)<>"]+)/g
-    const matches = strippedContent.match(urlRegex) || []
-    const uniqueUrls = Array.from(new Set(matches))
-
-    const videos = uniqueUrls.filter(
-      (url) =>
-        url.includes('youtube.com') ||
-        url.includes('youtu.be') ||
-        url.includes('vimeo.com'),
-    ).length
-
-    const web = uniqueUrls.length - videos
-
-    return { videos, web }
-  }, [isUser, strippedContent])
 
   return (
     <div
@@ -244,31 +231,67 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
               dangerouslySetInnerHTML={htmlContent}
             />
 
-            {/* @UI.Chat.Bubble.MediaSummary */}
-            {!isUser && (responseMedia.videos > 0 || responseMedia.web > 0) && (
-              <div className="flex flex-wrap gap-2 pt-4 mt-2 border-t border-white/[0.03]">
-                {responseMedia.videos > 0 && (
-                  <div className="flex items-center gap-2 px-3 py-1.5 bg-[#ff0000]/10 border border-[#ff0000]/20 rounded-full text-[13px] font-medium text-white/80 transition-all hover:bg-[#ff0000]/20 cursor-default">
-                    <div className="w-5 h-5 bg-[#ff0000] rounded-full flex items-center justify-center">
-                      <ChevronRight className="w-3 h-3 text-white fill-white" />
+            {/* @UI.Chat.Bubble.SourcesPill */}
+            {!isUser &&
+              (message.metadata?.sources?.filter(
+                (s) => s.url && s.url.startsWith('http'),
+              ).length ?? 0) > 0 && (
+                <div className="flex flex-wrap gap-2 pt-4 mt-2 border-t border-white/[0.03]">
+                  <button
+                    onClick={() => {
+                      dispatch(
+                        openSources({
+                          query:
+                            message.metadata?.searchQuery ||
+                            message.content.slice(0, 50),
+                          sources:
+                            message.metadata?.sources?.filter(
+                              (s) => s.url && s.url.startsWith('http'),
+                            ) || [],
+                        }),
+                      )
+                    }}
+                    className="group/sources flex items-center gap-2.5 px-3 py-1.5 bg-white/5 border border-white/10 hover:border-white/20 rounded-full transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-xl"
+                  >
+                    {/* Favicon Stack */}
+                    <div className="flex -space-x-2.5 overflow-hidden">
+                      {(message.metadata?.sources?.slice(0, 3) || []).map(
+                        (s, i) => (
+                          <div
+                            key={i}
+                            className="inline-block h-5 w-5 rounded-full ring-2 ring-black bg-white/10 backdrop-blur-xl flex items-center justify-center"
+                          >
+                            {s.icon ? (
+                              <img
+                                src={s.icon}
+                                alt=""
+                                className="h-full w-full object-contain p-0.5"
+                              />
+                            ) : (
+                              <Globe className="h-3 w-3 text-white/40" />
+                            )}
+                          </div>
+                        ),
+                      )}
+                      {(!message.metadata?.sources ||
+                        message.metadata.sources.length === 0) && (
+                        <div className="inline-block h-5 w-5 rounded-full ring-2 ring-black bg-white/10 backdrop-blur-xl flex items-center justify-center">
+                          <Globe className="h-3 w-3 text-white/40" />
+                        </div>
+                      )}
                     </div>
-                    <span>
-                      {responseMedia.videos} {t('chat.videos_found')}
+
+                    <span className="text-[13px] font-bold text-white/50 group-hover/sources:text-white transition-colors">
+                      {message.metadata?.sources?.filter(
+                        (s) => s.url && s.url.startsWith('http'),
+                      ).length ?? 0}{' '}
+                      {t('chat.sources')}
                     </span>
-                  </div>
-                )}
-                {responseMedia.web > 0 && (
-                  <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 rounded-full text-[13px] font-medium text-white/80 transition-all hover:bg-white/10 cursor-default">
-                    <div className="w-5 h-5 bg-white/10 rounded-full flex items-center justify-center">
-                      <Globe className="w-3 h-3 text-white/60" />
-                    </div>
-                    <span>
-                      {responseMedia.web} {t('chat.web_pages')}
-                    </span>
-                  </div>
-                )}
-              </div>
-            )}
+
+                    <ChevronRight className="w-3.5 h-3.5 text-white/20 group-hover/sources:text-white/60 transition-all transform group-hover/sources:translate-x-0.5" />
+                  </button>
+                </div>
+              )}
           </div>
         )}
       </div>

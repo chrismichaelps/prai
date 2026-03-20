@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
-import type { ChatMessage, AdaptiveData, Suggestion } from '@/types/chat';
+import type { ChatMessage, AdaptiveData, Suggestion, SearchResult } from '@/types/chat';
 
 export interface ChatState {
   messages: ChatMessage[];
@@ -8,6 +8,11 @@ export interface ChatState {
   error: string | null;
   suggestions: Suggestion[];
   activeAdaptiveData: AdaptiveData[];
+  isSourcesOpen: boolean;
+  selectedSources: {
+    query: string;
+    sources: SearchResult[];
+  } | null;
 }
 
 const initialState: ChatState = {
@@ -16,6 +21,8 @@ const initialState: ChatState = {
   error: null,
   suggestions: [],
   activeAdaptiveData: [],
+  isSourcesOpen: false,
+  selectedSources: null,
 };
 
 /** @Namespace.Chat.Slice */
@@ -60,10 +67,19 @@ export const chatSlice = createSlice({
     addActiveAdaptiveData: (state, action: PayloadAction<AdaptiveData>) => {
       state.activeAdaptiveData.push(action.payload);
     },
+    openSources: (state, action: PayloadAction<{ query: string; sources: SearchResult[] }>) => {
+      state.selectedSources = action.payload;
+      state.isSourcesOpen = true;
+    },
+    closeSources: (state) => {
+      state.isSourcesOpen = false;
+    },
     clearHistory: (state) => {
       state.messages = [];
       state.activeAdaptiveData = [];
       state.suggestions = [];
+      state.isSourcesOpen = false;
+      state.selectedSources = null;
     },
   },
 });
@@ -77,6 +93,8 @@ export const {
   setSuggestions,
   setActiveAdaptiveData,
   addActiveAdaptiveData,
+  openSources,
+  closeSources,
   clearHistory,
 } = chatSlice.actions;
 
