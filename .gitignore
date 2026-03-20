@@ -19,6 +19,7 @@ dist
 *.pem
 Thumbs.db
 *.local
+public/app-version.json
 
 # Debug
 npm-debug.log*
