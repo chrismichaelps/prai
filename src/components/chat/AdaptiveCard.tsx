@@ -450,7 +450,7 @@ const Content = () => {
           {tourismData.attractions.map((tag: string) => (
             <button
               key={tag}
-              onClick={() => onAction?.(tag)}
+              onClick={() => onAction?.(`Cuéntame más sobre ${tag}`)}
               className="px-3 py-1 bg-white/5 text-[10px] font-bold text-white/40 rounded-full border border-white/10 hover:bg-white/10 hover:text-white transition-all active:scale-95"
             >
               {tag}

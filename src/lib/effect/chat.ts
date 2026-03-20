@@ -47,7 +47,6 @@ export const sendChatMessage = (content: string) => Effect.gen(function* () {
   yield* Redux.dispatch(setLoading(true))
   yield* Redux.dispatch(setError(null))
   yield* Redux.dispatch(setSuggestions([]))
-  yield* Redux.dispatch(setActiveAdaptiveData([]))
 
   const messages = yield* Redux.getState().pipe(Effect.map((s) => s.chat.messages))
   const stream = openRouter.chat(messages)
