@@ -5,12 +5,17 @@ export interface UIState {
   isSidebarOpen: boolean;
   activeTab: string;
   isModelInfoVisible: boolean;
+  apiError: {
+    code: number;
+    message: string;
+  } | null;
 }
 
 const initialState: UIState = {
   isSidebarOpen: true,
   activeTab: 'chat',
   isModelInfoVisible: false,
+  apiError: null,
 };
 
 /** @Store.Slice.UI */
@@ -33,9 +38,15 @@ export const uiSlice = createSlice({
     toggleModelInfo: (state) => {
       state.isModelInfoVisible = !state.isModelInfoVisible;
     },
+    setApiError: (state, action: PayloadAction<{ code: number; message: string } | null>) => {
+      state.apiError = action.payload;
+    },
+    clearApiError: (state) => {
+      state.apiError = null;
+    },
   },
 });
 
-export const { toggleSidebar, setSidebarOpen, setActiveTab, setModelInfoVisible, toggleModelInfo } = uiSlice.actions;
+export const { toggleSidebar, setSidebarOpen, setActiveTab, setModelInfoVisible, toggleModelInfo, setApiError, clearApiError } = uiSlice.actions;
 
 export default uiSlice.reducer;
