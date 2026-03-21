@@ -21,7 +21,7 @@ const initialState: PassportState = {
   seals: [],
 };
 
-/** @Namespace.Passport.Slice */
+/** @Store.Slice.Passport */
 export const passportSlice = createSlice({
   name: 'passport',
   initialState,

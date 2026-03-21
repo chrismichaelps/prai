@@ -4,7 +4,7 @@ import type { Config } from "../schemas/ConfigSchema"
 import { PromptBuilderService } from "./PromptBuilder"
 import { ConfigError } from "../errors"
 
-/** @Namespace.Config.Service */
+/** @Service.Effect.Config */
 export class ConfigService extends Effect.Service<ConfigService>()("Config", {
   dependencies: [PromptBuilderService.Default],
   effect: Effect.gen(function* () {

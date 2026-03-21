@@ -12,7 +12,7 @@ Grammar_Lock: "@root/hashes/grammar/prai.hash.md"
 ### [AdaptiveCardsSchema.ts]
 - **Core_Schemas**: `Base`, `Tourism`, `Photos`, `Video`, `Suggestions`, `News`, `Radio`.
 - **CardType**: Literals for polymorphic dispatch.
-- **DNA_Anchor**: `@Namespace.AdaptiveCards.Schema`
+- **DNA_Anchor**: `@Schema.AdaptiveCards`
 
 ### [AdaptiveCard.tsx]
 - **Pattern**: Senior Compound Component (`AdaptiveCard.Root`, `.Media`, `.Header`, `.Content`, `.Actions`).
@@ -30,8 +30,8 @@ Grammar_Lock: "@root/hashes/grammar/prai.hash.md"
 ## [Namespace.Effect]
 
 ### [Services]
-- **PromptBuilderService**: Dynamic system prompt composition via base templates. (`@Namespace.PromptBuilder.Service`)
-- **ConfigService**: Centralized environment variable management via Schema. Injects PromptBuilder. (`@Namespace.Config.Service`)
+- **PromptBuilderService**: Dynamic system prompt composition via base templates. (`@Service.Effect.PromptBuilder`)
+- **ConfigService**: Centralized environment variable management via Schema. Injects PromptBuilder. (`@Service.Effect.Config`)
 - **OpenRouter**: OpenAI-compatible streaming chat completion via HTTP API. Returns `Stream<string, OpenRouterError>`. (`@Service.OpenRouter`)
 - **VoiceService**: Web Speech API abstraction natively wrapped in Effect async boundaries for cross-browser speech recognition. (`@Service.Voice`)
 - **I18nService**: Strictly typed, environment-injected dictionary resolution supporting multiple regions (North America, Latino). (`@Service.I18n`)
@@ -50,7 +50,7 @@ Grammar_Lock: "@root/hashes/grammar/prai.hash.md"
 
 ### [Error Strategy (errors.ts)]
 - **Pattern**: `Data.TaggedError` for all domain failures (e.g., `ConfigError`, `OpenRouterError`, `ParseError`).
-- **DNA_Anchor**: `@Namespace.Effect.Errors`
+- **DNA_Anchor**: `@Error.Effect`
 
 ## [Namespace.State] (Redux)
 - **Store**: Standard Toolkit `configureStore` wrapped by the Effect Execution Graph.

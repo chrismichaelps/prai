@@ -25,7 +25,7 @@ const initialState: ChatState = {
   selectedSources: null,
 };
 
-/** @Namespace.Chat.Slice */
+/** @Store.Slice.Chat */
 export const chatSlice = createSlice({
   name: 'chat',
   initialState,
