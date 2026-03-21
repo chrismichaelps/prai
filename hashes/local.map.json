@@ -140,6 +140,36 @@
       "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
       "dependencies": [],
       "fidelity_level": "Active"
+    },
+    "SeoService": {
+      "file_path": "@root/src/lib/effect/services/Seo.ts",
+      "hash_reference": "@root/hashes/lib/effect/services/Seo.hash.md",
+      "grammar_ref": "@root/hashes/grammar/effect.hash.md",
+      "dependencies": [
+        "@root/hashes/src/lib/effect/services/Config.hash.md",
+        "@root/hashes/src/lib/effect/errors.hash.md"
+      ],
+      "fidelity_level": "Active"
+    },
+    "sitemap": {
+      "file_path": "@root/src/app/sitemap.ts",
+      "hash_reference": "@root/hashes/src/app/sitemap.hash.md",
+      "grammar_ref": "@root/hashes/grammar/next.hash.md",
+      "dependencies": [
+        "@root/hashes/lib/effect/services/Seo.hash.md",
+        "@root/hashes/src/lib/effect/runtime.hash.md"
+      ],
+      "fidelity_level": "Active"
+    },
+    "robots": {
+      "file_path": "@root/src/app/robots.ts",
+      "hash_reference": "@root/hashes/src/app/robots.hash.md",
+      "grammar_ref": "@root/hashes/grammar/next.hash.md",
+      "dependencies": [
+        "@root/hashes/lib/effect/services/Seo.hash.md",
+        "@root/hashes/src/lib/effect/runtime.hash.md"
+      ],
+      "fidelity_level": "Active"
     }
   }
 }

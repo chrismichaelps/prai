@@ -7,6 +7,7 @@ import { PromptBuilderService } from "./services/PromptBuilder";
 import { VoiceServiceLive } from "./services/Voice";
 import { I18nLive } from "./i18n";
 import { BuildInfoService } from "./services/BuildInfo";
+import { SeoService } from "./services/Seo";
 
 /** @Logic.Effect.Runtime */
 const BaseLayer = Layer.mergeAll(
@@ -15,16 +16,16 @@ const BaseLayer = Layer.mergeAll(
   BrowserHttpClient.layerXMLHttpRequest
 );
 
-const ConfigLayer = ConfigService.Default.pipe(
+export const ConfigLayer = ConfigService.Default.pipe(
   Layer.provide(PromptBuilderService.Default)
 );
 
-const nextJsConfigProvider = ConfigProvider.fromMap(
+export const nextJsConfigProvider = ConfigProvider.fromMap(
   new Map([
     ["NEXT_PUBLIC_OPENROUTER_BASE_URL", process.env.NEXT_PUBLIC_OPENROUTER_BASE_URL || ""],
     ["NEXT_PUBLIC_MODEL_NAME", process.env.NEXT_PUBLIC_MODEL_NAME || ""],
     ["NEXT_PUBLIC_OPENROUTER_API_KEY", process.env.NEXT_PUBLIC_OPENROUTER_API_KEY || ""],
-    ["NEXT_PUBLIC_SITE_URL", process.env.NEXT_PUBLIC_SITE_URL || "https://prai.vercel.app"]
+    ["NEXT_PUBLIC_SITE_URL", process.env.NEXT_PUBLIC_SITE_URL || ""]
   ])
 );
 
@@ -34,6 +35,9 @@ const MainLayer = Layer.mergeAll(
   VoiceServiceLive,
   I18nLive,
   BuildInfoService.Default,
+  SeoService.Default.pipe(
+    Layer.provideMerge(ConfigLayer)
+  ),
   OpenRouter.Default.pipe(
     Layer.provideMerge(ConfigLayer),
     Layer.provideMerge(BaseLayer)
