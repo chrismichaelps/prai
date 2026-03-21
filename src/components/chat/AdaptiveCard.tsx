@@ -15,6 +15,7 @@ import {
   Video,
   Image as ImageIcon,
 } from 'lucide-react'
+import { RuntimeError } from '@/lib/effect/errors'
 import { cn } from '@/lib/utils'
 import type {
   CardType,
@@ -43,9 +44,9 @@ const AdaptiveCardContext = createContext<AdaptiveCardContextValue | null>(null)
 function useAdaptiveCard() {
   const context = useContext(AdaptiveCardContext)
   if (!context) {
-    throw new Error(
-      'AdaptiveCard sub-components must be wrapped in <AdaptiveCard.Root />',
-    )
+    throw new RuntimeError({
+      message: 'AdaptiveCard sub-components must be wrapped in <AdaptiveCard.Root />',
+    })
   }
   return context
 }

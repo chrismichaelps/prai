@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useCallback, useEffect } from 'react'
 import { runtime } from './runtime'
 import { initChat, sendChatMessage } from './chat'
+import { RuntimeError } from './errors'
 import { startSpeechToText, stopSpeechToText } from './services/Voice'
 import { clearHistory as clearChatAction } from '@/store/slices/chatSlice'
 import { useAppDispatch } from '@/store/hooks'
@@ -69,7 +70,9 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
 export const useChatActions = () => {
   const context = useContext(ChatContext)
   if (context === undefined) {
-    throw new Error('useChatActions must be used within a ChatProvider')
+    throw new RuntimeError({
+      message: 'useChatActions must be used within a ChatProvider',
+    })
   }
   return context
 }

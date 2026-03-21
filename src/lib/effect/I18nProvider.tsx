@@ -5,6 +5,7 @@ import { Effect } from 'effect'
 import { runtime } from './runtime'
 import { I18n, type Locale } from './services/I18n'
 import { translate } from './i18n'
+import { RuntimeError } from './errors'
 
 interface I18nContextType {
   locale: Locale
@@ -52,7 +53,9 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
 export function useI18n() {
   const context = useContext(I18nContext)
   if (!context) {
-    throw new Error('useI18n must be used within an I18nProvider')
+    throw new RuntimeError({
+      message: 'useI18n must be used within an I18nProvider',
+    })
   }
   return context
 }

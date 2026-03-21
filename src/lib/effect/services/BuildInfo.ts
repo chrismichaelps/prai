@@ -1,4 +1,5 @@
 import { Effect } from "effect"
+import { BuildInfoError } from "../errors"
 
 export interface BuildInfo {
   readonly buildHash: string
@@ -13,7 +14,7 @@ export class BuildInfoService extends Effect.Service<BuildInfoService>()("BuildI
         const data = await res.json() as { buildHash: string }
         return data.buildHash
       },
-      catch: () => new Error("Failed to fetch build info"),
+      catch: () => new BuildInfoError({ message: "Failed to fetch build info" }),
     })
 
     const buildHash = yield* fetchBuildInfo
