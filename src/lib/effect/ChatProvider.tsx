@@ -3,14 +3,16 @@
 import React, { createContext, useContext, useCallback, useEffect, useRef } from 'react'
 import { Fiber } from 'effect'
 import { runtime } from './runtime'
-import { initChat, sendChatMessage } from './chat'
+import { initChat, sendChatMessage, regenerateResponse } from './chat'
 import { RuntimeError } from './errors'
 import { startSpeechToText, stopSpeechToText } from './services/Voice'
-import { clearHistory as clearChatAction } from '@/store/slices/chatSlice'
+import { clearHistory as clearChatAction, editMessage as editChatMessageAction } from '@/store/slices/chatSlice'
 import { useAppDispatch } from '@/store/hooks'
 
 interface ChatContextType {
   sendMessage: (content: string) => Promise<void>
+  regenerateMessage: () => Promise<void>
+  editMessage: (index: number, content: string) => Promise<void>
   stopResponse: () => void
   clearHistory: () => void
   startVoice: (onResult: (text: string, isFinal: boolean) => void) => void
@@ -38,13 +40,32 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     const fiber = runtime.runFork(sendChatMessage(content))
     activeFiber.current = fiber
     
-    // Cleanup reference when fiber completes
     runtime.runPromise(Fiber.await(fiber)).then(() => {
       if (activeFiber.current === fiber) {
         activeFiber.current = null
       }
     })
   }, [])
+
+  const regenerateMessage = useCallback(async () => {
+    const fiber = runtime.runFork(regenerateResponse)
+    activeFiber.current = fiber
+    
+    runtime.runPromise(Fiber.await(fiber)).then(() => {
+      if (activeFiber.current === fiber) {
+        activeFiber.current = null
+      }
+    })
+  }, [])
+
+  const editMessage = useCallback(async (index: number, content: string) => {
+    if (activeFiber.current) {
+      await runtime.runPromise(Fiber.interrupt(activeFiber.current))
+      activeFiber.current = null
+    }
+    dispatch(editChatMessageAction({ index, content }))
+    await regenerateMessage()
+  }, [dispatch, regenerateMessage])
 
   const stopResponse = useCallback(async () => {
     if (activeFiber.current) {
@@ -70,6 +91,8 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     <ChatContext.Provider
       value={{
         sendMessage,
+        regenerateMessage,
+        editMessage,
         stopResponse,
         clearHistory: () => {
           dispatch(clearChatAction())
