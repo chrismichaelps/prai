@@ -241,12 +241,12 @@ export const sendChatMessage = (content: string) => Effect.gen(function* () {
 
   yield* Redux.dispatch(setLoading(false))
 }).pipe(
+  Effect.ensuring(Redux.dispatch(setLoading(false))),
   Effect.catchAll((err) =>
     Effect.gen(function* () {
       yield* Effect.logError(`[Chat] Fatal Error: ${String(err)}`)
       const config = yield* ConfigService
       yield* Redux.dispatch(setError(config.errorMessages.connectionError))
-      yield* Redux.dispatch(setLoading(false))
     })
   )
 )

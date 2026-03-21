@@ -10,7 +10,7 @@ import { DiscoveryLoader } from './DiscoveryLoader'
 import { useI18n } from '@/lib/effect/I18nProvider'
 import { MemoizedMessageBubble } from './MessageBubble'
 import { SourcesSidebar } from './SourcesSidebar'
-import { ArrowDown, AlertCircle, Loader2, Mic } from 'lucide-react'
+import { ArrowDown, AlertCircle, Loader2, Mic, Square } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 /** @UI.Chat.AdaptiveCard.Lazy */
@@ -80,6 +80,7 @@ export const Chat = {
     textareaRef,
     isRecording,
     onMicClick,
+    stopResponse,
     t,
   }: {
     value: string
@@ -92,6 +93,7 @@ export const Chat = {
     textareaRef: React.RefObject<HTMLTextAreaElement>
     isRecording: boolean
     onMicClick: () => void
+    stopResponse: () => void
     t: (key: string) => string
   }) => (
     <footer className="w-full h-fit flex flex-col items-center z-30 pointer-events-none pb-12 px-6">
@@ -162,17 +164,20 @@ export const Chat = {
                 />
               </button>
               <button
-                onClick={() => onSend()}
-                disabled={(!value.trim() && !isLoading) || isLoading}
+                onClick={isLoading ? stopResponse : () => onSend()}
+                disabled={!isLoading && !value.trim()}
                 className={cn(
                   'w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 shadow-xl relative overflow-hidden group shrink-0',
-                  isLoading || !value.trim()
+                  !isLoading && !value.trim()
                     ? 'bg-white/5 text-white/10'
                     : 'bg-white/10 text-white hover:bg-white hover:text-slate-950 active:scale-95',
                 )}
               >
                 {isLoading ? (
-                  <Loader2 className="w-4 h-4 text-white/20 animate-spin" />
+                  <div className="relative flex items-center justify-center">
+                    <Loader2 className="w-8 h-8 text-white/20 animate-spin absolute" />
+                    <Square className="w-3 h-3 text-white fill-white group-hover:text-slate-950 group-hover:fill-slate-950 transition-colors" />
+                  </div>
                 ) : (
                   <ArrowDown className="w-5 h-5 -rotate-90 group-hover:scale-110 transition-transform" />
                 )}
@@ -189,7 +194,7 @@ export const ChatContainer: React.FC = () => {
   const { messages, isLoading, error, activeAdaptiveData } = useAppSelector(
     (state) => state.chat,
   )
-  const { sendMessage, startVoice, stopVoice } = useChatActions()
+  const { sendMessage, stopResponse, startVoice, stopVoice } = useChatActions()
   const { t } = useI18n()
 
   const [userInput, setUserInput] = useState('')
@@ -365,6 +370,7 @@ export const ChatContainer: React.FC = () => {
         textareaRef={textareaRef}
         isRecording={isRecording}
         onMicClick={handleMicClick}
+        stopResponse={stopResponse}
         t={t}
       />
       <SourcesSidebar />

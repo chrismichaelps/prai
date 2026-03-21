@@ -1,6 +1,7 @@
 'use client'
 
-import React, { createContext, useContext, useCallback, useEffect } from 'react'
+import React, { createContext, useContext, useCallback, useEffect, useRef } from 'react'
+import { Fiber } from 'effect'
 import { runtime } from './runtime'
 import { initChat, sendChatMessage } from './chat'
 import { RuntimeError } from './errors'
@@ -10,6 +11,7 @@ import { useAppDispatch } from '@/store/hooks'
 
 interface ChatContextType {
   sendMessage: (content: string) => Promise<void>
+  stopResponse: () => void
   clearHistory: () => void
   startVoice: (onResult: (text: string, isFinal: boolean) => void) => void
   stopVoice: () => void
@@ -19,6 +21,7 @@ const ChatContext = createContext<ChatContextType | undefined>(undefined)
 
 /** @Context.Effect.Chat */
 export function ChatProvider({ children }: { children: React.ReactNode }) {
+  const activeFiber = useRef<Fiber.RuntimeFiber<any, any> | null>(null)
   const dispatch = useAppDispatch()
 
   const init = useCallback(async () => {
@@ -32,9 +35,22 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
   }, [init])
 
   const sendMessage = useCallback(async (content: string) => {
-    await runtime.runPromise(sendChatMessage(content)).catch((e) =>
-      console.error("[ChatProvider] sendMessage error:", e)
-    )
+    const fiber = runtime.runFork(sendChatMessage(content))
+    activeFiber.current = fiber
+    
+    // Cleanup reference when fiber completes
+    runtime.runPromise(Fiber.await(fiber)).then(() => {
+      if (activeFiber.current === fiber) {
+        activeFiber.current = null
+      }
+    })
+  }, [])
+
+  const stopResponse = useCallback(async () => {
+    if (activeFiber.current) {
+      await runtime.runPromise(Fiber.interrupt(activeFiber.current))
+      activeFiber.current = null
+    }
   }, [])
 
   const startVoice = useCallback((onResult: (text: string, isFinal: boolean) => void) => {
@@ -54,6 +70,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     <ChatContext.Provider
       value={{
         sendMessage,
+        stopResponse,
         clearHistory: () => {
           dispatch(clearChatAction())
           init()
