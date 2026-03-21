@@ -26,7 +26,7 @@ export function ModelInfoBanner() {
             stiffness: 120,
             mass: 0.8
           }}
-          className="fixed bottom-6 right-6 z-[100] max-w-sm w-full origin-bottom-right"
+          className="fixed bottom-4 left-4 right-4 sm:left-auto sm:bottom-6 sm:right-6 z-[100] max-w-sm w-auto sm:w-full origin-bottom sm:origin-bottom-right"
         >
           <div className="bg-[#090909]/95 backdrop-blur-3xl border border-white/10 rounded-3xl p-6 shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden relative group">
             {/* Background Glow - Soft & Premium */}
