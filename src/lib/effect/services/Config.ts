@@ -21,7 +21,7 @@ export class ConfigService extends Effect.Service<ConfigService>()("Config", {
       Effect.mapError(() => new ConfigError({ message: "Missing NEXT_PUBLIC_OPENROUTER_API_KEY" }))
     )
     const siteUrl = yield* EffectConfig.string("NEXT_PUBLIC_SITE_URL").pipe(
-      Effect.orElseSucceed(() => "https://prai.vercel.app")
+      Effect.mapError(() => new ConfigError({ message: "Missing NEXT_PUBLIC_SITE_URL" }))
     )
 
     const systemPrompt = promptBuilder.compose(`
