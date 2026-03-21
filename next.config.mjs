@@ -1,2 +1,11 @@
 /** @Config.Next */
-export default {}
+export default {
+  productionBrowserSourceMaps: false,
+  webpack: (config, { dev }) => {
+    if (!dev) {
+      config.devtool = false
+    }
+    return config
+  },
+}
+
