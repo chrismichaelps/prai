@@ -81,6 +81,22 @@ export const chatSlice = createSlice({
       state.isSourcesOpen = false;
       state.selectedSources = null;
     },
+    editMessage: (state, action: PayloadAction<{ index: number; content: string }>) => {
+      const { index, content } = action.payload;
+      if (!state.messages[index]) return;
+
+      state.messages[index].content = content;
+      state.messages[index].metadata = {
+        ...state.messages[index].metadata,
+        edited: true,
+      };
+      const lastIndex = state.messages.length - 1;
+      if (state.messages[lastIndex]?.role === 'assistant') {
+        state.messages.pop();
+      }
+      state.activeAdaptiveData = [];
+      state.suggestions = [];
+    },
   },
 });
 
@@ -96,6 +112,7 @@ export const {
   openSources,
   closeSources,
   clearHistory,
+  editMessage,
 } = chatSlice.actions;
 
 export default chatSlice.reducer;

@@ -451,7 +451,7 @@ const Content = () => {
           {tourismData.attractions.map((tag: string) => (
             <button
               key={tag}
-              onClick={() => onAction?.(`Cuéntame más sobre ${tag}`)}
+              onClick={() => typeof onAction === 'function' ? onAction(`Cuéntame más sobre ${tag}`) : undefined}
               className="px-3 py-1 bg-white/5 text-[10px] font-bold text-white/40 rounded-full border border-white/10 hover:bg-white/10 hover:text-white transition-all active:scale-95"
             >
               {tag}
@@ -472,7 +472,7 @@ const Content = () => {
               {(data as DiningContent).menuHighlights?.map((tag: string) => (
                 <button
                   key={tag}
-                  onClick={() => onAction?.(tag)}
+                  onClick={() => typeof onAction === 'function' ? onAction(tag) : undefined}
                   className="px-3 py-1.5 bg-white/5 text-xs font-bold text-white/40 rounded-xl border border-white/10 hover:bg-white/10 hover:text-white transition-all active:scale-95"
                 >
                   {tag}
@@ -490,7 +490,7 @@ const Content = () => {
               <div key={i} className="flex gap-6 items-start group/step">
                 <div className="flex flex-col items-center pt-1.5">
                   <button
-                    onClick={() => onAction?.(`${step.day}: ${step.title}`)}
+                    onClick={() => typeof onAction === 'function' ? onAction(`${step.day}: ${step.title}`) : undefined}
                     className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-[10px] font-black text-white/40 hover:bg-primary/20 hover:text-primary hover:border-primary/30 transition-all active:scale-95"
                   >
                     {i + 1}
@@ -582,7 +582,7 @@ const Actions = ({ onAction }: { onAction?: (action: string) => void }) => {
             key={i}
             onClick={() => {
               const message = actionToNaturalMessage(item.action, item.params)
-              onAction?.(message)
+              if (typeof onAction === 'function') onAction(message)
             }}
             className={cn(
               'flex items-center justify-between text-left px-5 py-4 rounded-xl bg-white/[0.03] border border-white/[0.08] text-white/70',

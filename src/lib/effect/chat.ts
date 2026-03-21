@@ -1,4 +1,4 @@
-import { Effect, Ref, Stream, Schema } from "effect"
+import { Effect, Ref, Stream } from "effect"
 import type { SearchResult } from "@/types/chat"
 import { OpenRouter } from "./services/OpenRouter"
 import { ConfigService } from "./services/Config"
@@ -12,21 +12,8 @@ import {
   setActiveAdaptiveData,
   clearHistory as clearChatHistory
 } from "@/store/slices/chatSlice"
-import { 
-  AdaptiveBlock 
-} from "./schemas/AdaptiveCardsSchema"
-import { 
-  THINKING_PHASES, 
-  DEFAULT_THINKING_STATUS 
-} from "./constants/ChatConstants"
 
-/** @Logic.Effect.Chat.Helpers */
-const getThinkingStatus = (length: number): string => {
-  const phase = THINKING_PHASES.find(p => length < p.threshold)
-  return phase ? phase.status : DEFAULT_THINKING_STATUS
-}
-
-/** @Logic.Effect.Chat */
+/** @Logic.Effect.Chat.Init */
 export const initChat = Effect.gen(function* () {
   const config = yield* ConfigService
 
@@ -37,16 +24,9 @@ export const initChat = Effect.gen(function* () {
   }))
 })
 
-/** @Logic.Effect.Chat.Send */
-export const sendChatMessage = (content: string) => Effect.gen(function* () {
+/** @Logic.Chat.GenerateResponse.Internal */
+const generateResponse: Effect.Effect<void, never, OpenRouter | Redux> = Effect.gen(function* () {
   const openRouter = yield* OpenRouter
-
-  if (!content.trim()) return
-
-  yield* Redux.dispatch(addMessage({ role: "user" as const, content }))
-  yield* Redux.dispatch(setLoading(true))
-  yield* Redux.dispatch(setError(null))
-  yield* Redux.dispatch(setSuggestions([]))
 
   const messages = yield* Redux.getState().pipe(Effect.map((s) => s.chat.messages))
   const stream = openRouter.chat(messages)
@@ -74,7 +54,7 @@ export const sendChatMessage = (content: string) => Effect.gen(function* () {
           if (dataStr === "[DONE]") break
 
           const parseResult = yield* Effect.try({
-            try: () => JSON.parse(dataStr) as { 
+            try: () => JSON.parse(dataStr) as {
               choices?: Array<{ delta?: { reasoning?: string; reasoning_details?: Array<{ text: string }>; content?: string } }>,
               citations?: string[]
             },
@@ -85,22 +65,22 @@ export const sendChatMessage = (content: string) => Effect.gen(function* () {
 
           const json = parseResult.value
           const delta = json.choices?.[0]?.delta
-          
+
           /** @Logic.Chat.Citations */
           if (json.citations && json.citations.length > 0) {
             const chatState = (yield* Redux.getState()).chat.messages
             const lastMessage = chatState[chatState.length - 1]
             const existingSources = lastMessage?.metadata?.sources || []
-            
+
             const newSources = json.citations.map(url => {
               try {
                 const domain = new URL(url).hostname.replace('www.', '')
                 return { title: domain, url, source: domain, verified: true }
-              } catch (e) {
+              } catch {
                 return { title: url, url, verified: false }
               }
             })
-            
+
             const allSources = [...existingSources, ...newSources]
             const uniqueSources = Array.from(new Map(allSources.map(s => [s.url, s])).values())
 
@@ -117,8 +97,8 @@ export const sendChatMessage = (content: string) => Effect.gen(function* () {
             if (!isThought) {
               yield* Ref.set(isThoughtRef, true)
               yield* Ref.set(thoughtStartTimeRef, Date.now())
-              yield* Redux.dispatch(updateLastMessage({ 
-                metadata: { thought: "", isThinking: true } 
+              yield* Redux.dispatch(updateLastMessage({
+                metadata: { thought: "", isThinking: true }
               }))
             }
 
@@ -132,11 +112,11 @@ export const sendChatMessage = (content: string) => Effect.gen(function* () {
               const start = yield* Ref.get(thoughtStartTimeRef)
               const duration = ((Date.now() - start) / 1000).toFixed(1)
               yield* Ref.set(isThoughtRef, false)
-              yield* Redux.dispatch(updateLastMessage({ 
-                metadata: { 
-                  thoughtTime: duration, 
-                  isThinking: false 
-                } 
+              yield* Redux.dispatch(updateLastMessage({
+                metadata: {
+                  thoughtTime: duration,
+                  isThinking: false
+                }
               }))
             }
 
@@ -148,13 +128,14 @@ export const sendChatMessage = (content: string) => Effect.gen(function* () {
             const urlMatches = current.match(/(https?:\/\/[^\s)<>"]+)/g) || []
             if (urlMatches.length > 0) {
               const existing = yield* Ref.get(extractedSourcesRef)
-              const newSources: SearchResult[] = urlMatches
-                .filter(url => { try { new URL(url); return true } catch { return false } })
-                .filter(url => !existing.some(s => s.url === url))
-                .map(url => {
+              const newSources: SearchResult[] = []
+              for (const url of urlMatches) {
+                if (existing.some(s => s.url === url)) continue
+                try {
                   const domain = new URL(url).hostname.replace('www.', '')
-                  return { title: domain, url, source: domain as string, verified: false }
-                })
+                  newSources.push({ title: domain, url, source: domain, verified: false })
+                } catch {}
+              }
               if (newSources.length > 0) {
                 const allSources: SearchResult[] = [...existing, ...newSources]
                 yield* Ref.set(extractedSourcesRef, allSources)
@@ -167,6 +148,8 @@ export const sendChatMessage = (content: string) => Effect.gen(function* () {
         }
       }
     })
+  ).pipe(
+    Effect.catchAll(() => Effect.void)
   )
 
   /** @Logic.Chat.PostStream */
@@ -180,7 +163,7 @@ export const sendChatMessage = (content: string) => Effect.gen(function* () {
       try {
         const block = JSON.parse(jsonStr as string)
         return { block, raw }
-      } catch (e) {
+      } catch {
         return null
       }
     })
@@ -193,22 +176,22 @@ export const sendChatMessage = (content: string) => Effect.gen(function* () {
     for (const { raw } of jsonBlocks) {
       processedContent = processedContent.replace(raw, "").trim()
     }
-    
+
     /** @Logic.Chat.AdaptiveExtraction */
     const adaptiveBlocks = jsonBlocks.map(b => b.block as { type: string; data: unknown })
     const suggestionItems = adaptiveBlocks
       .filter(block => block.type === "suggestions")
       .flatMap(block => (block.data as { items?: Array<{ label: string; action: string }> }).items || [])
-    
+
     if (suggestionItems.length > 0) {
       yield* Redux.dispatch(setSuggestions(suggestionItems))
     }
-    
+
     yield* Redux.dispatch(setActiveAdaptiveData(jsonBlocks.map(b => b.block)))
     const finalSources = yield* Ref.get(extractedSourcesRef)
-    yield* Redux.dispatch(updateLastMessage({ 
+    yield* Redux.dispatch(updateLastMessage({
       content: processedContent,
-      metadata: { 
+      metadata: {
         sources: finalSources,
         searchQuery: assistantContent.match(/Buscando\s+"([^"]+)"/i)?.[1] || undefined
       }
@@ -216,20 +199,20 @@ export const sendChatMessage = (content: string) => Effect.gen(function* () {
   } else {
     /** @Logic.Chat.SourceExtraction.NoBlocks */
     const realtimeSources = yield* Ref.get(extractedSourcesRef)
-    
+
     if (realtimeSources.length === 0) {
       const latestState = yield* Redux.getState()
       const lastMessage = latestState.chat.messages[latestState.chat.messages.length - 1]
       const thoughtContent = lastMessage?.metadata?.thought || ""
       const allContent = assistantContent + " " + thoughtContent
       const urlRegex = /(https?:\/\/[^\s)<>"]+)/g
-      const matches = allContent.match(urlRegex) || []
-      const uniqueUrls = Array.from(new Set(matches))
+      const foundUrls = allContent.match(urlRegex) || []
+      const uniqueUrls = Array.from(new Set(foundUrls))
       const postSources: SearchResult[] = uniqueUrls.map(url => {
         try {
           const domain = new URL(url).hostname.replace('www.', '')
           return { title: domain, url, source: domain, verified: false }
-        } catch (e) {
+        } catch {
           return { title: url, url, verified: false }
         }
       })
@@ -238,15 +221,45 @@ export const sendChatMessage = (content: string) => Effect.gen(function* () {
       }
     }
   }
+})
 
-  yield* Redux.dispatch(setLoading(false))
-}).pipe(
-  Effect.ensuring(Redux.dispatch(setLoading(false))),
-  Effect.catchAll((err) =>
-    Effect.gen(function* () {
-      yield* Effect.logError(`[Chat] Fatal Error: ${String(err)}`)
-      const config = yield* ConfigService
-      yield* Redux.dispatch(setError(config.errorMessages.connectionError))
-    })
+/** @Logic.Chat.Send */
+export const sendChatMessage = (content: string): Effect.Effect<void, never, OpenRouter | Redux | ConfigService> =>
+  Effect.gen(function* () {
+    if (!content.trim()) return
+
+    yield* Redux.dispatch(addMessage({ role: "user" as const, content }))
+    yield* Redux.dispatch(setLoading(true))
+    yield* Redux.dispatch(setError(null))
+    yield* Redux.dispatch(setSuggestions([]))
+
+    yield* generateResponse
+  }).pipe(
+    Effect.ensuring(Redux.dispatch(setLoading(false))),
+    Effect.catchAll((err) =>
+      Effect.gen(function* () {
+        yield* Effect.logError(`[Chat] Fatal Error: ${String(err)}`)
+        const config = yield* ConfigService
+        yield* Redux.dispatch(setError(config.errorMessages.connectionError))
+      })
+    )
   )
-)
+
+/** @Logic.Chat.Regenerate */
+export const regenerateResponse: Effect.Effect<void, never, OpenRouter | Redux | ConfigService> =
+  Effect.gen(function* () {
+    yield* Redux.dispatch(setLoading(true))
+    yield* Redux.dispatch(setError(null))
+    yield* Redux.dispatch(setSuggestions([]))
+
+    yield* generateResponse
+  }).pipe(
+    Effect.ensuring(Redux.dispatch(setLoading(false))),
+    Effect.catchAll((err) =>
+      Effect.gen(function* () {
+        yield* Effect.logError(`[Chat] Regeneration Error: ${String(err)}`)
+        const config = yield* ConfigService
+        yield* Redux.dispatch(setError(config.errorMessages.connectionError))
+      })
+    )
+  )
