@@ -3,13 +3,13 @@ import { NextResponse } from 'next/server';
 export async function POST(req: Request) {
   try {
     const { messages } = await req.json();
-    
+
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
-        'HTTP-Referer': 'https://prai.app', // Optional
+        'HTTP-Referer': process.env.NEXT_PUBLIC_SITE_URL || '', // Optional
         'X-Title': 'PR\\AI Assistant', // Optional
       },
       body: JSON.stringify({
@@ -20,7 +20,7 @@ export async function POST(req: Request) {
     });
 
     if (!response.ok) {
-        return NextResponse.json({ error: 'OpenRouter error' }, { status: response.status });
+      return NextResponse.json({ error: 'OpenRouter error' }, { status: response.status });
     }
 
     /** @Route.Chat.Response */

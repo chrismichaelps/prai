@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Términos de Servicio PR\\AI',
     description: 'Reglas y condiciones para el uso de nuestra inteligencia artificial boricua.',
-    url: 'https://prai.app/legal/terms',
+    url: 'https://prai-tourism.com/legal/terms',
     type: 'website',
   },
 }

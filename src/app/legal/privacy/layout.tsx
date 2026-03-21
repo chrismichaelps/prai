@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Privacidad en PR\\AI - Tu Seguridad es Primero',
     description: 'Nuestras políticas de manejo de datos para una experiencia segura.',
-    url: 'https://prai.app/legal/privacy',
+    url: 'https://prai-tourism.com/legal/privacy',
     type: 'website',
   },
 }
