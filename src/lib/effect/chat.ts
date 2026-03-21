@@ -12,6 +12,8 @@ import {
   setActiveAdaptiveData,
   clearHistory as clearChatHistory
 } from "@/store/slices/chatSlice"
+import { setApiError } from "@/store/slices/uiSlice"
+import { OpenRouterError } from "./errors"
 import type { AdaptiveData } from "@/types/chat"
 import { extractUrls, toSource } from "@/lib/url"
 
@@ -25,7 +27,7 @@ export const initChat = Effect.gen(function* () {
 })
 
 /** @Logic.Chat.GenerateResponse.Internal */
-const generateResponse: Effect.Effect<void, never, OpenRouter | Redux> = Effect.gen(function* () {
+const generateResponse: Effect.Effect<void, OpenRouterError, OpenRouter | Redux> = Effect.gen(function* () {
   const openRouter = yield* OpenRouter
   const messages = yield* Redux.getState().pipe(Effect.map((s) => s.chat.messages))
   const stream = openRouter.chat(messages)
@@ -97,7 +99,10 @@ const generateResponse: Effect.Effect<void, never, OpenRouter | Redux> = Effect.
           catch: (e) => ({ _tag: "ParseError" as const, cause: e, raw: dataStr })
         }).pipe(Effect.option)
 
-        if (parsed._tag === "None") continue
+        if (parsed._tag === "None") {
+          yield* Effect.logDebug(`[Chat] Skipped malformed stream line: ${dataStr.slice(0, 100)}`)
+          continue
+        }
         const json = parsed.value
         const delta = json.choices?.[0]?.delta
 
@@ -148,7 +153,7 @@ const generateResponse: Effect.Effect<void, never, OpenRouter | Redux> = Effect.
         }
       }
     })
-  ).pipe(Effect.catchAll(() => Effect.void))
+  )
 
   /** @Logic.Chat.PostStream */
   const assistantContent = yield* Ref.get(contentRef)
@@ -230,8 +235,12 @@ export const sendChatMessage = (
     Effect.catchAll((err) =>
       Effect.gen(function* () {
         yield* Effect.logError(`[Chat] Fatal Error: ${String(err)}`)
-        const config = yield* ConfigService
-        yield* Redux.dispatch(setError(config.errorMessages.connectionError))
+        if (err instanceof OpenRouterError) {
+          yield* Redux.dispatch(setApiError({ code: err.code, message: err.message }))
+        } else {
+          const config = yield* ConfigService
+          yield* Redux.dispatch(setError(config.errorMessages.connectionError))
+        }
       })
     )
   )
@@ -249,8 +258,12 @@ export const regenerateResponse: Effect.Effect<void, never, OpenRouter | Redux |
     Effect.catchAll((err) =>
       Effect.gen(function* () {
         yield* Effect.logError(`[Chat] Regeneration Error: ${String(err)}`)
-        const config = yield* ConfigService
-        yield* Redux.dispatch(setError(config.errorMessages.connectionError))
+        if (err instanceof OpenRouterError) {
+          yield* Redux.dispatch(setApiError({ code: err.code, message: err.message }))
+        } else {
+          const config = yield* ConfigService
+          yield* Redux.dispatch(setError(config.errorMessages.connectionError))
+        }
       })
     )
   )

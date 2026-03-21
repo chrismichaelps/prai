@@ -9,7 +9,7 @@ export class ConfigError extends Data.TaggedError("ConfigError")<{
 /** @Error.Effect.OpenRouter */
 export class OpenRouterError extends Data.TaggedError("OpenRouterError")<{
   readonly message: string
-  readonly code?: number
+  readonly code: number
   readonly rateLimit?: {
     readonly limit: string
     readonly remaining: string
