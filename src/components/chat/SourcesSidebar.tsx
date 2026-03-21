@@ -38,7 +38,7 @@ export const SourcesSidebar: React.FC = () => {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed top-0 right-0 h-full w-full md:w-[420px] bg-black border-l border-white/10 z-[70] flex flex-col shadow-[-20px_0_50px_rgba(0,0,0,0.5)]"
+            className="fixed top-0 right-0 h-full w-full md:w-[420px] bg-black border-l border-white/10 z-[110] flex flex-col shadow-[-20px_0_50px_rgba(0,0,0,0.5)]"
           >
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-5 border-b border-white/5">
@@ -125,16 +125,18 @@ export const SourcesSidebar: React.FC = () => {
                           )}
 
                           <div className="flex items-center gap-2 pt-1 pl-6">
-                            <div className="w-5 h-5 rounded-md bg-white/5 flex items-center justify-center p-1">
+                            <div className="w-5 h-5 rounded-md bg-white/5 flex items-center justify-center p-1 overflow-hidden">
                               {source.icon ? (
                                 <img
                                   src={source.icon}
                                   alt=""
                                   className="w-full h-full object-contain"
+                                  onError={(e) => {
+                                    (e.target as HTMLImageElement).style.display = 'none'
+                                  }}
                                 />
-                              ) : (
-                                <Globe className="w-3 h-3 text-white/40" />
-                              )}
+                              ) : null}
+                              <Globe className="w-3 h-3 text-white/40" />
                             </div>
                             <span className="text-[12px] font-medium text-white/50 group-hover/card:text-white/70 transition-colors">
                               {domain}

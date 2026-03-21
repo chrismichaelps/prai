@@ -97,20 +97,20 @@ const Media = () => {
   const videoData = data as VideoContent
 
   const mainImage = useMemo(() => {
-    return type === ADAPTIVE_CARD_TYPES.TOURISM && tourismData.images?.length
+    return type === ADAPTIVE_CARD_TYPES.TOURISM && tourismData?.images?.length
       ? tourismData.images[0]
-      : type === ADAPTIVE_CARD_TYPES.PHOTOS && photosData.images?.length
+      : type === ADAPTIVE_CARD_TYPES.PHOTOS && photosData?.images?.length
         ? photosData.images[0]
         : undefined
-  }, [type, data, tourismData.images, photosData.images])
+  }, [type, data, tourismData?.images, photosData?.images])
 
   const secondaryImages = useMemo(() => {
-    if (type === ADAPTIVE_CARD_TYPES.TOURISM && tourismData.images?.length)
+    if (type === ADAPTIVE_CARD_TYPES.TOURISM && tourismData?.images?.length)
       return tourismData.images.slice(1, 4)
-    if (type === ADAPTIVE_CARD_TYPES.PHOTOS && photosData.images?.length)
+    if (type === ADAPTIVE_CARD_TYPES.PHOTOS && photosData?.images?.length)
       return photosData.images.slice(1, 4)
     return []
-  }, [type, data, tourismData.images, photosData.images])
+  }, [type, data, tourismData?.images, photosData?.images])
 
   if (type === ADAPTIVE_CARD_TYPES.VIDEO) {
     if (!videoData.videoUrl && videoData.media_search_terms) {
