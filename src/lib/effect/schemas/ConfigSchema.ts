@@ -12,7 +12,7 @@ export const ConfigSchema = Schema.Struct({
   openRouterBaseUrl: Schema.String.pipe(Schema.minLength(1)),
   modelName: Schema.String.pipe(Schema.minLength(1)),
   apiKey: Schema.String.pipe(Schema.minLength(1)),
-  siteUrl: Schema.String.pipe(Schema.minLength(1)),
+  siteUrl: Schema.String,
   systemPrompt: Schema.String,
   errorMessages: ErrorMessagesSchema
 })
