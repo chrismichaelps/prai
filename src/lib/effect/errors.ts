@@ -41,3 +41,9 @@ export class AccessibilityError extends Data.TaggedError("AccessibilityError")<{
   readonly message: string
   readonly cause?: unknown
 }> {}
+
+/** @Error.Effect.Seo */
+export class SeoError extends Data.TaggedError("SeoError")<{
+  readonly message: string
+  readonly cause?: unknown
+}> {}
