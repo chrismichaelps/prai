@@ -339,10 +339,12 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, index, on
                                 src={s.icon}
                                 alt=""
                                 className="h-full w-full object-contain p-0.5"
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).style.display = 'none'
+                                }}
                               />
-                            ) : (
-                              <Globe className="h-3 w-3 text-white/40" />
-                            )}
+                            ) : null}
+                            <Globe className="h-3 w-3 text-white/40" />
                           </div>
                         ),
                       )}
