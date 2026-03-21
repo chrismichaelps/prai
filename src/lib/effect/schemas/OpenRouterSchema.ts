@@ -39,3 +39,18 @@ export const ChoiceSchema = Schema.Struct({
 export const OpenRouterResponseSchema = Schema.Struct({
   choices: Schema.NonEmptyArray(ChoiceSchema)
 })
+
+/** @Schema.Effect.OpenRouter.ErrorCodes */
+export const OpenRouterErrorCodes = {
+  400: "Bad Request",
+  401: "Unauthorized",
+  402: "Insufficient Credits",
+  403: "Content Flagged",
+  408: "Request Timeout",
+  429: "Rate Limited",
+  500: "Internal Error",
+  502: "Bad Gateway",
+  503: "Service Unavailable"
+} as const
+
+export type OpenRouterErrorCode = keyof typeof OpenRouterErrorCodes
