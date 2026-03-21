@@ -8,7 +8,7 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "brand.name": "PR\\AI",
     "brand.slogan": "Inteligencia Artificial de PR.",
     "brand.tagline": "Te ayudamos a descubrir todo sobre Puerto Rico con inteligencia artificial — playas, road trips, gastronomía, eventos y mucho más.",
-    
+
     // Header & Nav
     "nav.about": "Sobre PR\\AI",
     "nav.contact": "Contacto",
@@ -16,14 +16,13 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "nav.initial_chat": "Chat Inicial",
     "nav.export": "Exporta",
     "nav.share": "Compartir",
-    "nav.info": "Info del Modelo",
     "nav.menu": "Menú",
     "nav.actions": "Explora",
-    
+
     // Hero
     "hero.cta_chat": "Empezar a chatear",
     "hero.alt_mountains": "Montañas de Puerto Rico al atardecer",
-    
+
     // Chat
     "chat.placeholder": "Pregunta sobre turismo, gastronomía o cultura local...",
     "chat.loading": "AI analizando",
@@ -55,7 +54,7 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "chat.edit": "Editar",
     "chat.save": "Guardar",
     "chat.cancel": "Cancelar",
-    
+
     // Thinking Statuses (Internal)
     "chat.thinking.analyzing": "Analizando la consulta...",
     "chat.thinking.searching": "Buscando la mejor respuesta...",
@@ -64,7 +63,7 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "chat.thinking.finalizing": "Finalizando el razonamiento...",
     "chat.thinking.prefix": "Pensando...",
     "chat.thinking.completed": "Pensado durante",
-    
+
     // Footer
     "footer.rights": "Todos los derechos reservados.",
     "footer.legal": "Documentación Legal",
@@ -75,14 +74,14 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "footer.home": "Inicio",
     "footer.chat": "Chat",
     "footer.explore": "Explorar",
-    
+
     // Cookies
     "cookies.title": "Control de Cookies",
     "cookies.desc": "Utilizamos cookies para mejorar tu experiencia de navegación y analizar nuestro tráfico. Tú decides qué permites.",
     "cookies.accept": "Aceptar",
     "cookies.decline": "Rechazar",
     "cookies.view": "Ver Política de Cookies",
-    
+
     // Legal - Privacy
     "privacy.title": "Privacidad PR\\AI.",
     "privacy.subtitle": "Cómo protegemos tus datos y aseguramos una exploración segura de nuestra Isla.",
@@ -94,7 +93,7 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "privacy.s3.desc": "Implementamos medidas de seguridad de vanguardia para proteger sus datos. Sin embargo, ningún método de transmisión por Internet es 100% seguro. Nos esforzamos por proteger su información personal.",
     "privacy.cookies.title": "Cookies",
     "privacy.cookies.desc": "Utilizamos cookies para recordar sus preferencias y sesiones de exploración. Puede configurar su navegador para rechazar todas las cookies, pero esto podría afectar algunas funcionalidades del servicio.",
-    
+
     // Legal - Terms
     "terms.title": "Términos de Servicio.",
     "terms.subtitle": "Nuestras reglas para asegurar una experiencia transparente y segura al explorar Puerto Rico con PR\\AI.",
@@ -106,7 +105,7 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "terms.s3.desc": "Usted se compromete a no utilizar PR\\AI para ningún propósito ilegal o prohibido por estos términos. No deberá interferir con el funcionamiento normal del servicio ni intentar acceder a datos no autorizados.",
     "terms.note.title": "Nota Importante",
     "terms.note.desc": "PR\\AI utiliza modelos de lenguaje avanzados. Aunque nos esforzamos por la precisión, la información proporcionada puede contener errores. Siempre verifique información crítica con fuentes oficiales directamente.",
-    
+
     // Legal - Cookies
     "legal.cookies.title": "Política de Cookies.",
     "legal.cookies.subtitle": "Transparencia total sobre cómo utilizamos la tecnología para mejorar tu exploración de Puerto Rico.",
@@ -144,7 +143,7 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "brand.name": "PR\\AI",
     "brand.slogan": "AI for PR.",
     "brand.tagline": "We help you discover everything about Puerto Rico with artificial intelligence — beaches, road trips, gastronomy, events and much more.",
-    
+
     // Header & Nav
     "nav.about": "About PR\\AI",
     "nav.contact": "Contact",
@@ -152,14 +151,13 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "nav.initial_chat": "Initial Chat",
     "nav.export": "Export",
     "nav.share": "Share",
-    "nav.info": "Model Info",
     "nav.menu": "Menu",
     "nav.actions": "Explore",
-    
+
     // Hero
     "hero.cta_chat": "Start chatting",
     "hero.alt_mountains": "Puerto Rico mountains at sunset",
-    
+
     // Chat
     "chat.placeholder": "Ask about tourism, gastronomy or local culture...",
     "chat.loading": "AI analyzing",
@@ -197,7 +195,7 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "chat.thinking.finalizing": "Finalizing reasoning...",
     "chat.thinking.prefix": "Thinking...",
     "chat.thinking.completed": "Thought for",
-    
+
     // Footer
     "footer.rights": "All rights reserved.",
     "footer.legal": "Legal Documentation",
@@ -208,14 +206,14 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "footer.home": "Home",
     "footer.chat": "Chat",
     "footer.explore": "Explore",
-    
+
     // Cookies
     "cookies.title": "Cookie Settings",
     "cookies.desc": "We use cookies to enhance your browsing experience and analyze our traffic. You decide what to allow.",
     "cookies.accept": "Accept",
     "cookies.decline": "Decline",
     "cookies.view": "View Cookies Policy",
-    
+
     // Legal - Privacy
     "privacy.title": "Privacy PR\\AI.",
     "privacy.subtitle": "How we protect your data and ensure a safe exploration of our Island.",
@@ -227,7 +225,7 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "privacy.s3.desc": "We implement state-of-the-art security measures to protect your data. However, no method of internet transmission is 100% secure. We strive to protect your personal information.",
     "privacy.cookies.title": "Cookies",
     "privacy.cookies.desc": "We use cookies to remember your preferences and browsing sessions. You can configure your browser to reject all cookies, but this could affect some features of the service.",
-    
+
     // Legal - Terms
     "terms.title": "Terms of Service.",
     "terms.subtitle": "Our rules to ensure a transparent and safe experience when exploring Puerto Rico with PR\\AI.",
@@ -239,7 +237,7 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "terms.s3.desc": "You agree not to use PR\\AI for any illegal or prohibited purpose. You shall not interfere with the normal operation of the service or attempt to access unauthorized data.",
     "terms.note.title": "Important Note",
     "terms.note.desc": "PR\\AI uses advanced language models. While we strive for accuracy, the information provided may contain errors. Always verify critical information with official sources directly.",
-    
+
     // Legal - Cookies
     "legal.cookies.title": "Cookie Policy.",
     "legal.cookies.subtitle": "Total transparency on how we use technology to improve your exploration of Puerto Rico.",
@@ -291,7 +289,7 @@ export const I18nLive = Layer.effect(
     return {
       t: (_key: string) => "", // Placeholder, used by Provider.translate
       locale: Ref.get(currentLocale),
-      setLocale: (locale: Locale) => 
+      setLocale: (locale: Locale) =>
         Effect.gen(function* () {
           yield* Ref.set(currentLocale, locale)
           if (typeof document !== "undefined") {
