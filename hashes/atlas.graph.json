@@ -141,6 +141,27 @@
       "type": "SCHEMA_CONTRACT",
       "impact": "LOW",
       "reason": "About page imports GITHUB_REPO_URL constant"
+    },
+    {
+      "from": "@root/src/lib/effect/services/Seo",
+      "to": "@root/src/app/sitemap",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "sitemap.ts executes SeoService.getSitemapRoutes"
+    },
+    {
+      "from": "@root/src/lib/effect/services/Seo",
+      "to": "@root/src/app/robots",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "robots.ts executes SeoService.getRobotsConfig"
+    },
+    {
+      "from": "@root/src/lib/effect/services/Config",
+      "to": "@root/src/lib/effect/services/Seo",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "SeoService reads NEXT_PUBLIC_SITE_URL from ConfigService"
     }
   ],
   "dirty_propagation_rule": "When a node fidelity_level changes to DIRTY, recursively mark all nodes reachable via outgoing edges as DIRTY"
