@@ -94,10 +94,10 @@ export function Header({
             <div className="flex items-center gap-3">
               <button
                 onClick={() => dispatch(setModelInfoVisible(true))}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-white/70 hover:text-white transition-all bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 group"
+                className="flex items-center justify-center w-10 h-10 text-white/70 hover:text-white transition-all bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 group"
+                aria-label="Model Info"
               >
                 <Info className="w-4 h-4 text-white/70 group-hover:text-white" />
-                <span className="hidden sm:inline">{t('nav.info')}</span>
               </button>
             </div>
           ) : (
