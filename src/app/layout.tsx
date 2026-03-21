@@ -4,6 +4,7 @@ import { I18nProvider } from '@/lib/effect/I18nProvider'
 import { BuildInfoProvider } from '@/lib/effect/hooks/useBuildInfo'
 import { CookieBanner } from '@/components/ui/CookieBanner'
 import { ModelInfoBanner } from '@/components/ui/ModelInfoBanner'
+import { ErrorToast } from '@/components/ui/ErrorToast'
 import { Toaster } from 'sonner'
 import './globals.css'
 
@@ -66,6 +67,7 @@ export default function RootLayout({
               {children}
               <CookieBanner />
               <ModelInfoBanner />
+              <ErrorToast />
               <Toaster
                 position="top-center"
                 theme="dark"
