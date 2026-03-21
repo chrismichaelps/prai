@@ -13,7 +13,7 @@ const initialState: UIState = {
   isModelInfoVisible: false,
 };
 
-/** @Namespace.UI.Slice */
+/** @Store.Slice.UI */
 export const uiSlice = createSlice({
   name: 'ui',
   initialState,

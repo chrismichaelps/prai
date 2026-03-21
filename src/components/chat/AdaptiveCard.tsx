@@ -32,7 +32,7 @@ import type {
 import { ADAPTIVE_CARD_TYPES } from '../../lib/effect/constants/AdaptiveCardConstants'
 import { actionToNaturalMessage } from '@/lib/actions/actionToNaturalMessage'
 
-/** @Namespace.AdaptiveCard.Context */
+/** @Context.AdaptiveCard */
 type AdaptiveCardContextValue = {
   type: CardType
   data: any
@@ -59,7 +59,7 @@ interface AdaptiveCardProps {
   children?: React.ReactNode
 }
 
-/** @Namespace.AdaptiveCard.Root */
+/** @Component.AdaptiveCard.Root */
 const Root = ({
   type,
   data,
@@ -87,7 +87,7 @@ const Root = ({
 }
 Root.displayName = 'AdaptiveCard.Root'
 
-/** @Namespace.AdaptiveCard.Media */
+/** @Component.AdaptiveCard.Media */
 const Media = () => {
   const { type, data } = useAdaptiveCard()
   const { t } = useI18n()
