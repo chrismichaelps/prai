@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'PR\\AI Chat - Tu Guía en Puerto Rico',
     description: 'Planifica tu viaje y descubre Puerto Rico interactuando con nuestra IA.',
-    url: 'https://prai.app/chat',
+    url: 'https://prai-tourism.com/chat',
     type: 'website',
   },
 }

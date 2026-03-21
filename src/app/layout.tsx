@@ -8,6 +8,7 @@ import { Toaster } from 'sonner'
 import './globals.css'
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://prai-tourism.com'),
   title: 'PR\\AI - Tu Asistente de Inteligencia Artificial en Puerto Rico',
   description:
     'Descubre playas, road trips, gastronomía y experiencias familiares en Puerto Rico con la inteligencia artificial oficial de PR\\AI.',
@@ -29,7 +30,7 @@ export const metadata: Metadata = {
     title: 'PR\\AI - La IA Oficial de Puerto Rico',
     description:
       'Explora la isla con el asistente virtual más avanzado de Puerto Rico. Planifica tu viaje, descubre rutas y más.',
-    url: 'https://prai.app',
+    url: 'https://prai-tourism.com',
     siteName: 'PR\\AI',
     locale: 'es_PR',
     type: 'website',

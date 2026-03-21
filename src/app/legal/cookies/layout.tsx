@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Cookies en PR\\AI',
     description: 'Transparencia sobre el uso de cookies en nuestra plataforma.',
-    url: 'https://prai.app/legal/cookies',
+    url: 'https://prai-tourism.com/legal/cookies',
     type: 'website',
   },
 }
