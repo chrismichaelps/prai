@@ -51,6 +51,10 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "chat.view_menu": "Ver Menú y Ubicación",
     "chat.how_to_get_there": "¿Cómo puedo llegar?",
     "chat.search_for": "Buscar",
+    "chat.edited": "editado",
+    "chat.edit": "Editar",
+    "chat.save": "Guardar",
+    "chat.cancel": "Cancelar",
     
     // Thinking Statuses (Internal)
     "chat.thinking.analyzing": "Analizando la consulta...",
@@ -180,6 +184,10 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "chat.view_menu": "View Menu and Location",
     "chat.how_to_get_there": "How do I get there?",
     "chat.search_for": "Search for",
+    "chat.edited": "edited",
+    "chat.edit": "Edit",
+    "chat.save": "Save",
+    "chat.cancel": "Cancel",
 
     // Thinking Statuses (Internal)
     "chat.thinking.analyzing": "Analyzing query...",

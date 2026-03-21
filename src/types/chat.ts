@@ -18,6 +18,7 @@ export interface ChatMessage {
     steps?: { type: 'analyzed' | 'plan' | 'search'; label: string }[];
     sources?: SearchResult[];
     searchQuery?: string;
+    edited?: boolean;
   };
 }
 
