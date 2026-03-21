@@ -22,12 +22,7 @@ function getFiles(dir) {
 function hashBuild(dir) {
   const hash = createHash('sha256')
 
-  const files = getFiles(dir).filter(
-    (f) =>
-      !f.includes('/cache/') &&
-      !f.includes('/server/') &&
-      !f.includes('/image.blur.'),
-  )
+  const files = getFiles(dir)
 
   for (const file of files) {
     hash.update(file.replace(dir, ''))
@@ -37,9 +32,9 @@ function hashBuild(dir) {
   return hash.digest('hex')
 }
 
-const buildDir = join(process.cwd(), '.next')
+const srcDir = join(process.cwd(), 'src')
 const publicDir = join(process.cwd(), 'public')
-const version = hashBuild(buildDir)
+const version = hashBuild(srcDir)
 
 const out = join(publicDir, 'app-version.json')
 writeFileSync(
