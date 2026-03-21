@@ -58,7 +58,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" className="antialiased">
-      <body className="font-body min-h-screen bg-[#090909]">
+      <body className="font-body min-h-screen">
         <Providers>
           <I18nProvider>
             <BuildInfoProvider>
