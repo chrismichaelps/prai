@@ -194,7 +194,7 @@ export const ChatContainer: React.FC = () => {
   const { messages, isLoading, error, activeAdaptiveData } = useAppSelector(
     (state) => state.chat,
   )
-  const { sendMessage, stopResponse, startVoice, stopVoice } = useChatActions()
+  const { sendMessage, stopResponse, clearHistory, editMessage, startVoice, stopVoice } = useChatActions()
   const { t } = useI18n()
 
   const [userInput, setUserInput] = useState('')
@@ -314,7 +314,13 @@ export const ChatContainer: React.FC = () => {
         )}
 
         {messages.map((msg, index: number) => (
-          <MemoizedMessageBubble key={index} message={msg} />
+          <MemoizedMessageBubble 
+            key={index} 
+            message={msg} 
+            index={index}
+            onEdit={editMessage}
+            onStop={stopResponse}
+          />
         ))}
 
         {activeAdaptiveData.length > 0 &&

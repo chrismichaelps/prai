@@ -17,6 +17,9 @@ import {
   CheckCircle2,
   Search,
   Globe,
+  Pencil,
+  Check,
+  X,
 } from 'lucide-react'
 
 const md = new MarkdownIt({
@@ -33,15 +36,21 @@ interface MessageBubbleProps {
       steps?: { type: 'analyzed' | 'plan' | 'search'; label: string }[]
       sources?: SearchResult[]
       searchQuery?: string
+      edited?: boolean
     }
   }
+  index: number
+  onEdit?: (index: number, content: string) => void
+  onStop?: () => void
 }
 
-export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
+export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, index, onEdit, onStop }) => {
   const { t } = useI18n()
   if (message.role === 'system') return null
   const isUser = message.role === 'user'
   const [isThoughtOpen, setIsThoughtOpen] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
+  const [editContent, setEditContent] = useState(message.content)
 
   const dispatch = useAppDispatch()
   const [isCopied, setIsCopied] = useState(false)
@@ -101,10 +110,74 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
 
         {/* @UI.Chat.Bubble.User */}
         {isUser && (
-          <div className="flex flex-col items-end">
-            <div className="bg-[#1a1a1a] border border-white/[0.05] rounded-[2rem] px-6 py-4 text-white/90 text-[17px] font-normal shadow-2xl inline-block max-w-2xl">
-              {message.content}
-            </div>
+          <div className="flex flex-col items-end gap-2 group/user">
+            {!isEditing ? (
+              <div className="relative">
+                <div className="bg-[#1a1a1a] border border-white/[0.05] rounded-[2rem] px-6 py-4 text-white/90 text-[17px] font-normal shadow-2xl inline-block max-w-2xl">
+                  {message.content}
+                  {message.metadata?.edited && (
+                    <span className="ml-2 text-white/20 text-xs italic">
+                      ({t('chat.edited')})
+                    </span>
+                  )}
+                </div>
+                
+                {/* Edit Button */}
+                <button
+                  onClick={() => {
+                    setEditContent(message.content)
+                    setIsEditing(true)
+                    if (typeof onStop === 'function') onStop()
+                  }}
+                  className="absolute -left-12 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/5 border border-white/10 text-white/20 hover:text-white hover:bg-white/10 transition-all opacity-0 group-hover/user:opacity-100 active:scale-90"
+                  title={t('chat.edit')}
+                >
+                  <Pencil className="w-4 h-4" />
+                </button>
+              </div>
+            ) : (
+              <div className="w-full max-w-2xl bg-[#1a1a1a] border border-white/[0.08] rounded-[1.5rem] p-1.5 flex flex-col shadow-2xl animate-in zoom-in-95 duration-200">
+                <textarea
+                  autoFocus
+                  value={editContent}
+                  onChange={(e) => setEditContent(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault()
+                      if (editContent.trim() && editContent !== message.content) {
+                        if (typeof onEdit === 'function') onEdit(index, editContent)
+                      }
+                      setIsEditing(false)
+                    }
+                    if (e.key === 'Escape') setIsEditing(false)
+                  }}
+                  className="w-full bg-transparent border-none focus:ring-0 focus:outline-none outline-none text-[17px] text-white/90 p-4 resize-none min-h-[100px] font-sans leading-relaxed"
+                  style={{ outline: 'none', boxShadow: 'none' }}
+                />
+                <div className="flex justify-end gap-2 p-2 pt-0">
+                  <button
+                    onClick={() => setIsEditing(false)}
+                    className="px-4 py-2 rounded-xl text-xs font-bold text-white/40 hover:text-white hover:bg-white/5 transition-all flex items-center gap-2"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                    {t('chat.cancel')}
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (editContent.trim() && editContent !== message.content) {
+                        if (typeof onEdit === 'function') onEdit(index, editContent)
+                      }
+                      setIsEditing(false)
+                    }}
+                    disabled={!editContent.trim() || editContent === message.content}
+                    className="px-4 py-2 rounded-xl bg-white/10 text-white hover:bg-white hover:text-slate-950 transition-all text-xs font-bold flex items-center gap-2 disabled:opacity-50 disabled:pointer-events-none"
+                  >
+                    <Check className="w-3.5 h-3.5" />
+                    {t('chat.save')}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
