@@ -33,7 +33,7 @@
     "framer-motion": "^12.38.0",
     "lucide-react": "^0.462.0",
     "markdown-it": "^14.1.1",
-    "next": "15.0.0",
+    "next": "15.0.7",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-redux": "^9.2.0",
