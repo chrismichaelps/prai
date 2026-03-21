@@ -10,7 +10,7 @@ import { DiscoveryLoader } from './DiscoveryLoader'
 import { useI18n } from '@/lib/effect/I18nProvider'
 import { MemoizedMessageBubble } from './MessageBubble'
 import { SourcesSidebar } from './SourcesSidebar'
-import { ArrowDown, AlertCircle, Loader2, Plus, Mic } from 'lucide-react'
+import { ArrowDown, AlertCircle, Loader2, Mic } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 /** @UI.Chat.AdaptiveCard.Lazy */
@@ -142,12 +142,7 @@ export const Chat = {
           </div>
 
           {/* @UI.Chat.Actions */}
-          <div className="flex items-center justify-between px-3 pb-3">
-            <div className="flex items-center gap-0.5">
-              <button className="w-10 h-10 rounded-full flex items-center justify-center text-white/20 hover:text-white/50 transition-all active:scale-90">
-                <Plus className="w-5 h-5" />
-              </button>
-            </div>
+          <div className="flex items-center justify-end px-3 pb-3">
 
             <div className="flex items-center gap-2">
               <button
