@@ -2,6 +2,7 @@ import { Effect, Config as EffectConfig, Schema } from "effect"
 import { ConfigSchema } from "../schemas/ConfigSchema"
 import type { Config } from "../schemas/ConfigSchema"
 import { PromptBuilderService } from "./PromptBuilder"
+import { ConfigError } from "../errors"
 
 /** @Namespace.Config.Service */
 export class ConfigService extends Effect.Service<ConfigService>()("Config", {
@@ -11,13 +12,13 @@ export class ConfigService extends Effect.Service<ConfigService>()("Config", {
 
     /** @Logic.Config.EnvRead */
     const openRouterBaseUrl = yield* EffectConfig.string("NEXT_PUBLIC_OPENROUTER_BASE_URL").pipe(
-      Effect.mapError(() => new Error("Missing NEXT_PUBLIC_OPENROUTER_BASE_URL"))
+      Effect.mapError(() => new ConfigError({ message: "Missing NEXT_PUBLIC_OPENROUTER_BASE_URL" }))
     )
     const modelName = yield* EffectConfig.string("NEXT_PUBLIC_MODEL_NAME").pipe(
-      Effect.mapError(() => new Error("Missing NEXT_PUBLIC_MODEL_NAME"))
+      Effect.mapError(() => new ConfigError({ message: "Missing NEXT_PUBLIC_MODEL_NAME" }))
     )
     const apiKey = yield* EffectConfig.string("NEXT_PUBLIC_OPENROUTER_API_KEY").pipe(
-      Effect.mapError(() => new Error("Missing NEXT_PUBLIC_OPENROUTER_API_KEY"))
+      Effect.mapError(() => new ConfigError({ message: "Missing NEXT_PUBLIC_OPENROUTER_API_KEY" }))
     )
     const siteUrl = yield* EffectConfig.string("NEXT_PUBLIC_SITE_URL").pipe(
       Effect.orElseSucceed(() => "https://prai.vercel.app")

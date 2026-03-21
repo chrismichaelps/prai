@@ -17,3 +17,27 @@ export class OpenRouterError extends Data.TaggedError("OpenRouterError")<{
   }
   readonly cause?: unknown
 }> {}
+
+/** @Error.Effect.BuildInfo */
+export class BuildInfoError extends Data.TaggedError("BuildInfoError")<{
+  readonly message: string
+  readonly cause?: unknown
+}> {}
+
+/** @Error.Effect.Parse */
+export class ParseError extends Data.TaggedError("ParseError")<{
+  readonly message: string
+  readonly cause?: unknown
+}> {}
+
+/** @Error.Effect.Runtime */
+export class RuntimeError extends Data.TaggedError("RuntimeError")<{
+  readonly message: string
+  readonly cause?: unknown
+}> {}
+
+/** @Error.Effect.Accessibility */
+export class AccessibilityError extends Data.TaggedError("AccessibilityError")<{
+  readonly message: string
+  readonly cause?: unknown
+}> {}
