@@ -63,10 +63,22 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "auth.sign_out": "Cerrar sesión",
     "auth.welcome": "Bienvenido",
     "auth.terms_notice": "Al iniciar sesión, aceptas nuestros términos de servicio y política de privacidad.",
-    "auth.my_chat": "Mi Chat",
     "auth.profile": "Perfil",
     "auth.explorer": "Explorador",
     "auth.loading": "Cargando...",
+
+    // Profile
+    "profile.title": "Mi Perfil",
+    "profile.edit_title": "Editar Perfil",
+    "profile.display_name": "Nombre",
+    "profile.email": "Correo electrónico",
+    "profile.bio": "Biografía",
+    "profile.bio_placeholder": "Cuéntanos sobre ti...",
+    "profile.no_bio": "Sin biografía",
+    "profile.save": "Guardar",
+    "profile.saved": "Perfil guardado exitosamente",
+    "profile.save_error": "Error al guardar el perfil",
+    "profile.avatar_hint": "Avatar de Google",
 
     // Thinking Statuses (Internal)
     "chat.thinking.analyzing": "Analizando la consulta...",
@@ -224,9 +236,21 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "auth.explorer": "Explorer",
     "auth.welcome": "Welcome",
     "auth.terms_notice": "By signing in, you agree to our terms of service and privacy policy.",
-    "auth.my_chat": "My Chat",
     "auth.profile": "Profile",
     "auth.loading": "Loading...",
+
+    // Profile
+    "profile.title": "My Profile",
+    "profile.edit_title": "Edit Profile",
+    "profile.display_name": "Name",
+    "profile.email": "Email",
+    "profile.bio": "Bio",
+    "profile.bio_placeholder": "Tell us about yourself...",
+    "profile.no_bio": "No bio",
+    "profile.save": "Save",
+    "profile.saved": "Profile saved successfully",
+    "profile.save_error": "Error saving profile",
+    "profile.avatar_hint": "Google avatar",
 
 
     // Thinking Statuses (Internal)

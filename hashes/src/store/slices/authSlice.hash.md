@@ -37,6 +37,5 @@ export const signOut: AsyncThunk<void, void, { rejectValue: string }>
 Redux slice for authentication state management. **Currently superseded by `@Context.Auth`** which uses Supabase `onAuthStateChange` for real-time reactive updates.
 
 ### [Linkage]
-- **Legacy:** `@root/src/hooks/useAuthRedux.ts`, `@root/src/lib/effect/services/AuthReduxBridge.ts`
 - **Current:** `@root/src/contexts/AuthContext.tsx`
 - **Dependencies:** `@root/src/lib/effect/schemas/AuthSchema.ts`
