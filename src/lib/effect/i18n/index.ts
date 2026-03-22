@@ -22,6 +22,7 @@ const dictionary: Record<Locale, Record<string, string>> = {
     // Hero
     "hero.cta_chat": "Empezar a chatear",
     "hero.alt_mountains": "Montañas de Puerto Rico al atardecer",
+    "hero.alt_condado": "Agua del océano en Condado",
 
     // Chat
     "chat.placeholder": "Pregunta sobre turismo, gastronomía o cultura local...",
@@ -54,6 +55,18 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "chat.edit": "Editar",
     "chat.save": "Guardar",
     "chat.cancel": "Cancelar",
+
+    // Auth
+    "auth.sign_in": "Iniciar sesión",
+    "auth.sign_in_title": "Inicia sesión para continuar",
+    "auth.sign_in_with_google": "Continuar con Google",
+    "auth.sign_out": "Cerrar sesión",
+    "auth.welcome": "Bienvenido",
+    "auth.terms_notice": "Al iniciar sesión, aceptas nuestros términos de servicio y política de privacidad.",
+    "auth.my_chat": "Mi Chat",
+    "auth.profile": "Perfil",
+    "auth.explorer": "Explorador",
+    "auth.loading": "Cargando...",
 
     // Thinking Statuses (Internal)
     "chat.thinking.analyzing": "Analizando la consulta...",
@@ -171,6 +184,8 @@ const dictionary: Record<Locale, Record<string, string>> = {
     // Hero
     "hero.cta_chat": "Start chatting",
     "hero.alt_mountains": "Puerto Rico mountains at sunset",
+    "hero.alt_condado": "Condado Ocean Water",
+    "hero.alt_logo": "PR\\AI Logo",
 
     // Chat
     "chat.placeholder": "Ask about tourism, gastronomy or local culture...",
@@ -200,6 +215,19 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "chat.edit": "Edit",
     "chat.save": "Save",
     "chat.cancel": "Cancel",
+ 
+    // Auth
+    "auth.sign_in": "Sign in",
+    "auth.sign_in_title": "Sign in to continue",
+    "auth.sign_in_with_google": "Continue with Google",
+    "auth.sign_out": "Sign out",
+    "auth.explorer": "Explorer",
+    "auth.welcome": "Welcome",
+    "auth.terms_notice": "By signing in, you agree to our terms of service and privacy policy.",
+    "auth.my_chat": "My Chat",
+    "auth.profile": "Profile",
+    "auth.loading": "Loading...",
+
 
     // Thinking Statuses (Internal)
     "chat.thinking.analyzing": "Analyzing query...",
