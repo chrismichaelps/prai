@@ -77,6 +77,20 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, index, on
     return Array.from(new Set(matches || []))
   }, [message.metadata?.thought])
 
+  const visibleSources = useMemo((): SearchResult[] => {
+    const contentSources = message.metadata?.sources?.filter((s) => s.url && s.url.startsWith('http')) || []
+    const thoughtSourceUrls: SearchResult[] = thoughtUrls.map((url) => {
+      const domain = (() => { try { return new URL(url).hostname.replace('www.', '') } catch { return url } })()
+      return {
+        url,
+        title: domain,
+        source: domain,
+      }
+    })
+    const all = [...contentSources, ...thoughtSourceUrls]
+    return [...new Map(all.map((s) => [s.url, s])).values()]
+  }, [message.metadata?.sources, thoughtUrls])
+
   return (
     <div
       className={cn(
@@ -305,66 +319,50 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, index, on
             />
 
             {/* @UI.Chat.Bubble.SourcesPill */}
-            {!isUser &&
-              (message.metadata?.sources?.filter(
-                (s) => s.url && s.url.startsWith('http'),
-              ).length ?? 0) > 0 && (
-                <div className="flex flex-wrap gap-2 pt-4 mt-2 border-t border-white/[0.03]">
-                  <button
-                    onClick={() => {
-                      dispatch(
-                        openSources({
-                          query:
-                            message.metadata?.searchQuery ||
-                            message.content.slice(0, 50),
-                          sources:
-                            message.metadata?.sources?.filter(
-                              (s) => s.url && s.url.startsWith('http'),
-                            ) || [],
-                        }),
-                      )
-                    }}
-                    className="group/sources flex items-center gap-2.5 px-3 py-1.5 bg-white/5 border border-white/10 hover:border-white/20 rounded-full transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-xl"
-                  >
-                    {/* Favicon Stack */}
-                    <div className="flex -space-x-2.5 overflow-hidden">
-                      {(message.metadata?.sources?.slice(0, 3) || []).map(
-                        (s, i) => (
-                          <div
-                            key={i}
-                            className="inline-block h-5 w-5 rounded-full ring-2 ring-black bg-white/10 backdrop-blur-xl flex items-center justify-center"
-                          >
-                            {s.icon ? (
-                              <img
-                                src={s.icon}
-                                alt=""
-                                className="h-full w-full object-contain p-0.5"
-                                onError={(e) => {
-                                  (e.target as HTMLImageElement).style.display = 'none'
-                                }}
-                              />
-                            ) : null}
-                            <Globe className="h-3 w-3 text-white/40" />
-                          </div>
-                        ),
-                      )}
-                      {(!message.metadata?.sources ||
-                        message.metadata.sources.length === 0) && (
-                        <div className="inline-block h-5 w-5 rounded-full ring-2 ring-black bg-white/10 backdrop-blur-xl flex items-center justify-center">
-                          <Globe className="h-3 w-3 text-white/40" />
-                        </div>
-                      )}
-                    </div>
+            {!isUser && visibleSources.length > 0 && (
+              <div className="flex flex-wrap gap-2 pt-4 mt-2 border-t border-white/[0.03]">
+                <button
+                  onClick={() => {
+                    dispatch(
+                      openSources({
+                        query:
+                          message.metadata?.searchQuery ||
+                          message.content.slice(0, 50),
+                        sources: visibleSources,
+                      }),
+                    )
+                  }}
+                  className="group/sources flex items-center gap-2.5 px-3 py-1.5 bg-white/5 border border-white/10 hover:border-white/20 rounded-full transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-xl"
+                >
+                  {/* Favicon Stack */}
+                  <div className="flex -space-x-2.5 overflow-hidden">
+                    {visibleSources.slice(0, 3).map((s, i) => (
+                      <div
+                        key={i}
+                        className="inline-block h-5 w-5 rounded-full ring-2 ring-black bg-white/10 backdrop-blur-xl flex items-center justify-center"
+                      >
+                        {s.icon ? (
+                          <img
+                            src={s.icon}
+                            alt=""
+                            className="h-full w-full object-contain p-0.5"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).style.display = 'none'
+                            }}
+                          />
+                        ) : null}
+                        <Globe className="h-3 w-3 text-white/40" />
+                      </div>
+                    ))}
+                  </div>
 
-                    <span className="text-[13px] font-bold text-white/50 group-hover/sources:text-white transition-colors">
-                      {message.metadata?.sources?.filter(
-                        (s) => s.url && s.url.startsWith('http'),
-                      ).length ?? 0}{' '}
-                      {t('chat.sources')}
-                    </span>
+                  <span className="text-[13px] font-bold text-white/50 group-hover/sources:text-white transition-colors">
+                    {visibleSources.length}{' '}
+                    {t('chat.sources')}
+                  </span>
 
-                    <ChevronRight className="w-3.5 h-3.5 text-white/20 group-hover/sources:text-white/60 transition-all transform group-hover/sources:translate-x-0.5" />
-                  </button>
+                  <ChevronRight className="w-3.5 h-3.5 text-white/20 group-hover/sources:text-white/60 transition-all transform group-hover/sources:translate-x-0.5" />
+                </button>
                 </div>
               )}
           </div>

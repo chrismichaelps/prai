@@ -14,6 +14,7 @@ import {
   Search,
   Video,
   Image as ImageIcon,
+  Globe,
 } from 'lucide-react'
 import { RuntimeError } from '@/lib/effect/errors'
 import { cn } from '@/lib/utils'
@@ -113,56 +114,11 @@ const Media = () => {
   }, [type, data, tourismData?.images, photosData?.images])
 
   if (type === ADAPTIVE_CARD_TYPES.VIDEO) {
-    if (!videoData.videoUrl && videoData.media_search_terms) {
-      return (
-        <div className="aspect-video relative overflow-hidden group rounded-[1.5rem] bg-slate-900 border border-white/10 m-2">
-          <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-8 text-center">
-            <div className="max-w-xs space-y-4">
-              <Search className="w-10 h-10 text-primary mx-auto opacity-50 transition-colors" />
-              <div className="space-y-1">
-                <p className="text-white font-bold">{t('chat.no_video')}</p>
-                <p className="text-white/40 text-xs leading-relaxed">
-                  {t('chat.google_search_hint')}
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-1.5 justify-center">
-                {videoData.media_search_terms.map((term: string) => (
-                  <button
-                    key={term}
-                    onClick={() =>
-                      window.open(
-                        `https://www.youtube.com/results?search_query=${encodeURIComponent(term)}`,
-                        '_blank',
-                      )
-                    }
-                    className="px-3 py-1.5 bg-white/5 hover:bg-white/10 rounded-lg border border-white/10 text-[10px] text-white/60 hover:text-white transition-all flex items-center gap-2 group/term"
-                  >
-                    {term}
-                    <ExternalLink className="w-3 h-3 opacity-0 group-hover/term:opacity-100" />
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      )
-    }
-
-    if (videoData.videoUrl) {
-      const isYoutube =
-        videoData.provider === 'youtube' ||
-        videoData.videoUrl.includes('youtube.com') ||
-        videoData.videoUrl.includes('youtu.be')
-      let embedUrl = videoData.videoUrl
-
-      if (isYoutube) {
-        const videoId = videoData.videoUrl.match(
-          /(?:v=|\/embed\/|\/watch\?v=|\/.be\/)([a-zA-Z0-9_-]{11})/,
-        )?.[1]
-        if (videoId) {
-          embedUrl = `https://www.youtube.com/embed/${videoId}`
-        }
-      }
+    if (videoData.youtubeUrl) {
+      const videoId = videoData.youtubeUrl.match(
+        /(?:v=|\/embed\/|\/watch\?v=|\/.be\/)([a-zA-Z0-9_-]{11})/,
+      )?.[1]
+      const embedUrl = videoId ? `https://www.youtube.com/embed/${videoId}` : videoData.youtubeUrl
 
       return (
         <div className="space-y-4">
@@ -175,32 +131,48 @@ const Media = () => {
               title={videoData.title}
             />
           </div>
-          {videoData.media_search_terms && videoData.media_search_terms.length > 0 && (
+          {videoData.youtubeSearchUrl && (
             <div className="px-4 pb-2">
-              <div className="flex items-center gap-2 mb-3 text-white/30 text-[10px] font-bold uppercase tracking-widest">
-                <Search className="w-3 h-3" />
-                <span>{t('chat.google_search_hint')}</span>
-              </div>
-              <div className="flex flex-wrap gap-1.5">
-                {videoData.media_search_terms.map((term: string) => (
-                  <button
-                    key={term}
-                    onClick={() =>
-                      window.open(
-                        `https://www.youtube.com/results?search_query=${encodeURIComponent(term)}`,
-                        '_blank',
-                      )
-                    }
-                    className="px-3 py-1.5 bg-white/5 hover:bg-white/10 rounded-lg border border-white/10 text-[10px] text-white/60 hover:text-white transition-all flex items-center gap-2 group/term shadow-sm"
-                  >
-                    <Video className="w-3 h-3 text-red-500/50 group-hover:text-red-500 transition-colors" />
-                    {term}
-                    <ExternalLink className="w-3 h-3 opacity-0 group-hover/term:opacity-100" />
-                  </button>
-                ))}
-              </div>
+              <a
+                href={videoData.youtubeSearchUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 rounded-lg text-[12px] text-white/60 hover:text-white transition-all"
+              >
+                <Video className="w-4 h-4 text-red-500/70" />
+                Más videos en YouTube
+                <ExternalLink className="w-3 h-3 opacity-50" />
+              </a>
             </div>
           )}
+        </div>
+      )
+    }
+
+    if (videoData.youtubeSearchUrl) {
+      return (
+        <div className="aspect-video relative overflow-hidden group rounded-[1.5rem] bg-slate-900 border border-white/10 m-2">
+          <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-8 text-center">
+            <div className="max-w-xs space-y-4">
+              <Video className="w-10 h-10 text-red-500/50 mx-auto" />
+              <div className="space-y-1">
+                <p className="text-white font-bold">{videoData.title || t('chat.no_video')}</p>
+                {videoData.description && (
+                  <p className="text-white/40 text-xs leading-relaxed">{videoData.description}</p>
+                )}
+              </div>
+              <a
+                href={videoData.youtubeSearchUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/15 border border-white/20 rounded-lg text-[12px] text-white transition-all"
+              >
+                <Video className="w-4 h-4 text-red-500" />
+                Buscar en YouTube
+                <ExternalLink className="w-3 h-3 opacity-70" />
+              </a>
+            </div>
+          </div>
         </div>
       )
     }
@@ -514,6 +486,51 @@ const Content = () => {
                 </div>
               </div>
             ))}
+
+            {/* @UI.Chat.AdaptiveCard.BookingLinks */}
+            {(data as ItineraryContent).references && (
+              <div className="pt-4 border-t border-white/10">
+                <div className="flex items-center gap-2 mb-3 text-white/30 text-[10px] font-bold uppercase tracking-widest">
+                  <ExternalLink className="w-3 h-3" />
+                  <span>Reservar viaje</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {(data as ItineraryContent).references?.flights && (
+                    <a
+                      href={(data as ItineraryContent).references?.flights?.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 rounded-lg text-[11px] text-white/50 hover:text-white transition-all"
+                    >
+                      Vuelos
+                      <ExternalLink className="w-3 h-3 opacity-30" />
+                    </a>
+                  )}
+                  {(data as ItineraryContent).references?.hotels && (
+                    <a
+                      href={(data as ItineraryContent).references?.hotels?.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 rounded-lg text-[11px] text-white/50 hover:text-white transition-all"
+                    >
+                      Hoteles
+                      <ExternalLink className="w-3 h-3 opacity-30" />
+                    </a>
+                  )}
+                  {(data as ItineraryContent).references?.cars && (
+                    <a
+                      href={(data as ItineraryContent).references?.cars?.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 rounded-lg text-[11px] text-white/50 hover:text-white transition-all"
+                    >
+                      Carros
+                      <ExternalLink className="w-3 h-3 opacity-30" />
+                    </a>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -639,6 +656,44 @@ const Actions = ({ onAction }: { onAction?: (action: string) => void }) => {
             {t('chat.view_menu')}
           </span>
         </button>
+      </div>
+    )
+  }
+
+  if (type === ADAPTIVE_CARD_TYPES.REFERENCES) {
+    const refData = data as { title?: string; items?: Array<{ label?: string; description?: string; url?: string }> }
+    return (
+      <div className="pt-4 px-4 pb-4 space-y-3">
+        {refData.title && (
+          <div className="flex items-center gap-2 text-white/30 text-[10px] font-bold uppercase tracking-widest">
+            <Globe className="w-3 h-3" />
+            <span>{refData.title}</span>
+          </div>
+        )}
+        <div className="grid gap-2">
+          {refData.items?.map((item, i) => (
+            <a
+              key={i}
+              href={item.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-start gap-3 p-3 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 rounded-xl text-white/70 hover:text-white transition-all group"
+            >
+              <Globe className="w-4 h-4 mt-0.5 shrink-0 text-white/30 group-hover:text-white/50" />
+              <div className="flex-1 min-w-0">
+                <div className="text-[13px] font-bold text-white/80 group-hover:text-white transition-colors truncate">
+                  {item.label || (item.url ? (() => { try { return new URL(item.url || '').hostname.replace('www.', '') } catch { return item.url } })() : '')}
+                </div>
+                {item.description && (
+                  <div className="text-[11px] text-white/40 leading-relaxed mt-1 line-clamp-2">
+                    {item.description}
+                  </div>
+                )}
+              </div>
+              <ExternalLink className="w-3.5 h-3.5 shrink-0 mt-1 opacity-30 group-hover:opacity-60" />
+            </a>
+          ))}
+        </div>
       </div>
     )
   }

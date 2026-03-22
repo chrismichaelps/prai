@@ -4,11 +4,18 @@
 
 import React from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import MarkdownIt from 'markdown-it'
 import { X, Search, Globe, ExternalLink, CheckCircle2 } from 'lucide-react'
 import { useI18n } from '@/lib/effect/I18nProvider'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { closeSources } from '@/store/slices/chatSlice'
 import { cn } from '@/lib/utils'
+
+const md = new MarkdownIt({
+  html: true,
+  linkify: true,
+  typographer: true,
+})
 
 export const SourcesSidebar: React.FC = () => {
   const { isSourcesOpen, selectedSources } = useAppSelector(
@@ -16,6 +23,11 @@ export const SourcesSidebar: React.FC = () => {
   )
   const dispatch = useAppDispatch()
   const { t } = useI18n()
+
+  const htmlQuery = React.useMemo(() => {
+    if (!selectedSources?.query) return { __html: '' }
+    return { __html: md.render(selectedSources.query) }
+  }, [selectedSources?.query])
 
   if (!selectedSources && isSourcesOpen) return null
 
@@ -38,7 +50,7 @@ export const SourcesSidebar: React.FC = () => {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed top-0 right-0 h-full w-full md:w-[420px] bg-black border-l border-white/10 z-[110] flex flex-col shadow-[-20px_0_50px_rgba(0,0,0,0.5)]"
+            className="fixed top-0 right-0 h-full w-full md:w-[420px] bg-black border-l border-white/10 z-[150] flex flex-col shadow-[-20px_0_50px_rgba(0,0,0,0.5)]"
           >
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-5 border-b border-white/5">
@@ -63,27 +75,45 @@ export const SourcesSidebar: React.FC = () => {
                     <span>{t('chat.search_context')}</span>
                   </div>
                   <div className="bg-white/5 border border-white/10 rounded-2xl px-5 py-4">
-                    <p className="text-[15px] font-medium text-white/80 leading-relaxed italic">
-                      "{selectedSources.query}"
-                    </p>
+                    <div
+                      className={cn(
+                        'prose prose-p:leading-relaxed prose-invert max-w-none text-white/80',
+                        'prose-headings:text-base prose-headings:font-black prose-headings:mb-2 prose-headings:mt-4 prose-headings:text-white/90',
+                        'prose-strong:text-white/90 prose-strong:font-black',
+                        'text-[15px] font-medium leading-relaxed italic',
+                      )}
+                      dangerouslySetInnerHTML={htmlQuery}
+                    />
                   </div>
                 </div>
               )}
 
               {/* Sources List */}
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <div className="text-[11px] font-black uppercase tracking-[0.2em] text-white/20">
-                      {selectedSources?.sources.filter(s => s.url && s.url.startsWith('http')).length || 0}{' '}
-                      {t('chat.sources').toLowerCase()}
-                    </div>
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div className="text-[11px] font-black uppercase tracking-[0.2em] text-white/20">
+                    {selectedSources?.sources.filter(
+                      (s) => s.url && s.url.startsWith('http'),
+                    ).length || 0}{' '}
+                    {t('chat.sources').toLowerCase()}
                   </div>
+                </div>
 
                 <div className="grid gap-4">
                   {selectedSources?.sources.map((source, idx) => {
-                    const hasValidUrl = source.url && source.url.startsWith('http')
+                    const hasValidUrl =
+                      source.url && source.url.startsWith('http')
                     const domain = hasValidUrl
-                      ? (() => { try { return new URL(source.url).hostname.replace('www.', '') } catch { return source.url } })()
+                      ? (() => {
+                          try {
+                            return new URL(source.url).hostname.replace(
+                              'www.',
+                              '',
+                            )
+                          } catch {
+                            return source.url
+                          }
+                        })()
                       : source.title || source.source || 'Unknown'
 
                     return hasValidUrl ? (
@@ -93,10 +123,10 @@ export const SourcesSidebar: React.FC = () => {
                         target="_blank"
                         rel="noopener noreferrer"
                         className={cn(
-                          "group/card block rounded-2xl p-4 transition-all duration-300 hover:translate-x-1",
+                          'group/card block rounded-2xl p-4 transition-all duration-300 hover:translate-x-1',
                           source.verified
-                            ? "bg-[#1a1a1a]/40 hover:bg-[#1a1a1a]/80 border border-white/[0.05] hover:border-green-500/20"
-                            : "bg-[#1a1a1a]/40 hover:bg-[#1a1a1a]/60 border border-white/[0.05] hover:border-white/10"
+                            ? 'bg-[#1a1a1a]/40 hover:bg-[#1a1a1a]/80 border border-white/[0.05] hover:border-green-500/20'
+                            : 'bg-[#1a1a1a]/40 hover:bg-[#1a1a1a]/60 border border-white/[0.05] hover:border-white/10',
                         )}
                       >
                         <div className="flex flex-col gap-3">
@@ -132,7 +162,9 @@ export const SourcesSidebar: React.FC = () => {
                                   alt=""
                                   className="w-full h-full object-contain"
                                   onError={(e) => {
-                                    (e.target as HTMLImageElement).style.display = 'none'
+                                    ;(
+                                      e.target as HTMLImageElement
+                                    ).style.display = 'none'
                                   }}
                                 />
                               ) : null}

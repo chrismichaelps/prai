@@ -1,11 +1,15 @@
 import type { SearchResult } from "@/types/chat"
 
-const URL_RE = /(https?:\/\/[^\s)<>"]+)/g
-const TRAILING_PUNCT_RE = /[.,;:!?'")$]+$/
+const URL_RE = /(https?:\/\/[^\s<>"]+(?:\([^)\s]*\))*)/g
+const TRAILING_PUNCT_RE = /[.,;:?!'"`]+$/
 const MEDIA_HOSTNAMES = /^(www\.)?(youtube\.com|youtube\.be|youtu\.be|img\.youtube\.com|spotify\.com|open\.spotify\.com|soundcloud\.com|vimeo\.com)$/
 
 const sanitizeUrl = (raw: string): string | null => {
-  const cleaned = raw.replace(TRAILING_PUNCT_RE, "")
+  let cleaned = raw.replace(TRAILING_PUNCT_RE, "")
+  const openParens = (cleaned.match(/[(]/g) || []).length
+  const closeParens = (cleaned.match(/[)]/g) || []).length
+  const diff = openParens - closeParens
+  if (diff > 0) cleaned = cleaned + ")".repeat(diff)
   if (cleaned.length < 12) return null
   try {
     const { hostname } = new URL(cleaned)
@@ -16,10 +20,9 @@ const sanitizeUrl = (raw: string): string | null => {
   }
 }
 
-export const extractUrls = (text: string, ignoreTrailing = false): string[] => {
+export const extractUrls = (text: string): string[] => {
   const urls: string[] = []
   for (const m of text.matchAll(URL_RE)) {
-    if (ignoreTrailing && (m.index ?? 0) + m[0].length >= text.length) continue
     const url = sanitizeUrl(m[1] ?? "")
     if (url) urls.push(url)
   }
