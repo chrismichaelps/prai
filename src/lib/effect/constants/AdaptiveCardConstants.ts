@@ -14,6 +14,7 @@ export const ADAPTIVE_CARD_TYPES = {
   ACTIVITY: 'activity',
   EVENT: 'event',
   MEDIA_SEARCH: 'media_search',
+  REFERENCES: 'references',
 } as const;
 
 export type AdaptiveCardType = typeof ADAPTIVE_CARD_TYPES[keyof typeof ADAPTIVE_CARD_TYPES];

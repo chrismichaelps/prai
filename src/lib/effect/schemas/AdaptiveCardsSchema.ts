@@ -43,11 +43,9 @@ export type PhotosContent = Schema.Schema.Type<typeof PhotosContentSchema>
 
 export const VideoContentSchema = Schema.Struct({
   title: Schema.String,
-  videoUrl: Schema.optional(Schema.NullOr(Schema.String)),
-  provider: Schema.optional(Schema.NullOr(Schema.Literal("youtube", "vimeo", "direct", "tiktok", "instagram"))),
   description: Schema.optional(Schema.String),
-  thumbnail: Schema.optional(Schema.NullOr(Schema.String)),
-  media_search_terms: Schema.optional(Schema.Array(Schema.String)),
+  youtubeUrl: Schema.optional(Schema.NullOr(Schema.String)),
+  youtubeSearchUrl: Schema.optional(Schema.String),
 })
 
 /** @Type.Effect.AdaptiveCards.Video */
@@ -99,10 +97,16 @@ export const ItineraryStepSchema = Schema.Struct({
 
 export const ItineraryContentSchema = Schema.Struct({
   title: Schema.String,
+  description: Schema.optional(Schema.String),
   days: Schema.Number,
   steps: Schema.Array(ItineraryStepSchema),
   totalCostEstimate: Schema.optional(Schema.String),
   tips: Schema.optional(Schema.Array(Schema.String)),
+  references: Schema.optional(Schema.Struct({
+    flights: Schema.optional(Schema.Struct({ label: Schema.String, url: Schema.String })),
+    hotels: Schema.optional(Schema.Struct({ label: Schema.String, url: Schema.String })),
+    cars: Schema.optional(Schema.Struct({ label: Schema.String, url: Schema.String }))
+  }))
 })
 
 /** @Type.Effect.AdaptiveCards.Itinerary */
@@ -168,6 +172,18 @@ export const EventContentSchema = Schema.Struct({
 /** @Type.Effect.AdaptiveCards.Event */
 export type EventContent = Schema.Schema.Type<typeof EventContentSchema>
 
+export const ReferencesContentSchema = Schema.Struct({
+  title: Schema.optional(Schema.String),
+  items: Schema.Array(Schema.Struct({
+    label: Schema.optional(Schema.String),
+    description: Schema.optional(Schema.String),
+    url: Schema.String
+  }))
+})
+
+/** @Type.Effect.AdaptiveCards.References */
+export type ReferencesContent = Schema.Schema.Type<typeof ReferencesContentSchema>
+
 /** @Schema.Effect.AdaptiveCards.Union */
 export const AdaptiveBlock = Schema.Union(
   Schema.Struct({ type: Schema.Literal("tourism"), data: TourismContentSchema }),
@@ -182,6 +198,7 @@ export const AdaptiveBlock = Schema.Union(
   Schema.Struct({ type: Schema.Literal("news"), data: NewsContentSchema }),
   Schema.Struct({ type: Schema.Literal("radio"), data: RadioContentSchema }),
   Schema.Struct({ type: Schema.Literal("media_search"), data: MediaSearchContentSchema }),
+  Schema.Struct({ type: Schema.Literal("references"), data: ReferencesContentSchema }),
 )
 
 export type AdaptiveBlock = Schema.Schema.Type<typeof AdaptiveBlock>
@@ -200,7 +217,8 @@ export const AdaptiveCardTypeSchema = Schema.Literal(
   "dining",
   "activity",
   "event",
-  "media_search"
+  "media_search",
+  "references"
 )
 
 export type CardType = Schema.Schema.Type<typeof AdaptiveCardTypeSchema>
