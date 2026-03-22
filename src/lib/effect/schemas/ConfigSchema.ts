@@ -9,9 +9,9 @@ export const ErrorMessagesSchema = Schema.Struct({
 
 /** @Schema.Effect.Config */
 export const ConfigSchema = Schema.Struct({
-  openRouterBaseUrl: Schema.String.pipe(Schema.minLength(1)),
-  modelName: Schema.String.pipe(Schema.minLength(1)),
-  apiKey: Schema.String.pipe(Schema.minLength(1)),
+  openRouterBaseUrl: Schema.String,
+  modelName: Schema.String,
+  apiKey: Schema.String,
   siteUrl: Schema.String,
   systemPrompt: Schema.String,
   errorMessages: ErrorMessagesSchema
