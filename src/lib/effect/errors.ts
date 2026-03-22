@@ -47,3 +47,9 @@ export class SeoError extends Data.TaggedError("SeoError")<{
   readonly message: string
   readonly cause?: unknown
 }> {}
+
+/** @Error.Effect.Auth */
+export class AuthError extends Data.TaggedError("AuthError")<{
+  readonly message: string
+  readonly cause?: unknown
+}> {}

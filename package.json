@@ -28,6 +28,8 @@
     "@effect/platform": "^0.95.0",
     "@effect/platform-browser": "0.75.0",
     "@reduxjs/toolkit": "^2.11.2",
+    "@supabase/ssr": "^0.9.0",
+    "@supabase/supabase-js": "^2.99.3",
     "clsx": "^2.1.1",
     "effect": "3.20.0",
     "framer-motion": "^12.38.0",
