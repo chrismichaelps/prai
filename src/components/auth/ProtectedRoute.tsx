@@ -1,8 +1,8 @@
 'use client'
 
 import { useAuth } from '@/contexts/AuthContext'
-import { useRouter, usePathname } from 'next/navigation'
-import { useEffect, useMemo } from 'react'
+import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 import { Loader2 } from 'lucide-react'
 
 /** @Component.Auth.ProtectedRoute */
@@ -14,32 +14,27 @@ interface ProtectedRouteProps {
 export function ProtectedRoute({ children, redirectTo = '/' }: ProtectedRouteProps) {
   const { isAuthenticated, isLoading, initialized } = useAuth()
   const router = useRouter()
-  const pathname = usePathname()
-
-  const redirectUrl = useMemo(() => {
-    if (!initialized || isLoading || isAuthenticated) return null
-    const url = new URL(redirectTo, typeof window !== 'undefined' ? window.location.origin : '')
-    url.searchParams.set('callbackUrl', pathname)
-    return url.toString()
-  }, [initialized, isLoading, isAuthenticated, redirectTo, pathname])
 
   useEffect(() => {
-    if (redirectUrl) {
-      router.replace(redirectUrl)
+    if (initialized && !isLoading && !isAuthenticated) {
+      const callbackUrl = typeof window !== 'undefined' ? window.location.pathname : ''
+      const url = new URL(redirectTo, window.location.origin)
+      url.searchParams.set('callbackUrl', callbackUrl)
+      router.replace(url.toString())
     }
-  }, [redirectUrl, router])
+  }, [initialized, isLoading, isAuthenticated, redirectTo, router])
 
-  const content = useMemo(() => {
-    if (!initialized || isLoading) {
-      return (
-        <div className="min-h-screen flex items-center justify-center bg-[#090909]">
-          <Loader2 className="w-8 h-8 text-white animate-spin" />
-        </div>
-      )
-    }
-    if (!isAuthenticated) return null
-    return <>{children}</>
-  }, [initialized, isLoading, isAuthenticated, children])
+  if (!initialized || isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#090909]">
+        <Loader2 className="w-8 h-8 text-white animate-spin" />
+      </div>
+    )
+  }
 
-  return content
+  if (!isAuthenticated) {
+    return null
+  }
+
+  return <>{children}</>
 }

@@ -49,7 +49,6 @@ const MainLayer = Layer.mergeAll(
 
 /** @Logic.Effect.Runtime.Types */
 export type AppEnvironment = Layer.Layer.Success<typeof MainLayer>;
-export type AppRuntime = ManagedRuntime.ManagedRuntime<AppEnvironment, never>;
 
-export const runtime: AppRuntime = ManagedRuntime.make(MainLayer) as AppRuntime;
-
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const runtime = ManagedRuntime.make(MainLayer as any);

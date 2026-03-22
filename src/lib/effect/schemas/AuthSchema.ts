@@ -13,6 +13,19 @@ export const UserSchema = Schema.Struct({
 
 export type User = Schema.Schema.Type<typeof UserSchema>
 
+/** @Type.Effect.Auth.Profile */
+export const ProfileSchema = Schema.Struct({
+  id: Schema.String,
+  display_name: Schema.optional(Schema.String),
+  bio: Schema.optional(Schema.String),
+  language: Schema.optional(Schema.String),
+  avatar_url: Schema.optional(Schema.String),
+  created_at: Schema.optional(Schema.String),
+  updated_at: Schema.optional(Schema.String)
+})
+
+export type Profile = Schema.Schema.Type<typeof ProfileSchema>
+
 /** @Type.Effect.Auth.Session */
 export const SessionSchema = Schema.Struct({
   access_token: Schema.String,

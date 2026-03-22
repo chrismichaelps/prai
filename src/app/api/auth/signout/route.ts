@@ -32,5 +32,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 400 })
   }
 
-  return NextResponse.json({ success: true })
+  const response = NextResponse.json({ success: true })
+
+  for (const cookie of cookiesToSet) {
+    response.cookies.set(cookie.name, cookie.value, cookie.options as Parameters<typeof response.cookies.set>[2])
+  }
+
+  return response
 }
