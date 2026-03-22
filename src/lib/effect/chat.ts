@@ -59,6 +59,11 @@ const generateResponse: Effect.Effect<void, OpenRouterError, OpenRouter | Redux>
 
       const newSources = novel.map((u) => toSource(u, verified))
       yield* Ref.update(sourcesRef, (prev) => [...prev, ...newSources])
+    })
+
+  /** @Logic.Chat.SyncSources */
+  const syncSources = () =>
+    Effect.gen(function* () {
       const all = yield* Ref.get(sourcesRef)
       yield* Redux.dispatch(updateLastMessage({ metadata: { sources: all } }))
     })
@@ -70,7 +75,7 @@ const generateResponse: Effect.Effect<void, OpenRouterError, OpenRouter | Redux>
       const region = content.slice(cursor)
       if (region.length === 0) return
 
-      yield* trackUrls(extractUrls(region, true), false)
+      yield* trackUrls(extractUrls(region), false)
       yield* Ref.set(scanCursorRef, Math.max(0, content.length - URL_MAX_LEN))
     })
 
@@ -109,6 +114,7 @@ const generateResponse: Effect.Effect<void, OpenRouterError, OpenRouter | Redux>
         /** @Logic.Chat.Citations */
         if (json.citations?.length) {
           yield* trackUrls(json.citations, true)
+          yield* syncSources()
         }
 
         if (!delta) continue
@@ -150,6 +156,7 @@ const generateResponse: Effect.Effect<void, OpenRouterError, OpenRouter | Redux>
 
           /** @Logic.Chat.RealtimeUrlExtraction */
           yield* scanContent(current)
+          yield* syncSources()
         }
       }
     })
@@ -159,6 +166,7 @@ const generateResponse: Effect.Effect<void, OpenRouterError, OpenRouter | Redux>
   const assistantContent = yield* Ref.get(contentRef)
 
   yield* trackUrls(extractUrls(assistantContent), false)
+  yield* syncSources()
 
   const matches = [...assistantContent.matchAll(/```json\n([\s\S]*?)\n```\n/g)]
 
@@ -190,13 +198,22 @@ const generateResponse: Effect.Effect<void, OpenRouterError, OpenRouter | Redux>
 
     if (suggestions.length > 0) yield* Redux.dispatch(setSuggestions(suggestions))
 
+    /** @Logic.Chat.ReferencesExtraction */
+    const referenceBlocks = adaptiveBlocks.filter((b) => b.type === "references")
+    for (const block of referenceBlocks) {
+      const items = (block.data as { items?: Array<{ label?: string; url?: string }> })?.items || []
+      const refUrls = items.map((item) => item.url).filter((url): url is string => !!url && url.startsWith("http"))
+      if (refUrls.length > 0) {
+        yield* trackUrls(refUrls, true)
+      }
+    }
+    yield* syncSources()
+
     yield* Redux.dispatch(setActiveAdaptiveData(jsonBlocks.map((b) => b.block as unknown as AdaptiveData)))
-    const allSources = yield* Ref.get(sourcesRef)
     yield* Redux.dispatch(
       updateLastMessage({
         content: processedContent,
         metadata: {
-          sources: allSources,
           searchQuery: assistantContent.match(/Buscando\s+"([^"]+)"/i)?.[1] || undefined
         }
       })

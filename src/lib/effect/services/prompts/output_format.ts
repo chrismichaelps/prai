@@ -50,13 +50,19 @@ export const output_format = `
   {
     "type": "itinerary",
     "data": {
-      "title": "Título",
+      "title": "Título del itinerario",
+      "description": "Breve descripción del viaje",
       "days": 2,
       "steps": [
         { "day": 1, "title": "Actividad", "description": "Descripción", "time": "10:00 AM" }
       ],
       "totalCostEstimate": "$200 - $400",
-      "tips": ["Consejo A", "Consejo B"]
+      "tips": ["Consejo A", "Consejo B"],
+      "references": {
+        "flights": { "label": "Buscar vuelos", "url": "https://www.google.com/travel/flights?q=[origen]+a+[destino]" },
+        "hotels": { "label": "Buscar hoteles", "url": "https://www.booking.com/searchresults.html?q=[lugar]" },
+        "cars": { "label": "Alquilar carro", "url": "https://www.rentalcars.com/search.do?dropFts=[ciudad]" }
+      }
     }
   }
 
@@ -77,12 +83,10 @@ export const output_format = `
   {
     "type": "video",
     "data": {
-      "title": "Título",
-      "videoUrl": "URL real o null",
-      "provider": "youtube | vimeo | direct | null",
-      "description": "Descripción",
-      "thumbnail": "URL real o null",
-      "media_search_terms": ["términos muy específicos para búsqueda"]
+      "title": "Título del video",
+      "description": "Breve descripción",
+      "youtubeUrl": "URL directa de YouTube (https://youtu.be/[ID]) o null",
+      "youtubeSearchUrl": "URL de búsqueda YouTube (https://www.youtube.com/results?search_query=[términos])"
     }
   }
 
@@ -120,6 +124,22 @@ export const output_format = `
     }
   }
 
+  /* @Schema.AdaptiveCard.References */
+  {
+    "type": "references",
+    "data": {
+      "title": "Referencias",
+      "items": [
+        {
+          "label": "Título breve del artículo o tema",
+          "description": "Breve descripción de 1-2 oraciones sobre el contenido del enlace",
+          "url": "https://en.wikipedia.org/wiki/Artículo"
+        }
+      ]
+    }
+  }
+
   - Los campos de medios son OPCIONALES. Si no tienes enlaces reales → déjalos vacíos y usa "media_search_terms".
-  - NUNCA uses emojis ni símbolos visuales en los bloques JSON.
+  - NUNCA uses emojis ni símbolos visuales en los bloques JSON ni en sus descripciones.
+  - Usa el bloque @Schema.AdaptiveCard.References para listar TODAS las fuentes de tu respuesta.
 </output_format>`;

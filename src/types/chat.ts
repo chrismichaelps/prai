@@ -1,3 +1,7 @@
+import type { CardType } from '@/lib/effect/schemas/AdaptiveCardsSchema';
+
+export type { CardType };
+
 export interface SearchResult {
   title: string;
   url: string;
@@ -22,15 +26,13 @@ export interface ChatMessage {
   };
 }
 
-export type CardType = 'radio' | 'tourism' | 'news' | 'photos' | 'video' | 'suggestions' | 'personality' | 'welcome';
-
-export interface AdaptiveData {
-  type: CardType;
-  data: unknown;
-}
-
 export interface Suggestion {
   label: string;
   action: string;
   icon?: string;
+}
+
+export interface AdaptiveData {
+  type: CardType;
+  data: unknown;
 }
