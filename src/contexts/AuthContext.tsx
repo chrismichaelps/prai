@@ -2,7 +2,6 @@
 
 import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 import type { User, Session } from '@/lib/effect/schemas/AuthSchema'
 
 /** @Context.Auth */
@@ -25,63 +24,72 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [initialized, setInitialized] = useState(false)
-  const supabase = createSupabaseBrowserClient()
+  const supabaseRef = useRef<ReturnType<typeof import('@/lib/supabase/client').createSupabaseBrowserClient> | null>(null)
   const hasInitialized = useRef(false)
 
   useEffect(() => {
-    if (hasInitialized.current) return
-    hasInitialized.current = true
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        setUser(session.user as User)
-        setSession(session as unknown as Session)
-        const callbackUrl = sessionStorage.getItem('authCallbackUrl')
-        if (callbackUrl) {
-          sessionStorage.removeItem('authCallbackUrl')
-          router.replace(callbackUrl)
-        }
-      }
-      setIsLoading(false)
-      setInitialized(true)
+    if (supabaseRef.current) return
+    
+    import('@/lib/supabase/client').then(({ createSupabaseBrowserClient }) => {
+      supabaseRef.current = createSupabaseBrowserClient()
+      initAuth(supabaseRef.current)
     })
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
-        setUser(session.user as User)
-        setSession(session as unknown as Session)
-        const callbackUrl = sessionStorage.getItem('authCallbackUrl')
-        if (callbackUrl) {
-          sessionStorage.removeItem('authCallbackUrl')
-          router.replace(callbackUrl)
-        }
-      } else {
-        setUser(null)
-        setSession(null)
-      }
-      setIsLoading(false)
-    })
+    function initAuth(supabase: NonNullable<typeof supabaseRef.current>) {
+      if (hasInitialized.current) return
+      hasInitialized.current = true
 
-    return () => subscription.unsubscribe()
-  }, [supabase, router])
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session?.user) {
+          setUser(session.user as User)
+          setSession(session as unknown as Session)
+          const callbackUrl = sessionStorage.getItem('authCallbackUrl')
+          if (callbackUrl) {
+            sessionStorage.removeItem('authCallbackUrl')
+            router.replace(callbackUrl)
+          }
+        }
+        setIsLoading(false)
+        setInitialized(true)
+      })
+
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        if (session?.user) {
+          setUser(session.user as User)
+          setSession(session as unknown as Session)
+          const callbackUrl = sessionStorage.getItem('authCallbackUrl')
+          if (callbackUrl) {
+            sessionStorage.removeItem('authCallbackUrl')
+            router.replace(callbackUrl)
+          }
+        } else {
+          setUser(null)
+          setSession(null)
+        }
+        setIsLoading(false)
+      })
+
+      return () => subscription.unsubscribe()
+    }
+  }, [router])
 
   const signIn = useCallback((callbackUrl?: string) => {
     if (callbackUrl) {
       sessionStorage.setItem('authCallbackUrl', callbackUrl)
     }
-    supabase.auth.signInWithOAuth({
+    supabaseRef.current?.auth.signInWithOAuth({
       provider: 'google',
       options: {
         redirectTo: `${window.location.origin}/api/auth/callback`
       }
     })
-  }, [supabase])
+  }, [])
 
   const signOut = useCallback(async () => {
-    await supabase.auth.signOut()
+    await supabaseRef.current?.auth.signOut()
     await fetch('/api/auth/signout', { method: 'POST', credentials: 'include' })
     router.push('/')
-  }, [supabase, router])
+  }, [router])
 
   const value: AuthContextValue = {
     user,
