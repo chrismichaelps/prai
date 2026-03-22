@@ -125,7 +125,7 @@ export const SourcesSidebar: React.FC = () => {
                         className={cn(
                           'group/card block rounded-2xl p-4 transition-all duration-300 hover:translate-x-1',
                           source.verified
-                            ? 'bg-[#1a1a1a]/40 hover:bg-[#1a1a1a]/80 border border-white/[0.05] hover:border-green-500/20'
+                            ? 'bg-[#1a1a1a]/40 hover:bg-[#1a1a1a]/80 border border-white/[0.05] hover:border-primary/20'
                             : 'bg-[#1a1a1a]/40 hover:bg-[#1a1a1a]/60 border border-white/[0.05] hover:border-white/10',
                         )}
                       >
@@ -133,8 +133,8 @@ export const SourcesSidebar: React.FC = () => {
                           <div className="flex items-start justify-between gap-4">
                             <div className="flex items-center gap-2">
                               {source.verified ? (
-                                <div className="w-4 h-4 rounded-full bg-green-500/20 border border-green-500/30 flex items-center justify-center">
-                                  <CheckCircle2 className="w-2.5 h-2.5 text-green-400" />
+                                <div className="w-4 h-4 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center">
+                                  <CheckCircle2 className="w-2.5 h-2.5 text-primary" />
                                 </div>
                               ) : (
                                 <div className="w-4 h-4 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">

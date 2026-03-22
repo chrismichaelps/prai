@@ -212,12 +212,12 @@ export function Header({
                                 <button
                                   onClick={() => {
                                     setIsDropdownOpen(false)
-                                    router.push('/chat')
+                                    router.push('/profile')
                                   }}
                                   className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-white/70 hover:text-white hover:bg-white/5 transition-colors"
                                 >
-                                  <Settings className="w-4 h-4" />
-                                  {t('auth.my_chat') || 'Mi Chat'}
+                                  <User className="w-4 h-4" />
+                                  {t('auth.profile')}
                                 </button>
                                 <button
                                   onClick={() => {
@@ -377,6 +377,18 @@ export function Header({
                         className="group flex items-center gap-3 text-white text-3xl font-display font-bold hover:opacity-80 transition-opacity relative w-fit"
                       >
                         {t('nav.open_chat')}
+                        <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
+                        <span className="block h-[2px] w-full bg-white/50 absolute -bottom-2 left-0" />
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          toggleMenu()
+                          router.push('/profile')
+                        }}
+                        className="group flex items-center gap-3 text-white text-3xl font-display font-bold hover:opacity-80 transition-opacity relative w-fit"
+                      >
+                        {t('auth.profile')}
                         <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
                         <span className="block h-[2px] w-full bg-white/50 absolute -bottom-2 left-0" />
                       </button>

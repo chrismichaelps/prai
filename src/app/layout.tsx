@@ -5,7 +5,7 @@ import { BuildInfoProvider } from '@/lib/effect/hooks/useBuildInfo'
 import { CookieBanner } from '@/components/ui/CookieBanner'
 import { ModelInfoBanner } from '@/components/ui/ModelInfoBanner'
 import { ErrorToast } from '@/components/ui/ErrorToast'
-import { Toaster } from 'sonner'
+import { ToastProvider } from '@/components/ui/ToastProvider'
 import { AuthProvider } from '@/contexts/AuthContext'
 import './globals.css'
 
@@ -65,18 +65,14 @@ export default function RootLayout({
         <Providers>
           <I18nProvider>
             <BuildInfoProvider>
-              <AuthProvider>
-                {children}
-                <CookieBanner />
-                <ModelInfoBanner />
-                <ErrorToast />
-                <Toaster
-                  position="top-center"
-                  theme="dark"
-                  richColors
-                  expand={false}
-                />
-              </AuthProvider>
+              <ToastProvider>
+                <AuthProvider>
+                  {children}
+                  <CookieBanner />
+                  <ModelInfoBanner />
+                  <ErrorToast />
+                </AuthProvider>
+              </ToastProvider>
             </BuildInfoProvider>
           </I18nProvider>
         </Providers>
