@@ -1,14 +1,18 @@
-import React, { useState } from 'react'
+'use client'
+
+import React, { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronDown, ArrowRight, Info, Menu, X } from 'lucide-react'
+import { ChevronDown, ArrowRight, Info, Menu, X, User, LogOut, Settings, LogIn } from 'lucide-react'
 import { PraiLogo } from '@/components/brand/PraiLogo'
 import { useI18n } from '@/lib/effect/I18nProvider'
 import { useBuildInfo } from '@/lib/effect/hooks/useBuildInfo'
 import { cn } from '@/lib/utils'
 import { useAppDispatch } from '@/store/hooks'
 import { setModelInfoVisible } from '@/store/slices/uiSlice'
+import { useAuth } from '@/contexts/AuthContext'
 
 /** @UI.Layout.Header */
 export function Header({
@@ -24,10 +28,36 @@ export function Header({
   const { t } = useI18n()
   const dispatch = useAppDispatch()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
   const buildHash = useBuildInfo()
+  const { user, isAuthenticated, isLoading, signIn, signOut } = useAuth()
+
+  const getCallbackUrl = () => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search)
+      return params.get('callbackUrl') || undefined
+    }
+    return undefined
+  }
+
+  const navLinks = [{ label: t('nav.about'), key: 'about', href: '/about' }]
+
+  const toggleMenu = () => setIsMenuOpen(!isMenuOpen)
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   // Lock scroll when menu is open
-  React.useEffect(() => {
+  useEffect(() => {
     if (isMenuOpen) {
       document.body.style.overflow = 'hidden'
     } else {
@@ -38,9 +68,14 @@ export function Header({
     }
   }, [isMenuOpen])
 
-  const navLinks = [{ label: t('nav.about'), key: 'about', href: '/about' }]
-
-  const toggleMenu = () => setIsMenuOpen(!isMenuOpen)
+  const avatarUrl = user?.user_metadata?.avatar_url
+  const userName = user?.user_metadata?.name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || t('auth.explorer')
+  const initials = userName
+    .split(' ')
+    .map((w: string) => w[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2)
 
   return (
     <motion.header
@@ -102,20 +137,127 @@ export function Header({
             </div>
           ) : (
             <>
-              {/* Desktop Button */}
-              <div className="hidden md:block">
-                <button
-                  onClick={() => router.push('/chat')}
-                  className={cn(
-                    'flex items-center gap-2 px-5 py-2.5 text-sm font-bold border rounded-xl transition-all shadow-xl',
-                    transparent
-                      ? 'text-primary-foreground border-primary-foreground/30 hover:bg-white/10'
-                      : 'text-white bg-brand-blue border-transparent hover:scale-105 active:scale-95',
+              {/* Desktop Actions */}
+              <div className="hidden md:flex items-center gap-3">
+                <AnimatePresence mode="wait">
+                  {isAuthenticated ? (
+                    <motion.div
+                      key="authenticated"
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.9 }}
+                      transition={{ duration: 0.2 }}
+                      className="flex items-center gap-3"
+                    >
+                      <button
+                        onClick={() => router.push('/chat')}
+                        className={cn(
+                          'flex items-center gap-2 px-4 py-2 text-sm font-medium border rounded-lg transition-colors',
+                          transparent
+                            ? 'text-primary-foreground border-primary-foreground/30 hover:bg-primary-foreground/10'
+                            : 'text-white border-transparent bg-brand-blue hover:scale-[1.02] active:scale-[0.98]'
+                        )}
+                      >
+                        {t('nav.open_chat')}
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </button>
+
+                      {/* Avatar Dropdown */}
+                      <div className="relative" ref={dropdownRef}>
+                        <button
+                          onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                          className={cn(
+                            "flex items-center justify-center w-9 h-9 rounded-full overflow-hidden border-2 transition-all focus:outline-none focus:ring-2",
+                            transparent 
+                              ? "border-primary-foreground/30 focus:ring-primary-foreground/30"
+                              : "border-brand-blue/30 focus:ring-brand-blue/30"
+                          )}
+                        >
+                          {avatarUrl ? (
+                            <img
+                              src={avatarUrl}
+                              alt={userName}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className={cn(
+                              "w-full h-full flex items-center justify-center text-xs font-semibold",
+                              transparent 
+                                ? "bg-primary-foreground/20 text-primary-foreground"
+                                : "bg-brand-blue/10 text-brand-blue"
+                            )}>
+                              {initials}
+                            </div>
+                          )}
+                        </button>
+
+                        {/* Dropdown Menu */}
+                        <AnimatePresence>
+                          {isDropdownOpen && (
+                            <motion.div
+                              initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                              animate={{ opacity: 1, y: 0, scale: 1 }}
+                              exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                              transition={{ duration: 0.15 }}
+                              className="absolute right-0 top-full mt-2 w-56 bg-[#1a1a1a] border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
+                            >
+                              {/* User Info */}
+                              <div className="px-4 py-3 border-b border-white/10">
+                                <p className="text-sm font-bold text-white truncate">{userName}</p>
+                                <p className="text-xs text-white/40 truncate">{user?.email}</p>
+                              </div>
+
+                              {/* Menu Items */}
+                              <div className="py-2">
+                                <button
+                                  onClick={() => {
+                                    setIsDropdownOpen(false)
+                                    router.push('/chat')
+                                  }}
+                                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-white/70 hover:text-white hover:bg-white/5 transition-colors"
+                                >
+                                  <Settings className="w-4 h-4" />
+                                  {t('auth.my_chat') || 'Mi Chat'}
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    setIsDropdownOpen(false)
+                                    signOut()
+                                  }}
+                                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-400/70 hover:text-red-400 hover:bg-red-400/5 transition-colors"
+                                >
+                                  <LogOut className="w-4 h-4" />
+                                  {t('auth.sign_out')}
+                                </button>
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="unauthenticated"
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.9 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <button
+                        onClick={() => signIn(getCallbackUrl())}
+                        className={cn(
+                          'flex items-center gap-2 px-4 py-2 text-sm font-medium border rounded-lg transition-colors',
+                          transparent
+                            ? 'text-primary-foreground border-primary-foreground/30 hover:bg-primary-foreground/10'
+                            : 'text-white border-transparent bg-brand-blue hover:scale-[1.02] active:scale-[0.98]'
+                        )}
+                      >
+                        <LogIn className="w-3.5 h-3.5" />
+                        {t('auth.sign_in')}
+                      </button>
+                    </motion.div>
                   )}
-                >
-                  {t('nav.open_chat')}
-                  <ChevronDown className="w-3.5 h-3.5" />
-                </button>
+                </AnimatePresence>
               </div>
 
               {/* Mobile Hamburger Toggle */}
@@ -175,7 +317,6 @@ export function Header({
             {/* Header Mirror for Mobile Open State */}
             <div className="flex items-center justify-between px-6 py-5 border-b border-white/10">
               <PraiLogo white={true} animate={false} />
-              {/* Note: The close (X) icon is provided by the main toggle button (z-120) */}
               <div className="w-10 h-10" />
             </div>
 
@@ -218,17 +359,61 @@ export function Header({
                   {t('nav.actions')}
                 </span>
 
-                <button
-                  onClick={() => {
-                    toggleMenu()
-                    router.push('/chat')
-                  }}
-                  className="group flex items-center gap-3 text-white text-3xl font-display font-bold hover:opacity-80 transition-opacity relative w-fit"
-                >
-                  {t('nav.open_chat')}
-                  <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
-                  <span className="block h-[2px] w-full bg-white/50 absolute -bottom-2 left-0" />
-                </button>
+                <AnimatePresence mode="wait">
+                  {isAuthenticated ? (
+                    <motion.div
+                      key="mobile-authenticated"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 20 }}
+                      transition={{ duration: 0.2 }}
+                      className="flex flex-col gap-4"
+                    >
+                      <button
+                        onClick={() => {
+                          toggleMenu()
+                          router.push('/chat')
+                        }}
+                        className="group flex items-center gap-3 text-white text-3xl font-display font-bold hover:opacity-80 transition-opacity relative w-fit"
+                      >
+                        {t('nav.open_chat')}
+                        <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
+                        <span className="block h-[2px] w-full bg-white/50 absolute -bottom-2 left-0" />
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          toggleMenu()
+                          signOut()
+                        }}
+                        className="group flex items-center gap-3 text-red-400/70 text-2xl font-display font-bold hover:opacity-80 transition-opacity relative w-fit"
+                      >
+                        <LogOut className="w-5 h-5" />
+                        {t('auth.sign_out')}
+                      </button>
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="mobile-unauthenticated"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 20 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <button
+                        onClick={() => {
+                          toggleMenu()
+                          signIn(getCallbackUrl())
+                        }}
+                        className="group flex items-center gap-3 text-white text-3xl font-display font-bold hover:opacity-80 transition-opacity relative w-fit"
+                      >
+                        {t('auth.sign_in_with_google')}
+                        <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
+                        <span className="block h-[2px] w-full bg-white/50 absolute -bottom-2 left-0" />
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </motion.div>
             </div>
 
