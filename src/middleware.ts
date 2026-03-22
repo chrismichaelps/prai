@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { updateSession } from '@/lib/supabase/proxy'
 
-/** @Logic.Middleware.I18n */
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   // Sync NEXT_LOCALE cookie if missing
   const hasLocale = request.cookies.has('NEXT_LOCALE')
   
@@ -12,11 +12,14 @@ export function middleware(request: NextRequest) {
     return response
   }
 
-  return NextResponse.next()
+  // Update session and refresh cookies
+  const supabaseResponse = await updateSession(request)
+
+  return supabaseResponse
 }
 
 export const config = {
   matcher: [
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }

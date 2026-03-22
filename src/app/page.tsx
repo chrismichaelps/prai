@@ -2,16 +2,18 @@
 
 import { useRouter } from 'next/navigation'
 import { ArrowRight } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
 import { useI18n } from '@/lib/effect/I18nProvider'
+import { useAuth } from '@/contexts/AuthContext'
 import heroImage from '@/assets/hero-mountains.jpg'
 
 export default function IndexPage() {
   const router = useRouter()
   const { t } = useI18n()
+  const { isAuthenticated } = useAuth()
 
   return (
     <main className="relative min-h-screen overflow-hidden">
@@ -54,21 +56,27 @@ export default function IndexPage() {
             {t('brand.tagline')}
           </motion.p>
 
-          <motion.nav
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.6, duration: 0.5 }}
-            className="flex items-center gap-8"
-          >
-            <button
-              onClick={() => router.push('/chat')}
-              className="group flex items-center gap-2 text-primary-foreground font-medium hover:opacity-80 transition-opacity relative"
-            >
-              {t('hero.cta_chat')}
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              <span className="block h-px w-full bg-primary-foreground/50 absolute -bottom-1 left-0" />
-            </button>
-          </motion.nav>
+          <AnimatePresence>
+            {isAuthenticated && (
+              <motion.nav
+                key="cta"
+                initial={{ y: 20, opacity: 0, scale: 0.95 }}
+                animate={{ y: 0, opacity: 1, scale: 1 }}
+                exit={{ y: -10, opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.4, ease: "easeOut" }}
+                className="flex items-center gap-8"
+              >
+                <button
+                  onClick={() => router.push('/chat')}
+                  className="group flex items-center gap-2 text-primary-foreground font-medium hover:opacity-80 transition-opacity relative"
+                >
+                  {t('hero.cta_chat')}
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  <span className="block h-px w-full bg-primary-foreground/50 absolute -bottom-1 left-0" />
+                </button>
+              </motion.nav>
+            )}
+          </AnimatePresence>
         </section>
 
         {/* Footer */}
