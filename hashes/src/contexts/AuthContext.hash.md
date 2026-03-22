@@ -29,7 +29,8 @@ interface AuthContextValue {
 - **EventDriven_Law:** Auth state changes via `onAuthStateChange` subscription.
 
 ### [Implementation Notes]
-- **useEffect + Ref:** Uses `useEffect` with `useRef` guard for one-time initialization.
+- **LazyLoad:** Supabase client loaded via dynamic `import()` inside `useEffect` to avoid build-time errors.
+- **useRef:** Stores supabase client instance in `useRef` to prevent recreation on re-renders.
 - **getSession:** Fetches initial session on mount.
 - **onAuthStateChange:** Subscribes to auth events, handles signin/signout.
 - **sessionStorage:** Stores `callbackUrl` for redirect after OAuth flow.
