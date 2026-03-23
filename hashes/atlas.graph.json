@@ -1,7 +1,7 @@
 {
-  "graph_version": "1.0",
-  "state_anchor": "BigInt:0x1",
-  "description": "Directional dependency edges. Upstream node change → downstream nodes flagged DIRTY.",
+  "graph_version": "2.0",
+  "state_anchor": "BigInt:0x0fc98cc",
+  "description": "Directional dependency edges auto-generated from Linkage blocks in .hash.md contracts.",
   "grammar_refs": {
     "effect": "@root/hashes/grammar/effect.hash.md",
     "next": "@root/hashes/grammar/next.hash.md",
@@ -10,159 +10,823 @@
   },
   "edges": [
     {
-      "from": "@root/src/lib/effect/services/PromptBuilder",
-      "to": "@root/src/lib/effect/services/Config",
+      "from": "@root/src/app/about/page.tsx",
+      "to": "@root/src/components/layout/Header.tsx",
       "type": "LAYER_DEPENDENCY",
       "impact": "HIGH",
-      "reason": "ConfigService.Default lists PromptBuilderService.Default as a dependency"
+      "reason": "Mounts the globally responsive Header layout component."
     },
     {
-      "from": "@root/src/lib/effect/services/Config",
-      "to": "@root/src/lib/effect/services/OpenRouter",
+      "from": "@root/src/app/about/page.tsx",
+      "to": "@root/src/lib/constants.ts",
       "type": "LAYER_DEPENDENCY",
       "impact": "HIGH",
-      "reason": "OpenRouter reads apiKey, modelName, openRouterBaseUrl from ConfigService"
+      "reason": "Binds the architectural execution flow directly to the downstream dependency."
     },
     {
-      "from": "@root/src/lib/effect/services/Config",
-      "to": "@root/src/lib/effect/chat",
+      "from": "@root/src/app/api/auth/callback/route.ts",
+      "to": "next/server",
       "type": "LAYER_DEPENDENCY",
       "impact": "HIGH",
-      "reason": "chat.ts yields ConfigService for systemPrompt and errorMessages"
+      "reason": "Enforces Next.js server-side execution handlers and NextResponse formatting."
     },
     {
-      "from": "@root/src/lib/effect/services/OpenRouter",
-      "to": "@root/src/lib/effect/chat",
+      "from": "@root/src/app/api/auth/callback/route.ts",
+      "to": "@supabase/ssr",
       "type": "LAYER_DEPENDENCY",
       "impact": "HIGH",
-      "reason": "sendChatMessage yields OpenRouter.chat() stream"
+      "reason": "Requires Supabase Server Client for secure HTTP-only cookie and token exchange."
     },
     {
-      "from": "@root/src/lib/effect/errors",
-      "to": "@root/src/lib/effect/services/OpenRouter",
-      "type": "SCHEMA_CONTRACT",
-      "impact": "HIGH",
-      "reason": "OpenRouter imports OpenRouterError from errors.ts"
-    },
-    {
-      "from": "@root/src/store",
-      "to": "@root/src/lib/effect/services/Redux",
+      "from": "@root/src/app/api/auth/session/route.ts",
+      "to": "next/server",
       "type": "LAYER_DEPENDENCY",
       "impact": "HIGH",
-      "reason": "Redux service wraps the singleton Redux store"
+      "reason": "Enforces Next.js server-side execution handlers and NextResponse formatting."
     },
     {
-      "from": "@root/src/lib/effect/services/Redux",
-      "to": "@root/src/lib/effect/chat",
+      "from": "@root/src/app/api/auth/session/route.ts",
+      "to": "@supabase/ssr",
       "type": "LAYER_DEPENDENCY",
       "impact": "HIGH",
-      "reason": "chat.ts dispatches all UI state changes via Redux service"
+      "reason": "Requires Supabase Server Client for secure HTTP-only cookie and token exchange."
     },
     {
-      "from": "@root/src/lib/effect/runtime",
-      "to": "@root/src/lib/effect/ChatProvider",
+      "from": "@root/src/app/api/auth/signin/route.ts",
+      "to": "next/server",
       "type": "LAYER_DEPENDENCY",
       "impact": "HIGH",
-      "reason": "ChatProvider calls runtime.runPromise to bridge Effect → React"
+      "reason": "Enforces Next.js server-side execution handlers and NextResponse formatting."
     },
     {
-      "from": "@root/src/lib/effect/chat",
-      "to": "@root/src/lib/effect/ChatProvider",
+      "from": "@root/src/app/api/auth/signin/route.ts",
+      "to": "@supabase/ssr",
       "type": "LAYER_DEPENDENCY",
       "impact": "HIGH",
-      "reason": "ChatProvider imports initChat and sendChatMessage from chat.ts"
+      "reason": "Requires Supabase Server Client for secure HTTP-only cookie and token exchange."
     },
     {
-      "from": "@root/src/lib/effect/ChatProvider",
-      "to": "@root/src/components/chat/ChatContainer",
+      "from": "@root/src/app/api/auth/signout/route.ts",
+      "to": "next/server",
       "type": "LAYER_DEPENDENCY",
       "impact": "HIGH",
-      "reason": "ChatContainer consumes useChatActions() from ChatProvider context"
+      "reason": "Enforces Next.js server-side execution handlers and NextResponse formatting."
     },
     {
-      "from": "@root/src/lib/effect/i18n",
-      "to": "@root/src/lib/effect/I18nProvider",
-      "type": "SCHEMA_CONTRACT",
-      "impact": "MEDIUM",
-      "reason": "I18nProvider uses I18nLive layer and translate function from i18n/index.ts"
-    },
-    {
-      "from": "@root/src/lib/effect/services/I18n",
-      "to": "@root/src/lib/effect/I18nProvider",
-      "type": "SCHEMA_CONTRACT",
-      "impact": "MEDIUM",
-      "reason": "I18nProvider yields I18n service tag for locale operations"
-    },
-    {
-      "from": "@root/src/lib/effect/schemas/AdaptiveCardsSchema",
-      "to": "@root/src/lib/effect/chat",
-      "type": "SCHEMA_CONTRACT",
-      "impact": "MEDIUM",
-      "reason": "chat.ts decodes AdaptiveBlock from AdaptiveCardsSchema"
-    },
-    {
-      "from": "@root/src/lib/effect/schemas/ConfigSchema",
-      "to": "@root/src/lib/effect/services/Config",
-      "type": "SCHEMA_CONTRACT",
-      "impact": "HIGH",
-      "reason": "Config.ts decodes environment variables using ConfigSchema"
-    },
-    {
-      "from": "@root/src/lib/effect/constants/ChatConstants",
-      "to": "@root/src/lib/effect/chat",
-      "type": "SCHEMA_CONTRACT",
-      "impact": "LOW",
-      "reason": "chat.ts imports THINKING_PHASES and DEFAULT_THINKING_STATUS"
-    },
-    {
-      "from": "@root/src/store/slices/chatSlice",
-      "to": "@root/src/lib/effect/chat",
+      "from": "@root/src/app/api/auth/signout/route.ts",
+      "to": "@supabase/ssr",
       "type": "LAYER_DEPENDENCY",
       "impact": "HIGH",
-      "reason": "chat.ts imports all Redux chat action creators"
+      "reason": "Requires Supabase Server Client for secure HTTP-only cookie and token exchange."
     },
     {
-      "from": "@root/src/lib/constants",
-      "to": "@root/src/components/layout/Header",
-      "type": "SCHEMA_CONTRACT",
-      "impact": "LOW",
-      "reason": "Header imports GITHUB_REPO_URL constant"
-    },
-    {
-      "from": "@root/src/lib/constants",
-      "to": "@root/src/components/layout/Footer",
-      "type": "SCHEMA_CONTRACT",
-      "impact": "LOW",
-      "reason": "Footer imports GITHUB_REPO_URL constant"
-    },
-    {
-      "from": "@root/src/lib/constants",
-      "to": "@root/src/app/about/page",
-      "type": "SCHEMA_CONTRACT",
-      "impact": "LOW",
-      "reason": "About page imports GITHUB_REPO_URL constant"
-    },
-    {
-      "from": "@root/src/lib/effect/services/Seo",
-      "to": "@root/src/app/sitemap",
+      "from": "@root/src/app/api/chat/route.ts",
+      "to": "next/server",
       "type": "LAYER_DEPENDENCY",
       "impact": "HIGH",
-      "reason": "sitemap.ts executes SeoService.getSitemapRoutes"
+      "reason": "Enforces Next.js server-side execution handlers and NextResponse formatting."
     },
     {
-      "from": "@root/src/lib/effect/services/Seo",
-      "to": "@root/src/app/robots",
+      "from": "@root/src/app/chat/page.tsx",
+      "to": "react",
       "type": "LAYER_DEPENDENCY",
       "impact": "HIGH",
-      "reason": "robots.ts executes SeoService.getRobotsConfig"
+      "reason": "Anchors interactive UI logic to the React Client Component lifecycle."
     },
     {
-      "from": "@root/src/lib/effect/services/Config",
-      "to": "@root/src/lib/effect/services/Seo",
+      "from": "@root/src/app/chat/page.tsx",
+      "to": "@/components/layout/Header",
       "type": "LAYER_DEPENDENCY",
       "impact": "HIGH",
-      "reason": "SeoService reads NEXT_PUBLIC_SITE_URL from ConfigService"
+      "reason": "Mounts the globally responsive Header layout component."
+    },
+    {
+      "from": "@root/src/app/chat/page.tsx",
+      "to": "@/components/chat/ChatContainer",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Injects the primary AI chat interface constraint box."
+    },
+    {
+      "from": "@root/src/app/chat/page.tsx",
+      "to": "@/components/auth/ProtectedRoute",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Tightly guarded by the unauthenticated redirect boundary."
+    },
+    {
+      "from": "@root/src/app/layout.tsx",
+      "to": "@/components/Providers",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Binds the architectural execution flow directly to the downstream dependency."
+    },
+    {
+      "from": "@root/src/app/layout.tsx",
+      "to": "@/lib/effect/I18nProvider",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Inherits strict internationalization (i18n) localized contexts."
+    },
+    {
+      "from": "@root/src/app/layout.tsx",
+      "to": "@/lib/effect/hooks/useBuildInfo",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Governed by pure functional Effect TS execution runtimes."
+    },
+    {
+      "from": "@root/src/app/layout.tsx",
+      "to": "@/components/ui/CookieBanner",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Relies on standardized UI primitive elements and design tokens."
+    },
+    {
+      "from": "@root/src/app/layout.tsx",
+      "to": "@/components/ui/ModelInfoBanner",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Relies on standardized UI primitive elements and design tokens."
+    },
+    {
+      "from": "@root/src/app/layout.tsx",
+      "to": "@/components/ui/ErrorToast",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Relies on standardized UI primitive elements and design tokens."
+    },
+    {
+      "from": "@root/src/app/layout.tsx",
+      "to": "@/components/ui/ToastProvider",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Relies on standardized UI primitive elements and design tokens."
+    },
+    {
+      "from": "@root/src/app/layout.tsx",
+      "to": "@/contexts/AuthContext",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Consumes the global Supabase Authentication session state."
+    },
+    {
+      "from": "@root/src/app/legal/cookies/layout.tsx",
+      "to": "- next",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Binds the architectural execution flow directly to the downstream dependency."
+    },
+    {
+      "from": "@root/src/app/legal/cookies/page.tsx",
+      "to": "- react",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Anchors interactive UI logic to the React Client Component lifecycle."
+    },
+    {
+      "from": "@root/src/app/legal/layout.tsx",
+      "to": "react",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Anchors interactive UI logic to the React Client Component lifecycle."
+    },
+    {
+      "from": "@root/src/app/legal/privacy/layout.tsx",
+      "to": "- next",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Binds the architectural execution flow directly to the downstream dependency."
+    },
+    {
+      "from": "@root/src/app/legal/privacy/page.tsx",
+      "to": "@/components/layout/Header",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Mounts the globally responsive Header layout component."
+    },
+    {
+      "from": "@root/src/app/legal/privacy/page.tsx",
+      "to": "@/components/layout/Footer",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Provides the global Footer branding and legal disclaimers."
+    },
+    {
+      "from": "@root/src/app/legal/privacy/page.tsx",
+      "to": "@/lib/effect/I18nProvider (for localized legal text)",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Inherits strict internationalization (i18n) localized contexts."
+    },
+    {
+      "from": "@root/src/app/legal/terms/layout.tsx",
+      "to": "- next",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Binds the architectural execution flow directly to the downstream dependency."
+    },
+    {
+      "from": "@root/src/app/legal/terms/page.tsx",
+      "to": "@/components/layout/Header",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Mounts the globally responsive Header layout component."
+    },
+    {
+      "from": "@root/src/app/legal/terms/page.tsx",
+      "to": "@/components/layout/Footer",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Provides the global Footer branding and legal disclaimers."
+    },
+    {
+      "from": "@root/src/app/legal/terms/page.tsx",
+      "to": "@/lib/effect/I18nProvider",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Inherits strict internationalization (i18n) localized contexts."
+    },
+    {
+      "from": "@root/src/app/not-found.tsx",
+      "to": "next/link",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Binds the architectural execution flow directly to the downstream dependency."
+    },
+    {
+      "from": "@root/src/app/not-found.tsx",
+      "to": "next/image",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Mandates Next.js optimized image rendering pipelines."
+    },
+    {
+      "from": "@root/src/app/not-found.tsx",
+      "to": "framer-motion",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Injects explicit Framer Motion mathematical animation constraints."
+    },
+    {
+      "from": "@root/src/app/not-found.tsx",
+      "to": "lucide-react",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Imports standardized vector iconography."
+    },
+    {
+      "from": "@root/src/app/not-found.tsx",
+      "to": "@/components/layout/Header",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Mounts the globally responsive Header layout component."
+    },
+    {
+      "from": "@root/src/app/not-found.tsx",
+      "to": "@/components/layout/Footer",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Provides the global Footer branding and legal disclaimers."
+    },
+    {
+      "from": "@root/src/app/not-found.tsx",
+      "to": "@/lib/effect/I18nProvider",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Inherits strict internationalization (i18n) localized contexts."
+    },
+    {
+      "from": "@root/src/app/page.tsx",
+      "to": "next/navigation",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Leverages Next.js programmatic client-side routing hooks."
+    },
+    {
+      "from": "@root/src/app/page.tsx",
+      "to": "framer-motion",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Injects explicit Framer Motion mathematical animation constraints."
+    },
+    {
+      "from": "@root/src/app/page.tsx",
+      "to": "@/components/layout/Header",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Mounts the globally responsive Header layout component."
+    },
+    {
+      "from": "@root/src/app/page.tsx",
+      "to": "@/components/layout/Footer",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Provides the global Footer branding and legal disclaimers."
+    },
+    {
+      "from": "@root/src/app/page.tsx",
+      "to": "@/lib/effect/I18nProvider",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Inherits strict internationalization (i18n) localized contexts."
+    },
+    {
+      "from": "@root/src/app/page.tsx",
+      "to": "@/contexts/AuthContext",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Consumes the global Supabase Authentication session state."
+    },
+    {
+      "from": "@root/src/app/profile/_components/ProfileClient.tsx",
+      "to": "@root/src/components/layout/Header.tsx",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Mounts the globally responsive Header layout component."
+    },
+    {
+      "from": "@root/src/app/profile/_components/ProfileClient.tsx",
+      "to": "@root/contexts/AuthContext.tsx",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Consumes the global Supabase Authentication session state."
+    },
+    {
+      "from": "@root/src/app/profile/_components/ProfileClient.tsx",
+      "to": "@root/components/ui/ToastProvider.tsx",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Relies on standardized UI primitive elements and design tokens."
+    },
+    {
+      "from": "@root/src/app/profile/_components/ProfileClient.tsx",
+      "to": "@supabase/ssr",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Requires Supabase Server Client for secure HTTP-only cookie and token exchange."
+    },
+    {
+      "from": "@root/src/app/profile/page.tsx",
+      "to": "@root/src/app/profile/_components/ProfileClient.tsx",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Binds the architectural execution flow directly to the downstream dependency."
+    },
+    {
+      "from": "@root/src/app/profile/page.tsx",
+      "to": "next (Metadata)",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Binds the architectural execution flow directly to the downstream dependency."
+    },
+    {
+      "from": "@root/src/app/robots.ts",
+      "to": "effect",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Governed by pure functional Effect TS execution runtimes."
+    },
+    {
+      "from": "@root/src/app/robots.ts",
+      "to": "@/lib/effect/runtime",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Governed by pure functional Effect TS execution runtimes."
+    },
+    {
+      "from": "@root/src/app/robots.ts",
+      "to": "@/lib/effect/services/Seo",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Consumes isolated Effect Service layer for pure functional side-effects."
+    },
+    {
+      "from": "@root/src/app/robots.ts",
+      "to": "next (MetadataRoute)",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Binds the architectural execution flow directly to the downstream dependency."
+    },
+    {
+      "from": "@root/src/app/sitemap.ts",
+      "to": "effect",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Governed by pure functional Effect TS execution runtimes."
+    },
+    {
+      "from": "@root/src/app/sitemap.ts",
+      "to": "@/lib/effect/runtime",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Governed by pure functional Effect TS execution runtimes."
+    },
+    {
+      "from": "@root/src/app/sitemap.ts",
+      "to": "@/lib/effect/services/Seo",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Consumes isolated Effect Service layer for pure functional side-effects."
+    },
+    {
+      "from": "@root/src/app/sitemap.ts",
+      "to": "next (MetadataRoute)",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Binds the architectural execution flow directly to the downstream dependency."
+    },
+    {
+      "from": "@root/src/components/Providers.tsx",
+      "to": "Redux",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Binds the architectural execution flow directly to the downstream dependency."
+    },
+    {
+      "from": "@root/src/components/Providers.tsx",
+      "to": "ChatProvider",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Binds the architectural execution flow directly to the downstream dependency."
+    },
+    {
+      "from": "@root/src/components/chat/AdaptiveCard.tsx",
+      "to": "@root/src/lib/effect/schemas/AdaptiveCardsSchema.ts",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Requires strict architectural DTO validation schemas."
+    },
+    {
+      "from": "@root/src/components/chat/DiscoveryLoader.tsx",
+      "to": "Framer Motion",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Binds the architectural execution flow directly to the downstream dependency."
+    },
+    {
+      "from": "@root/src/components/chat/MessageBubble.tsx",
+      "to": "Message type from chat",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Binds the architectural execution flow directly to the downstream dependency."
+    },
+    {
+      "from": "@root/src/components/chat/Suggestions.tsx",
+      "to": "I18n translations",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Binds the architectural execution flow directly to the downstream dependency."
+    },
+    {
+      "from": "@root/src/components/layout/Header.tsx",
+      "to": "@root/contexts/AuthContext.tsx",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Consumes the global Supabase Authentication session state."
+    },
+    {
+      "from": "@root/src/components/layout/Header.tsx",
+      "to": "framer-motion",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Injects explicit Framer Motion mathematical animation constraints."
+    },
+    {
+      "from": "@root/src/components/layout/Header.tsx",
+      "to": "@root/store/slices/uiSlice.ts",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Dispatches deterministic global Redux state mutations."
+    },
+    {
+      "from": "@root/src/components/layout/SideNav.tsx",
+      "to": "@root/src/lib/effect/I18nProvider.tsx",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Inherits strict internationalization (i18n) localized contexts."
+    },
+    {
+      "from": "@root/src/components/layout/TopAppBar.tsx",
+      "to": "Header component",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Mounts the globally responsive Header layout component."
+    },
+    {
+      "from": "@root/src/components/ui/CookieBanner.tsx",
+      "to": "@root/src/lib/effect/I18nProvider.tsx",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Inherits strict internationalization (i18n) localized contexts."
+    },
+    {
+      "from": "@root/src/components/ui/ModelInfoBanner.tsx",
+      "to": "@root/src/lib/effect/I18nProvider.tsx",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Inherits strict internationalization (i18n) localized contexts."
+    },
+    {
+      "from": "@root/src/components/ui/ToastProvider.tsx",
+      "to": "lucide-react",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Imports standardized vector iconography."
+    },
+    {
+      "from": "@root/src/components/ui/ToastProvider.tsx",
+      "to": "framer-motion",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Injects explicit Framer Motion mathematical animation constraints."
+    },
+    {
+      "from": "@root/src/components/ui/ToastProvider.tsx",
+      "to": "React.createContext",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Binds the architectural execution flow directly to the downstream dependency."
+    },
+    {
+      "from": "@root/src/contexts/AuthContext.tsx",
+      "to": "@supabase/ssr",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Requires Supabase Server Client for secure HTTP-only cookie and token exchange."
+    },
+    {
+      "from": "@root/src/contexts/AuthContext.tsx",
+      "to": "lucide-react",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Imports standardized vector iconography."
+    },
+    {
+      "from": "@root/src/contexts/AuthContext.tsx",
+      "to": "React.createContext",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Binds the architectural execution flow directly to the downstream dependency."
+    },
+    {
+      "from": "@root/src/contexts/AuthContext.tsx",
+      "to": "Database (types)",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Binds the architectural execution flow directly to the downstream dependency."
+    },
+    {
+      "from": "@root/src/hooks/useAuth.ts",
+      "to": "@root/src/contexts/AuthContext.tsx",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Consumes the global Supabase Authentication session state."
+    },
+    {
+      "from": "@root/src/hooks/useAuthRedux.ts",
+      "to": "@root/src/store/slices/authSlice.ts",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Dispatches deterministic global Redux state mutations."
+    },
+    {
+      "from": "@root/src/lib/actions/actionToNaturalMessage.ts",
+      "to": "Chat message processing",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Binds the architectural execution flow directly to the downstream dependency."
+    },
+    {
+      "from": "@root/src/lib/effect/constants/PostgRErrorCodes.ts",
+      "to": "N/A (Pure Constants)",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Binds the architectural execution flow directly to the downstream dependency."
+    },
+    {
+      "from": "@root/src/lib/effect/i18n/index.ts",
+      "to": "react",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Anchors interactive UI logic to the React Client Component lifecycle."
+    },
+    {
+      "from": "@root/src/lib/effect/i18n/index.ts",
+      "to": "js-cookie",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Binds the architectural execution flow directly to the downstream dependency."
+    },
+    {
+      "from": "@root/src/lib/effect/runtime.ts",
+      "to": "@effect/platform-browser",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Governed by pure functional Effect TS execution runtimes."
+    },
+    {
+      "from": "@root/src/lib/effect/runtime.ts",
+      "to": "ConfigService",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Binds the architectural execution flow directly to the downstream dependency."
+    },
+    {
+      "from": "@root/src/lib/effect/runtime.ts",
+      "to": "OpenRouter",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Binds the architectural execution flow directly to the downstream dependency."
+    },
+    {
+      "from": "@root/src/lib/effect/runtime.ts",
+      "to": "Redux",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Binds the architectural execution flow directly to the downstream dependency."
+    },
+    {
+      "from": "@root/src/lib/effect/runtime.ts",
+      "to": "PromptBuilder",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Binds the architectural execution flow directly to the downstream dependency."
+    },
+    {
+      "from": "@root/src/lib/effect/runtime.ts",
+      "to": "VoiceServiceLive",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Binds the architectural execution flow directly to the downstream dependency."
+    },
+    {
+      "from": "@root/src/lib/effect/runtime.ts",
+      "to": "I18nLive",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Binds the architectural execution flow directly to the downstream dependency."
+    },
+    {
+      "from": "@root/src/lib/effect/runtime.ts",
+      "to": "BuildInfoService",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Binds the architectural execution flow directly to the downstream dependency."
+    },
+    {
+      "from": "@root/src/lib/effect/runtime.ts",
+      "to": "SeoService",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Binds the architectural execution flow directly to the downstream dependency."
+    },
+    {
+      "from": "@root/src/lib/effect/schemas/AdaptiveCardsSchema.ts",
+      "to": "Chat rendering",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Binds the architectural execution flow directly to the downstream dependency."
+    },
+    {
+      "from": "@root/src/lib/effect/schemas/AuthSchema.ts",
+      "to": "effect/Schema",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Governed by pure functional Effect TS execution runtimes."
+    },
+    {
+      "from": "@root/src/lib/effect/schemas/ConfigSchema.ts",
+      "to": "effect/Schema",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Governed by pure functional Effect TS execution runtimes."
+    },
+    {
+      "from": "@root/src/lib/effect/schemas/OpenRouterSchema.ts",
+      "to": "OpenRouter service",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Binds the architectural execution flow directly to the downstream dependency."
+    },
+    {
+      "from": "@root/src/lib/effect/services/Auth.ts",
+      "to": "@supabase/ssr",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Requires Supabase Server Client for secure HTTP-only cookie and token exchange."
+    },
+    {
+      "from": "@root/src/lib/effect/services/Auth.ts",
+      "to": "@supabase/supabase-js",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Binds the architectural execution flow directly to the downstream dependency."
+    },
+    {
+      "from": "@root/src/lib/effect/services/AuthReduxBridge.ts",
+      "to": "@root/src/lib/effect/services/Auth.ts",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Consumes isolated Effect Service layer for pure functional side-effects."
+    },
+    {
+      "from": "@root/src/lib/effect/services/Seo.ts",
+      "to": "@root/src/lib/effect/services/Config.ts",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Consumes isolated Effect Service layer for pure functional side-effects."
+    },
+    {
+      "from": "@root/src/lib/effect/services/Supabase.ts",
+      "to": "@supabase/ssr",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Requires Supabase Server Client for secure HTTP-only cookie and token exchange."
+    },
+    {
+      "from": "@root/src/lib/effect/services/Supabase.ts",
+      "to": "@supabase/supabase-js",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Binds the architectural execution flow directly to the downstream dependency."
+    },
+    {
+      "from": "@root/src/lib/effect/services/prompts/accuracy_and_media.ts",
+      "to": "N/A (Pure String Constant)",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Binds the architectural execution flow directly to the downstream dependency."
+    },
+    {
+      "from": "@root/src/lib/effect/services/prompts/index.ts",
+      "to": "Chat service",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Binds the architectural execution flow directly to the downstream dependency."
+    },
+    {
+      "from": "@root/src/lib/effect/services/prompts/index.ts",
+      "to": "Config service",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Binds the architectural execution flow directly to the downstream dependency."
+    },
+    {
+      "from": "@root/src/lib/supabase/client.ts",
+      "to": "@supabase/ssr",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Requires Supabase Server Client for secure HTTP-only cookie and token exchange."
+    },
+    {
+      "from": "@root/src/lib/supabase/proxy.ts",
+      "to": "@supabase/ssr",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Requires Supabase Server Client for secure HTTP-only cookie and token exchange."
+    },
+    {
+      "from": "@root/src/lib/supabase/server.ts",
+      "to": "@supabase/ssr",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Requires Supabase Server Client for secure HTTP-only cookie and token exchange."
+    },
+    {
+      "from": "@root/src/store/hooks.ts",
+      "to": "@root/src/store/index.ts",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Dispatches deterministic global Redux state mutations."
+    },
+    {
+      "from": "@root/src/store/slices/authSlice.ts",
+      "to": "@root/src/lib/effect/schemas/AuthSchema.ts",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Requires strict architectural DTO validation schemas."
+    },
+    {
+      "from": "@root/src/store/slices/passportSlice.ts",
+      "to": "@root/src/store/index.ts",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Dispatches deterministic global Redux state mutations."
+    },
+    {
+      "from": "@root/src/types/chat.ts",
+      "to": "Chat components",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Binds the architectural execution flow directly to the downstream dependency."
+    },
+    {
+      "from": "@root/src/types/database.ts",
+      "to": "N/A (Pure Type Declaration)",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Binds the architectural execution flow directly to the downstream dependency."
     }
-  ],
-  "dirty_propagation_rule": "When a node fidelity_level changes to DIRTY, recursively mark all nodes reachable via outgoing edges as DIRTY"
+  ]
 }
