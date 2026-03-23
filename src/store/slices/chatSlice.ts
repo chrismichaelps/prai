@@ -2,6 +2,7 @@ import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import type { ChatMessage, AdaptiveData, Suggestion, SearchResult } from '@/types/chat';
 
+/** @Store.Redux.ChatSlice */
 export interface ChatState {
   messages: ChatMessage[];
   isLoading: boolean;

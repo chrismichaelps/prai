@@ -10,6 +10,7 @@ import { useI18n } from '@/lib/effect/I18nProvider'
 import { useAuth } from '@/contexts/AuthContext'
 import heroImage from '@/assets/hero-mountains.jpg'
 
+/** @Route.IndexPage */
 export default function IndexPage() {
   const router = useRouter()
   const { t } = useI18n()

@@ -1,6 +1,6 @@
 "use client";
 
-/** @UI.Brand.Logo */
+/** @UI.Component.Brand.PraiLogo */
 import React from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';

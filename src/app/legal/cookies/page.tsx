@@ -4,7 +4,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { useI18n } from '@/lib/effect/I18nProvider';
 
-/** @Page.Legal.Cookies */
+/** @app.legal.cookies.page */
 export default function CookiesPage() {
   const { t } = useI18n();
   return (

@@ -1,6 +1,6 @@
 'use client'
 
-/** @UI.Layout.SideNav */
+/** @UI.Component.Layout.SideNav */
 
 import React from 'react'
 import Link from 'next/link'

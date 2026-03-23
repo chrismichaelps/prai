@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 
+/** @Route.Chat.Completions */
 export async function POST(req: Request) {
   try {
     const { messages } = await req.json();
@@ -23,7 +24,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'OpenRouter error' }, { status: response.status });
     }
 
-    /** @Route.Chat.Response */
     return new Response(response.body, {
       headers: {
         'Content-Type': 'text/event-stream',
