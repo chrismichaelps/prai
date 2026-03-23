@@ -1,174 +1,847 @@
 {
   "shard_id": "@root/src",
-  "state_anchor": "BigInt:0x1",
+  "state_anchor": "BigInt:0x0fc98cc",
   "parent_bridge": "@root/hashes/local.map.json",
-  "git_anchor": "INIT",
+  "git_anchor": "LATEST",
   "cache_integrity": "VERIFIED",
   "nodes": {
-    "errors": {
-      "file_path": "@root/src/lib/effect/errors.ts",
-      "hash_reference": "@root/hashes/src/lib/effect/errors.hash.md",
-      "grammar_ref": "@root/hashes/grammar/effect.hash.md",
-      "dependencies": [],
-      "fidelity_level": "Active"
-    },
-    "PromptBuilderService": {
-      "file_path": "@root/src/lib/effect/services/PromptBuilder.ts",
-      "hash_reference": "@root/hashes/src/lib/effect/services/PromptBuilder.hash.md",
-      "grammar_ref": "@root/hashes/grammar/effect.hash.md",
-      "dependencies": [],
-      "fidelity_level": "Active"
-    },
-    "ConfigService": {
-      "file_path": "@root/src/lib/effect/services/Config.ts",
-      "hash_reference": "@root/hashes/src/lib/effect/services/Config.hash.md",
-      "grammar_ref": "@root/hashes/grammar/effect.hash.md",
-      "dependencies": [
-        "@root/hashes/src/lib/effect/services/PromptBuilder.hash.md",
-        "@root/hashes/grammar/effect.hash.md"
-      ],
-      "fidelity_level": "Active"
-    },
-    "OpenRouterService": {
-      "file_path": "@root/src/lib/effect/services/OpenRouter.ts",
-      "hash_reference": "@root/hashes/src/lib/effect/services/OpenRouter.hash.md",
-      "grammar_ref": "@root/hashes/grammar/effect.hash.md",
-      "dependencies": [
-        "@root/hashes/src/lib/effect/services/Config.hash.md",
-        "@root/hashes/src/lib/effect/errors.hash.md"
-      ],
-      "fidelity_level": "Active"
-    },
-    "ReduxService": {
-      "file_path": "@root/src/lib/effect/services/Redux.ts",
-      "hash_reference": "@root/hashes/src/lib/effect/services/Redux.hash.md",
-      "grammar_ref": "@root/hashes/grammar/effect.hash.md",
-      "dependencies": [
-        "@root/hashes/src/store/index.hash.md"
-      ],
-      "fidelity_level": "Active"
-    },
-    "VoiceService": {
-      "file_path": "@root/src/lib/effect/services/Voice.ts",
-      "hash_reference": "@root/hashes/src/lib/effect/services/Voice.hash.md",
-      "grammar_ref": "@root/hashes/grammar/effect.hash.md",
-      "dependencies": [],
-      "fidelity_level": "Active"
-    },
-    "I18nService": {
-      "file_path": "@root/src/lib/effect/services/I18n.ts",
-      "hash_reference": "@root/hashes/src/lib/effect/services/I18n.hash.md",
-      "grammar_ref": "@root/hashes/grammar/effect.hash.md",
-      "dependencies": [],
-      "fidelity_level": "Active"
-    },
-    "chat": {
-      "file_path": "@root/src/lib/effect/chat.ts",
-      "hash_reference": "@root/hashes/src/lib/effect/chat.hash.md",
-      "grammar_ref": "@root/hashes/grammar/effect.hash.md",
-      "dependencies": [
-        "@root/hashes/src/lib/effect/services/OpenRouter.hash.md",
-        "@root/hashes/src/lib/effect/services/Config.hash.md",
-        "@root/hashes/src/lib/effect/services/Redux.hash.md",
-        "@root/hashes/src/store/slices/chatSlice.hash.md"
-      ],
-      "fidelity_level": "Active"
-    },
-    "runtime": {
-      "file_path": "@root/src/lib/effect/runtime.ts",
-      "hash_reference": "@root/hashes/src/lib/effect/runtime.hash.md",
-      "grammar_ref": "@root/hashes/grammar/effect.hash.md",
-      "dependencies": [
-        "@root/hashes/src/lib/effect/services/Config.hash.md",
-        "@root/hashes/src/lib/effect/services/OpenRouter.hash.md",
-        "@root/hashes/src/lib/effect/services/Redux.hash.md",
-        "@root/hashes/src/lib/effect/services/Voice.hash.md",
-        "@root/hashes/src/lib/effect/services/I18n.hash.md"
-      ],
-      "fidelity_level": "Active"
-    },
-    "ChatProvider": {
-      "file_path": "@root/src/lib/effect/ChatProvider.tsx",
-      "hash_reference": "@root/hashes/src/lib/effect/ChatProvider.hash.md",
-      "grammar_ref": "@root/hashes/grammar/effect.hash.md",
-      "dependencies": [
-        "@root/hashes/src/lib/effect/runtime.hash.md",
-        "@root/hashes/src/lib/effect/chat.hash.md"
-      ],
-      "fidelity_level": "Active"
-    },
-    "I18nProvider": {
-      "file_path": "@root/src/lib/effect/I18nProvider.tsx",
-      "hash_reference": "@root/hashes/src/lib/effect/I18nProvider.hash.md",
-      "grammar_ref": "@root/hashes/grammar/effect.hash.md",
-      "dependencies": [
-        "@root/hashes/src/lib/effect/services/I18n.hash.md",
-        "@root/hashes/src/lib/effect/runtime.hash.md"
-      ],
-      "fidelity_level": "Active"
-    },
-    "i18n": {
-      "file_path": "@root/src/lib/effect/i18n/index.ts",
-      "hash_reference": "@root/hashes/src/lib/effect/i18n/index.hash.md",
-      "grammar_ref": "@root/hashes/grammar/effect.hash.md",
-      "dependencies": [
-        "@root/hashes/src/lib/effect/services/I18n.hash.md"
-      ],
-      "fidelity_level": "Active"
-    },
-    "store": {
-      "file_path": "@root/src/store/index.ts",
-      "hash_reference": "@root/hashes/src/store/index.hash.md",
+    "app_about_page": {
+      "file_path": "@root/src/app/about/page.tsx",
+      "hash_reference": "@root/hashes/src/app/about/page.hash.md",
       "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
       "dependencies": [
-        "@root/hashes/src/store/slices/chatSlice.hash.md",
-        "@root/hashes/src/store/slices/passportSlice.hash.md",
-        "@root/hashes/src/store/slices/uiSlice.hash.md"
+        "@root/src/components/layout/Header.tsx",
+        "@root/src/lib/constants.ts"
       ],
       "fidelity_level": "Active"
     },
-    "middleware": {
-      "file_path": "@root/src/middleware.ts",
-      "hash_reference": "@root/hashes/src/middleware.hash.md",
-      "grammar_ref": "@root/hashes/grammar/next.hash.md",
+    "app_api_auth_callback_route": {
+      "file_path": "@root/src/app/api/auth/callback/route.ts",
+      "hash_reference": "@root/hashes/src/app/api/auth/callback/route.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "next/server",
+        "@supabase/ssr"
+      ],
+      "fidelity_level": "Active"
+    },
+    "app_api_auth_session_route": {
+      "file_path": "@root/src/app/api/auth/session/route.ts",
+      "hash_reference": "@root/hashes/src/app/api/auth/session/route.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "next/server",
+        "@supabase/ssr"
+      ],
+      "fidelity_level": "Active"
+    },
+    "app_api_auth_signin_route": {
+      "file_path": "@root/src/app/api/auth/signin/route.ts",
+      "hash_reference": "@root/hashes/src/app/api/auth/signin/route.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "next/server",
+        "@supabase/ssr"
+      ],
+      "fidelity_level": "Active"
+    },
+    "app_api_auth_signout_route": {
+      "file_path": "@root/src/app/api/auth/signout/route.ts",
+      "hash_reference": "@root/hashes/src/app/api/auth/signout/route.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "next/server",
+        "@supabase/ssr"
+      ],
+      "fidelity_level": "Active"
+    },
+    "app_api_build-info_route": {
+      "file_path": "@root/src/app/api/build-info/route.ts",
+      "hash_reference": "@root/hashes/src/app/api/build-info/route.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
       "dependencies": [],
       "fidelity_level": "Active"
     },
-    "constants": {
+    "app_api_chat_route": {
+      "file_path": "@root/src/app/api/chat/route.ts",
+      "hash_reference": "@root/hashes/src/app/api/chat/route.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "next/server"
+      ],
+      "fidelity_level": "Active"
+    },
+    "app_chat_layout": {
+      "file_path": "@root/src/app/chat/layout.tsx",
+      "hash_reference": "@root/hashes/src/app/chat/layout.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [],
+      "fidelity_level": "Active"
+    },
+    "app_chat_page": {
+      "file_path": "@root/src/app/chat/page.tsx",
+      "hash_reference": "@root/hashes/src/app/chat/page.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "react",
+        "@/components/layout/Header",
+        "@/components/chat/ChatContainer",
+        "@/components/auth/ProtectedRoute"
+      ],
+      "fidelity_level": "Active"
+    },
+    "app_layout": {
+      "file_path": "@root/src/app/layout.tsx",
+      "hash_reference": "@root/hashes/src/app/layout.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "@/components/Providers",
+        "@/lib/effect/I18nProvider",
+        "@/lib/effect/hooks/useBuildInfo",
+        "@/components/ui/CookieBanner",
+        "@/components/ui/ModelInfoBanner",
+        "@/components/ui/ErrorToast",
+        "@/components/ui/ToastProvider",
+        "@/contexts/AuthContext"
+      ],
+      "fidelity_level": "Active"
+    },
+    "app_legal_cookies_layout": {
+      "file_path": "@root/src/app/legal/cookies/layout.tsx",
+      "hash_reference": "@root/hashes/src/app/legal/cookies/layout.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "- next"
+      ],
+      "fidelity_level": "Active"
+    },
+    "app_legal_cookies_page": {
+      "file_path": "@root/src/app/legal/cookies/page.tsx",
+      "hash_reference": "@root/hashes/src/app/legal/cookies/page.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "- react"
+      ],
+      "fidelity_level": "Active"
+    },
+    "app_legal_layout": {
+      "file_path": "@root/src/app/legal/layout.tsx",
+      "hash_reference": "@root/hashes/src/app/legal/layout.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "react"
+      ],
+      "fidelity_level": "Active"
+    },
+    "app_legal_privacy_layout": {
+      "file_path": "@root/src/app/legal/privacy/layout.tsx",
+      "hash_reference": "@root/hashes/src/app/legal/privacy/layout.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "- next"
+      ],
+      "fidelity_level": "Active"
+    },
+    "app_legal_privacy_page": {
+      "file_path": "@root/src/app/legal/privacy/page.tsx",
+      "hash_reference": "@root/hashes/src/app/legal/privacy/page.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "@/components/layout/Header",
+        "@/components/layout/Footer",
+        "@/lib/effect/I18nProvider (for localized legal text)"
+      ],
+      "fidelity_level": "Active"
+    },
+    "app_legal_terms_layout": {
+      "file_path": "@root/src/app/legal/terms/layout.tsx",
+      "hash_reference": "@root/hashes/src/app/legal/terms/layout.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "- next"
+      ],
+      "fidelity_level": "Active"
+    },
+    "app_legal_terms_page": {
+      "file_path": "@root/src/app/legal/terms/page.tsx",
+      "hash_reference": "@root/hashes/src/app/legal/terms/page.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "@/components/layout/Header",
+        "@/components/layout/Footer",
+        "@/lib/effect/I18nProvider"
+      ],
+      "fidelity_level": "Active"
+    },
+    "app_not-found": {
+      "file_path": "@root/src/app/not-found.tsx",
+      "hash_reference": "@root/hashes/src/app/not-found.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "next/link",
+        "next/image",
+        "framer-motion",
+        "lucide-react",
+        "@/components/layout/Header",
+        "@/components/layout/Footer",
+        "@/lib/effect/I18nProvider"
+      ],
+      "fidelity_level": "Active"
+    },
+    "app_page": {
+      "file_path": "@root/src/app/page.tsx",
+      "hash_reference": "@root/hashes/src/app/page.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "next/navigation",
+        "framer-motion",
+        "@/components/layout/Header",
+        "@/components/layout/Footer",
+        "@/lib/effect/I18nProvider",
+        "@/contexts/AuthContext"
+      ],
+      "fidelity_level": "Active"
+    },
+    "app_profile__components_ProfileClient": {
+      "file_path": "@root/src/app/profile/_components/ProfileClient.tsx",
+      "hash_reference": "@root/hashes/src/app/profile/_components/ProfileClient.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "@root/src/components/layout/Header.tsx",
+        "@root/contexts/AuthContext.tsx",
+        "@root/components/ui/ToastProvider.tsx",
+        "@supabase/ssr"
+      ],
+      "fidelity_level": "Active"
+    },
+    "app_profile_page": {
+      "file_path": "@root/src/app/profile/page.tsx",
+      "hash_reference": "@root/hashes/src/app/profile/page.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "@root/src/app/profile/_components/ProfileClient.tsx",
+        "next (Metadata)"
+      ],
+      "fidelity_level": "Active"
+    },
+    "app_robots": {
+      "file_path": "@root/src/app/robots.ts",
+      "hash_reference": "@root/hashes/src/app/robots.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "effect",
+        "@/lib/effect/runtime",
+        "@/lib/effect/services/Seo",
+        "next (MetadataRoute)"
+      ],
+      "fidelity_level": "Active"
+    },
+    "app_sitemap": {
+      "file_path": "@root/src/app/sitemap.ts",
+      "hash_reference": "@root/hashes/src/app/sitemap.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "effect",
+        "@/lib/effect/runtime",
+        "@/lib/effect/services/Seo",
+        "next (MetadataRoute)"
+      ],
+      "fidelity_level": "Active"
+    },
+    "components_Providers": {
+      "file_path": "@root/src/components/Providers.tsx",
+      "hash_reference": "@root/hashes/src/components/Providers.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "Redux",
+        "ChatProvider"
+      ],
+      "fidelity_level": "Active"
+    },
+    "components_auth_ProtectedRoute": {
+      "file_path": "@root/src/components/auth/ProtectedRoute.tsx",
+      "hash_reference": "@root/hashes/src/components/auth/ProtectedRoute.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [],
+      "fidelity_level": "Active"
+    },
+    "components_brand_PraiLogo": {
+      "file_path": "@root/src/components/brand/PraiLogo.tsx",
+      "hash_reference": "@root/hashes/src/components/brand/PraiLogo.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [],
+      "fidelity_level": "Active"
+    },
+    "components_chat_AdaptiveCard": {
+      "file_path": "@root/src/components/chat/AdaptiveCard.tsx",
+      "hash_reference": "@root/hashes/src/components/chat/AdaptiveCard.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "@root/src/lib/effect/schemas/AdaptiveCardsSchema.ts"
+      ],
+      "fidelity_level": "Active"
+    },
+    "components_chat_ChatContainer": {
+      "file_path": "@root/src/components/chat/ChatContainer.tsx",
+      "hash_reference": "@root/hashes/src/components/chat/ChatContainer.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [],
+      "fidelity_level": "Active"
+    },
+    "components_chat_DiscoveryLoader": {
+      "file_path": "@root/src/components/chat/DiscoveryLoader.tsx",
+      "hash_reference": "@root/hashes/src/components/chat/DiscoveryLoader.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "Framer Motion"
+      ],
+      "fidelity_level": "Active"
+    },
+    "components_chat_MessageBubble": {
+      "file_path": "@root/src/components/chat/MessageBubble.tsx",
+      "hash_reference": "@root/hashes/src/components/chat/MessageBubble.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "Message type from chat"
+      ],
+      "fidelity_level": "Active"
+    },
+    "components_chat_SourcesSidebar": {
+      "file_path": "@root/src/components/chat/SourcesSidebar.tsx",
+      "hash_reference": "@root/hashes/src/components/chat/SourcesSidebar.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [],
+      "fidelity_level": "Active"
+    },
+    "components_chat_Suggestions": {
+      "file_path": "@root/src/components/chat/Suggestions.tsx",
+      "hash_reference": "@root/hashes/src/components/chat/Suggestions.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "I18n translations"
+      ],
+      "fidelity_level": "Active"
+    },
+    "components_layout_Footer": {
+      "file_path": "@root/src/components/layout/Footer.tsx",
+      "hash_reference": "@root/hashes/src/components/layout/Footer.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [],
+      "fidelity_level": "Active"
+    },
+    "components_layout_Header": {
+      "file_path": "@root/src/components/layout/Header.tsx",
+      "hash_reference": "@root/hashes/src/components/layout/Header.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "@root/contexts/AuthContext.tsx",
+        "framer-motion",
+        "@root/store/slices/uiSlice.ts"
+      ],
+      "fidelity_level": "Active"
+    },
+    "components_layout_SideNav": {
+      "file_path": "@root/src/components/layout/SideNav.tsx",
+      "hash_reference": "@root/hashes/src/components/layout/SideNav.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "@root/src/lib/effect/I18nProvider.tsx"
+      ],
+      "fidelity_level": "Active"
+    },
+    "components_layout_TopAppBar": {
+      "file_path": "@root/src/components/layout/TopAppBar.tsx",
+      "hash_reference": "@root/hashes/src/components/layout/TopAppBar.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "Header component"
+      ],
+      "fidelity_level": "Active"
+    },
+    "components_ui_CookieBanner": {
+      "file_path": "@root/src/components/ui/CookieBanner.tsx",
+      "hash_reference": "@root/hashes/src/components/ui/CookieBanner.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "@root/src/lib/effect/I18nProvider.tsx"
+      ],
+      "fidelity_level": "Active"
+    },
+    "components_ui_ErrorToast": {
+      "file_path": "@root/src/components/ui/ErrorToast.tsx",
+      "hash_reference": "@root/hashes/src/components/ui/ErrorToast.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [],
+      "fidelity_level": "Active"
+    },
+    "components_ui_ModelInfoBanner": {
+      "file_path": "@root/src/components/ui/ModelInfoBanner.tsx",
+      "hash_reference": "@root/hashes/src/components/ui/ModelInfoBanner.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "@root/src/lib/effect/I18nProvider.tsx"
+      ],
+      "fidelity_level": "Active"
+    },
+    "components_ui_ToastProvider": {
+      "file_path": "@root/src/components/ui/ToastProvider.tsx",
+      "hash_reference": "@root/hashes/src/components/ui/ToastProvider.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "lucide-react",
+        "framer-motion",
+        "React.createContext"
+      ],
+      "fidelity_level": "Active"
+    },
+    "contexts_AuthContext": {
+      "file_path": "@root/src/contexts/AuthContext.tsx",
+      "hash_reference": "@root/hashes/src/contexts/AuthContext.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "@supabase/ssr",
+        "lucide-react",
+        "React.createContext",
+        "Database (types)"
+      ],
+      "fidelity_level": "Active"
+    },
+    "hooks_useAuth": {
+      "file_path": "@root/src/hooks/useAuth.ts",
+      "hash_reference": "@root/hashes/src/hooks/useAuth.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "@root/src/contexts/AuthContext.tsx"
+      ],
+      "fidelity_level": "Active"
+    },
+    "hooks_useAuthRedux": {
+      "file_path": "@root/src/hooks/useAuthRedux.ts",
+      "hash_reference": "@root/hashes/src/hooks/useAuthRedux.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "@root/src/store/slices/authSlice.ts"
+      ],
+      "fidelity_level": "Active"
+    },
+    "lib_actions_actionToNaturalMessage": {
+      "file_path": "@root/src/lib/actions/actionToNaturalMessage.ts",
+      "hash_reference": "@root/hashes/src/lib/actions/actionToNaturalMessage.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "Chat message processing"
+      ],
+      "fidelity_level": "Active"
+    },
+    "lib_constants": {
       "file_path": "@root/src/lib/constants.ts",
       "hash_reference": "@root/hashes/src/lib/constants.hash.md",
       "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
       "dependencies": [],
       "fidelity_level": "Active"
     },
-    "SeoService": {
+    "lib_effect_ChatProvider": {
+      "file_path": "@root/src/lib/effect/ChatProvider.tsx",
+      "hash_reference": "@root/hashes/src/lib/effect/ChatProvider.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [],
+      "fidelity_level": "Active"
+    },
+    "lib_effect_I18nProvider": {
+      "file_path": "@root/src/lib/effect/I18nProvider.tsx",
+      "hash_reference": "@root/hashes/src/lib/effect/I18nProvider.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [],
+      "fidelity_level": "Active"
+    },
+    "lib_effect_chat": {
+      "file_path": "@root/src/lib/effect/chat.ts",
+      "hash_reference": "@root/hashes/src/lib/effect/chat.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [],
+      "fidelity_level": "Active"
+    },
+    "lib_effect_constants_AdaptiveCardConstants": {
+      "file_path": "@root/src/lib/effect/constants/AdaptiveCardConstants.ts",
+      "hash_reference": "@root/hashes/src/lib/effect/constants/AdaptiveCardConstants.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [],
+      "fidelity_level": "Active"
+    },
+    "lib_effect_constants_ChatConstants": {
+      "file_path": "@root/src/lib/effect/constants/ChatConstants.ts",
+      "hash_reference": "@root/hashes/src/lib/effect/constants/ChatConstants.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [],
+      "fidelity_level": "Active"
+    },
+    "lib_effect_constants_PostgRErrorCodes": {
+      "file_path": "@root/src/lib/effect/constants/PostgRErrorCodes.ts",
+      "hash_reference": "@root/hashes/src/lib/effect/constants/PostgRErrorCodes.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "N/A (Pure Constants)"
+      ],
+      "fidelity_level": "Active"
+    },
+    "lib_effect_errors": {
+      "file_path": "@root/src/lib/effect/errors.ts",
+      "hash_reference": "@root/hashes/src/lib/effect/errors.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [],
+      "fidelity_level": "Active"
+    },
+    "lib_effect_hooks_useBuildInfo": {
+      "file_path": "@root/src/lib/effect/hooks/useBuildInfo.tsx",
+      "hash_reference": "@root/hashes/src/lib/effect/hooks/useBuildInfo.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [],
+      "fidelity_level": "Active"
+    },
+    "lib_effect_i18n_index": {
+      "file_path": "@root/src/lib/effect/i18n/index.ts",
+      "hash_reference": "@root/hashes/src/lib/effect/i18n/index.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "react",
+        "js-cookie"
+      ],
+      "fidelity_level": "Active"
+    },
+    "lib_effect_runtime": {
+      "file_path": "@root/src/lib/effect/runtime.ts",
+      "hash_reference": "@root/hashes/src/lib/effect/runtime.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "@effect/platform-browser",
+        "ConfigService",
+        "OpenRouter",
+        "Redux",
+        "PromptBuilder",
+        "VoiceServiceLive",
+        "I18nLive",
+        "BuildInfoService",
+        "SeoService"
+      ],
+      "fidelity_level": "Active"
+    },
+    "lib_effect_schemas_AdaptiveCardsSchema": {
+      "file_path": "@root/src/lib/effect/schemas/AdaptiveCardsSchema.ts",
+      "hash_reference": "@root/hashes/src/lib/effect/schemas/AdaptiveCardsSchema.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "Chat rendering"
+      ],
+      "fidelity_level": "Active"
+    },
+    "lib_effect_schemas_AuthSchema": {
+      "file_path": "@root/src/lib/effect/schemas/AuthSchema.ts",
+      "hash_reference": "@root/hashes/src/lib/effect/schemas/AuthSchema.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "effect/Schema"
+      ],
+      "fidelity_level": "Active"
+    },
+    "lib_effect_schemas_ConfigSchema": {
+      "file_path": "@root/src/lib/effect/schemas/ConfigSchema.ts",
+      "hash_reference": "@root/hashes/src/lib/effect/schemas/ConfigSchema.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "effect/Schema"
+      ],
+      "fidelity_level": "Active"
+    },
+    "lib_effect_schemas_OpenRouterSchema": {
+      "file_path": "@root/src/lib/effect/schemas/OpenRouterSchema.ts",
+      "hash_reference": "@root/hashes/src/lib/effect/schemas/OpenRouterSchema.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "OpenRouter service"
+      ],
+      "fidelity_level": "Active"
+    },
+    "lib_effect_services_Auth": {
+      "file_path": "@root/src/lib/effect/services/Auth.ts",
+      "hash_reference": "@root/hashes/src/lib/effect/services/Auth.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "@supabase/ssr",
+        "@supabase/supabase-js"
+      ],
+      "fidelity_level": "Active"
+    },
+    "lib_effect_services_AuthReduxBridge": {
+      "file_path": "@root/src/lib/effect/services/AuthReduxBridge.ts",
+      "hash_reference": "@root/hashes/src/lib/effect/services/AuthReduxBridge.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "@root/src/lib/effect/services/Auth.ts"
+      ],
+      "fidelity_level": "Active"
+    },
+    "lib_effect_services_BuildInfo": {
+      "file_path": "@root/src/lib/effect/services/BuildInfo.ts",
+      "hash_reference": "@root/hashes/src/lib/effect/services/BuildInfo.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [],
+      "fidelity_level": "Active"
+    },
+    "lib_effect_services_Config": {
+      "file_path": "@root/src/lib/effect/services/Config.ts",
+      "hash_reference": "@root/hashes/src/lib/effect/services/Config.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [],
+      "fidelity_level": "Active"
+    },
+    "lib_effect_services_I18n": {
+      "file_path": "@root/src/lib/effect/services/I18n.ts",
+      "hash_reference": "@root/hashes/src/lib/effect/services/I18n.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [],
+      "fidelity_level": "Active"
+    },
+    "lib_effect_services_OpenRouter": {
+      "file_path": "@root/src/lib/effect/services/OpenRouter.ts",
+      "hash_reference": "@root/hashes/src/lib/effect/services/OpenRouter.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [],
+      "fidelity_level": "Active"
+    },
+    "lib_effect_services_PromptBuilder": {
+      "file_path": "@root/src/lib/effect/services/PromptBuilder.ts",
+      "hash_reference": "@root/hashes/src/lib/effect/services/PromptBuilder.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [],
+      "fidelity_level": "Active"
+    },
+    "lib_effect_services_Redux": {
+      "file_path": "@root/src/lib/effect/services/Redux.ts",
+      "hash_reference": "@root/hashes/src/lib/effect/services/Redux.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [],
+      "fidelity_level": "Active"
+    },
+    "lib_effect_services_Seo": {
       "file_path": "@root/src/lib/effect/services/Seo.ts",
-      "hash_reference": "@root/hashes/lib/effect/services/Seo.hash.md",
-      "grammar_ref": "@root/hashes/grammar/effect.hash.md",
+      "hash_reference": "@root/hashes/src/lib/effect/services/Seo.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
       "dependencies": [
-        "@root/hashes/src/lib/effect/services/Config.hash.md",
-        "@root/hashes/src/lib/effect/errors.hash.md"
+        "@root/src/lib/effect/services/Config.ts"
       ],
       "fidelity_level": "Active"
     },
-    "sitemap": {
-      "file_path": "@root/src/app/sitemap.ts",
-      "hash_reference": "@root/hashes/src/app/sitemap.hash.md",
-      "grammar_ref": "@root/hashes/grammar/next.hash.md",
+    "lib_effect_services_Supabase": {
+      "file_path": "@root/src/lib/effect/services/Supabase.ts",
+      "hash_reference": "@root/hashes/src/lib/effect/services/Supabase.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
       "dependencies": [
-        "@root/hashes/lib/effect/services/Seo.hash.md",
-        "@root/hashes/src/lib/effect/runtime.hash.md"
+        "@supabase/ssr",
+        "@supabase/supabase-js"
       ],
       "fidelity_level": "Active"
     },
-    "robots": {
-      "file_path": "@root/src/app/robots.ts",
-      "hash_reference": "@root/hashes/src/app/robots.hash.md",
-      "grammar_ref": "@root/hashes/grammar/next.hash.md",
+    "lib_effect_services_Voice": {
+      "file_path": "@root/src/lib/effect/services/Voice.ts",
+      "hash_reference": "@root/hashes/src/lib/effect/services/Voice.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [],
+      "fidelity_level": "Active"
+    },
+    "lib_effect_services_prompts_accuracy_and_media": {
+      "file_path": "@root/src/lib/effect/services/prompts/accuracy_and_media.ts",
+      "hash_reference": "@root/hashes/src/lib/effect/services/prompts/accuracy_and_media.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
       "dependencies": [
-        "@root/hashes/lib/effect/services/Seo.hash.md",
-        "@root/hashes/src/lib/effect/runtime.hash.md"
+        "N/A (Pure String Constant)"
       ],
+      "fidelity_level": "Active"
+    },
+    "lib_effect_services_prompts_action_handling": {
+      "file_path": "@root/src/lib/effect/services/prompts/action_handling.ts",
+      "hash_reference": "@root/hashes/src/lib/effect/services/prompts/action_handling.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [],
+      "fidelity_level": "Active"
+    },
+    "lib_effect_services_prompts_family_safety": {
+      "file_path": "@root/src/lib/effect/services/prompts/family_safety.ts",
+      "hash_reference": "@root/hashes/src/lib/effect/services/prompts/family_safety.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [],
+      "fidelity_level": "Active"
+    },
+    "lib_effect_services_prompts_guardrails": {
+      "file_path": "@root/src/lib/effect/services/prompts/guardrails.ts",
+      "hash_reference": "@root/hashes/src/lib/effect/services/prompts/guardrails.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [],
+      "fidelity_level": "Active"
+    },
+    "lib_effect_services_prompts_index": {
+      "file_path": "@root/src/lib/effect/services/prompts/index.ts",
+      "hash_reference": "@root/hashes/src/lib/effect/services/prompts/index.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "Chat service",
+        "Config service"
+      ],
+      "fidelity_level": "Active"
+    },
+    "lib_effect_services_prompts_output_format": {
+      "file_path": "@root/src/lib/effect/services/prompts/output_format.ts",
+      "hash_reference": "@root/hashes/src/lib/effect/services/prompts/output_format.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [],
+      "fidelity_level": "Active"
+    },
+    "lib_effect_services_prompts_role": {
+      "file_path": "@root/src/lib/effect/services/prompts/role.ts",
+      "hash_reference": "@root/hashes/src/lib/effect/services/prompts/role.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [],
+      "fidelity_level": "Active"
+    },
+    "lib_effect_services_prompts_rules": {
+      "file_path": "@root/src/lib/effect/services/prompts/rules.ts",
+      "hash_reference": "@root/hashes/src/lib/effect/services/prompts/rules.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [],
+      "fidelity_level": "Active"
+    },
+    "lib_effect_services_prompts_thought_process": {
+      "file_path": "@root/src/lib/effect/services/prompts/thought_process.ts",
+      "hash_reference": "@root/hashes/src/lib/effect/services/prompts/thought_process.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [],
+      "fidelity_level": "Active"
+    },
+    "lib_supabase_client": {
+      "file_path": "@root/src/lib/supabase/client.ts",
+      "hash_reference": "@root/hashes/src/lib/supabase/client.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "@supabase/ssr"
+      ],
+      "fidelity_level": "Active"
+    },
+    "lib_supabase_proxy": {
+      "file_path": "@root/src/lib/supabase/proxy.ts",
+      "hash_reference": "@root/hashes/src/lib/supabase/proxy.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "@supabase/ssr"
+      ],
+      "fidelity_level": "Active"
+    },
+    "lib_supabase_server": {
+      "file_path": "@root/src/lib/supabase/server.ts",
+      "hash_reference": "@root/hashes/src/lib/supabase/server.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "@supabase/ssr"
+      ],
+      "fidelity_level": "Active"
+    },
+    "lib_url": {
+      "file_path": "@root/src/lib/url.ts",
+      "hash_reference": "@root/hashes/src/lib/url.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [],
+      "fidelity_level": "Active"
+    },
+    "lib_utils": {
+      "file_path": "@root/src/lib/utils.ts",
+      "hash_reference": "@root/hashes/src/lib/utils.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [],
+      "fidelity_level": "Active"
+    },
+    "middleware": {
+      "file_path": "@root/src/middleware.ts",
+      "hash_reference": "@root/hashes/src/middleware.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [],
+      "fidelity_level": "Active"
+    },
+    "store_hooks": {
+      "file_path": "@root/src/store/hooks.ts",
+      "hash_reference": "@root/hashes/src/store/hooks.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "@root/src/store/index.ts"
+      ],
+      "fidelity_level": "Active"
+    },
+    "store_index": {
+      "file_path": "@root/src/store/index.ts",
+      "hash_reference": "@root/hashes/src/store/index.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [],
+      "fidelity_level": "Active"
+    },
+    "store_slices_authSlice": {
+      "file_path": "@root/src/store/slices/authSlice.ts",
+      "hash_reference": "@root/hashes/src/store/slices/authSlice.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "@root/src/lib/effect/schemas/AuthSchema.ts"
+      ],
+      "fidelity_level": "Active"
+    },
+    "store_slices_chatSlice": {
+      "file_path": "@root/src/store/slices/chatSlice.ts",
+      "hash_reference": "@root/hashes/src/store/slices/chatSlice.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [],
+      "fidelity_level": "Active"
+    },
+    "store_slices_passportSlice": {
+      "file_path": "@root/src/store/slices/passportSlice.ts",
+      "hash_reference": "@root/hashes/src/store/slices/passportSlice.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "@root/src/store/index.ts"
+      ],
+      "fidelity_level": "Active"
+    },
+    "store_slices_uiSlice": {
+      "file_path": "@root/src/store/slices/uiSlice.ts",
+      "hash_reference": "@root/hashes/src/store/slices/uiSlice.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [],
+      "fidelity_level": "Active"
+    },
+    "types_chat": {
+      "file_path": "@root/src/types/chat.ts",
+      "hash_reference": "@root/hashes/src/types/chat.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "Chat components"
+      ],
+      "fidelity_level": "Active"
+    },
+    "types_database": {
+      "file_path": "@root/src/types/database.ts",
+      "hash_reference": "@root/hashes/src/types/database.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "N/A (Pure Type Declaration)"
+      ],
+      "fidelity_level": "Active"
+    },
+    "types_database.types": {
+      "file_path": "@root/src/types/database.types.ts",
+      "hash_reference": "@root/hashes/src/types/database.types.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [],
+      "fidelity_level": "Active"
+    },
+    "types_images.d": {
+      "file_path": "@root/src/types/images.d.ts",
+      "hash_reference": "@root/hashes/src/types/images.d.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [],
       "fidelity_level": "Active"
     }
   }
