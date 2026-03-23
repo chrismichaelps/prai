@@ -4,7 +4,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { useI18n } from '@/lib/effect/I18nProvider';
 
-/** @Page.Legal.Terms */
+/** @App.Legal.Terms */
 export default function TermsPage() {
   const { t } = useI18n();
   return (

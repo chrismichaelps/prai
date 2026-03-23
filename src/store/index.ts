@@ -4,6 +4,7 @@ import passportReducer from './slices/passportSlice';
 import uiReducer from './slices/uiSlice';
 import authReducer from './slices/authSlice';
 
+/** @Store.Redux.Root */
 export const store = configureStore({
   reducer: {
     chat: chatReducer,

@@ -6,7 +6,7 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import heroMorro from '@/assets/hero-morro.png';
 
-/** @Layout.Legal */
+/** @App.Legal.Layout */
 export default function LegalLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="relative min-h-screen overflow-hidden font-sans">

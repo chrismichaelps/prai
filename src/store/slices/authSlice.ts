@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
 import type { User, Session } from '@supabase/supabase-js'
 
+/** @Store.Slice.Auth */
 export interface AuthState {
   user: User | null
   session: Session | null

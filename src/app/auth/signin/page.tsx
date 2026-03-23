@@ -5,6 +5,7 @@ import { useI18n } from '@/lib/effect/I18nProvider'
 import { useAuth } from '@/contexts/AuthContext'
 import { motion } from 'framer-motion'
 
+/** @Route.Auth.SigninPage */
 export default function SignInPage() {
   const { t } = useI18n()
   const router = useRouter()

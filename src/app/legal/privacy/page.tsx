@@ -4,7 +4,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { useI18n } from '@/lib/effect/I18nProvider';
 
-/** @Page.Legal.Privacy */
+/** @App.Legal.Privacy */
 export default function PrivacyPage() {
   const { t } = useI18n();
   return (

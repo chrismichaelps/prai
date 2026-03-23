@@ -10,6 +10,7 @@ import { useI18n } from '@/lib/effect/I18nProvider'
 import { GITHUB_REPO_URL } from '@/lib/constants'
 import heroImage from '@/assets/condado-ocean-dusk.png'
 
+/** @Route.About */
 export default function AboutPage() {
   const router = useRouter()
   const { t } = useI18n()
