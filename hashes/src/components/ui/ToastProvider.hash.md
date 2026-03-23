@@ -1,30 +1,28 @@
 ---
-State_ID: BigInt(0x1)
+State_ID: BigInt(0x0fc98cc)
 Git_SHA: LATEST
 Grammar_Lock: "@root/hashes/grammar/typescript.hash.md"
 ---
 
-## @UI.Component.ToastProvider
+## @Component.ToastProvider
 
 ### [Signatures]
 ```ts
-export function ToastProvider({ children }: React.PropsWithChildren<object>): React.ReactElement
-export function useToast(): { showToast: (message: string, type?: 'success' | 'error') => void }
+export type ToastType = 'success' | 'error' | 'info'
+export interface Toast { id: string; message: string; type: ToastType }
+export const ToastContext: React.Context<ToastContextType | undefined>
+
+export function ToastProvider(props: { children: React.ReactNode }): JSX.Element
+export function useToast(): ToastContextType
 ```
 
 ### [Governance]
-- **Context_Law:** Uses React Context for toast state management.
-- **Animation_Law:** Uses Framer Motion for smooth enter/exit animations.
-- **AutoDismiss_Law:** Toasts auto-dismiss after 4 seconds.
-
-### [Implementation Notes]
-- **Styling:** Uses same glass-morphism style as CookieBanner (dark bg, blur, rounded).
-- **Position:** Fixed bottom-right on desktop, bottom-center on mobile.
-- **Types:** Supports `success` and `error` toast types with appropriate icons/colors.
+- **UI_Consistency_Law:** Success and info state indicators MUST align with the global brand variable `--primary` defined in `globals.css` rather than explicit Tailwind greens.
+- **Singleton_Provider:** Must tightly wrap the root `<Providers>` layout slice.
+- **Animation_Lifecycle:** `framer-motion` `AnimatePresence` exclusively handles toast mount/unmount behaviors to prevent race conditions during React rendering.
 
 ### [Semantic Hash]
-Provides toast notifications with cookie banner styling and Framer Motion animations.
+Provides a global notification context leveraging Framer Motion physics for smooth entrance/exit notifications (Success/Error/Info).
 
 ### [Linkage]
-- **Used by:** `@root/src/app/layout.tsx`
-- **Children:** All app components
+- **Dependencies:** `lucide-react`, `framer-motion`, `React.createContext`

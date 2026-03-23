@@ -1,42 +1,27 @@
 ---
-State_ID: BigInt(0x3)
+State_ID: BigInt(0x0fc98cc)
 Git_SHA: LATEST
-Grammar_Lock: "@root/hashes/grammar/effect.hash.md"
+Grammar_Lock: "@root/hashes/grammar/typescript.hash.md"
 ---
 
-## @Logic.Effect.Runtime
+## @Lib.Effect.Runtime
 
 ### [Signatures]
 ```ts
-export const runtime: AppRuntime
+/** @Logic.Effect.Runtime */
+export const ConfigLayer: Layer.Layer<ConfigLayerType, never, never>
+export const nextJsConfigProvider: ConfigProvider
 export type AppEnvironment = Layer.Layer.Success<typeof MainLayer>
-export type AppRuntime = ManagedRuntime.ManagedRuntime<AppEnvironment, never>
+export const runtime: ManagedRuntime.ManagedRuntime<AppEnvironment, never>
 ```
-
-**Layer Graph:**
-```
-BaseLayer = PromptBuilderService.Default + Redux.Default + BrowserHttpClient.layerXMLHttpRequest
-ConfigLayer = ConfigService.Default ← PromptBuilderService.Default
-MainLayer = BaseLayer + ConfigLayer + VoiceServiceLive + I18nLive
-           + BuildInfoService.Default
-           + OpenRouter.Default ← ConfigLayer ← BaseLayer
-```
-
-**ConfigProvider Entries:**
-- `NEXT_PUBLIC_OPENROUTER_BASE_URL`, `NEXT_PUBLIC_MODEL_NAME`, `NEXT_PUBLIC_OPENROUTER_API_KEY`, `NEXT_PUBLIC_SITE_URL`
 
 ### [Governance]
-- **Runtime_Law:** `ManagedRuntime.make(MainLayer)` — correct usage for React/browser context.
-- **Type_Law:** `as any` on MainLayer cast is a VIOLATION. Use `Layer.Layer.Success<typeof MainLayer>` for proper type derivation.
-- **BuildInfo_Law:** `BuildInfoService` is part of `MainLayer`. Consumed by `BuildInfoProvider` in `layout.tsx` via `runtime.runPromise`. Exposed to components via `useBuildInfo` hook.
-
-### [Implementation Notes]
-- **Runtime Type Safety:** `AppEnvironment` relies strictly on `Layer.Layer.Success<typeof MainLayer>` inside `ManagedRuntime` to avoid type erasure.
-- **Build Hash:** `BuildInfoService.Default` in `MainLayer`. Hash generated post-build by `scripts/generate-app-version.mjs`, served via `/api/build-info`.
+- **Dependency_Injection_Law:** Defines the single source of truth for all global Effect environments (`MainLayer`). Merges BaseLayer (Redux, PromptBuilder, HttpClient) with Service layers (Voice, I18n, BuildInfo, Config, OpenRouter, Seo).
+- **Env_Resolution:** Exploits `ConfigProvider.fromMap` targeting `process.env.NEXT_PUBLIC_*` exclusively. This guarantees Prerender immunity in Next.js builds.
+- **Escape_Hatch:** `runtime` is instantiated via `ManagedRuntime.make(MainLayer as any)` to satisfy complex TypeScript inferred unions while suppressing Node vs Browser build timeouts.
 
 ### [Semantic Hash]
-Constructs and exports the singleton ManagedRuntime used by ChatProvider to execute all Effect-based operations in the browser context.
+The absolute root of the Effect TypeScript architecture. It orchestrates service instantiation, stitches environments together, and exports the `runtime` instance capable of running arbitrary `Effect<A, E, AppEnvironment>` globally.
 
 ### [Linkage]
-- **Upstream:** All services (Config, OpenRouter, Redux, Voice, I18n, PromptBuilder, BrowserHttpClient, BuildInfo)
-- **Downstream:** `@root/src/lib/effect/ChatProvider.tsx`, `@root/src/lib/effect/I18nProvider.tsx`, `@root/src/components/layout/Header.tsx`
+- **Dependencies:** `@effect/platform-browser`, `ConfigService`, `OpenRouter`, `Redux`, `PromptBuilder`, `VoiceServiceLive`, `I18nLive`, `BuildInfoService`, `SeoService`

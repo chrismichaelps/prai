@@ -1,32 +1,29 @@
 ---
-State_ID: BigInt(0x1)
+State_ID: BigInt(0x0fc98cc)
 Git_SHA: LATEST
 Grammar_Lock: "@root/hashes/grammar/typescript.hash.md"
 ---
 
-## @Lib.Effect.Constants.PostgRErrorCodes
+## @Constants.PostgRErrorCodes
 
 ### [Signatures]
 ```ts
-export const PostgRErrorCodes: {
-  readonly SINGLETON_NOT_FOUND: "PGRST116"
-  readonly PARSING_ERROR: "PGRST100"
-  // ... all PostgREST error codes
-}
+export const PostgRErrorCodes = {
+  UNIQUE_VIOLATION: '23505',
+  FOREIGN_KEY_VIOLATION: '23503',
+  CHECK_VIOLATION: '23514',
+  NOT_NULL_VIOLATION: '23502',
+} as const;
 
-export type PostgRErrorCode = (typeof PostgRErrorCodes)[keyof typeof PostgRErrorCodes]
+export type PostgRErrorCode = typeof PostgRErrorCodes[keyof typeof PostgRErrorCodes];
 ```
 
 ### [Governance]
-- **Constant_Law:** All PostgREST error codes defined as constants.
-- **TypeSafe_Law:** Provides type for error code matching.
-
-### [Implementation Notes]
-- **Source:** Derived from [PostgREST Error Codes](https://postgrest.org/en/stable/api.html#error-codes).
-- **Usage:** Use instead of magic strings for error handling (e.g., `error?.code === PostgRErrorCodes.SINGLETON_NOT_FOUND`).
+- **Immutability_Law:** Exported strictly `as const` to provide absolute compile-time safety when mapping raw Postgres error strings to Effect `TaggedError` variants.
+- **Agnostic_Isolation:** This file exists independently of the Supabase client to ensure database error definitions can be used purely within Effect layers without importing third-party SDKs.
 
 ### [Semantic Hash]
-Centralized PostgREST API error code constants for type-safe error handling.
+A pure, static dictionary mapping standard PostgreSQL integrity constraint violation codes. Crucial for the `DatabaseError` parsing boundary.
 
 ### [Linkage]
-- **Used by:** `@root/src/contexts/AuthContext.tsx`
+- **Dependencies:** N/A (Pure Constants)

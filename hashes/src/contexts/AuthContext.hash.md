@@ -1,49 +1,28 @@
 ---
-State_ID: BigInt(0x3)
+State_ID: BigInt(0x0fc98cc)
 Git_SHA: LATEST
 Grammar_Lock: "@root/hashes/grammar/typescript.hash.md"
 ---
 
-## @Context.Auth
+## @Context.AuthContext
 
 ### [Signatures]
 ```ts
-export function AuthProvider({ children }: { children: React.ReactNode }): React.ReactElement
-export function useAuth(): AuthContextValue
+export interface UserProfile { display_name: string | null; bio: string | null; language: string | null; avatar_url: string | null; preferences: Json | null; }
+export interface AuthContextType { user: User | null; profile: UserProfile | null; session: Session | null; isAuthenticated: boolean; isLoading: boolean; signIn: (redirectUrl?: string) => Promise<void>; signOut: () => Promise<void>; refreshProfile: () => Promise<void>; }
 
-interface AuthContextValue {
-  user: User | null
-  session: Session | null
-  profile: Profile | null
-  isLoading: boolean
-  isAuthenticated: boolean
-  initialized: boolean
-  signIn: (callbackUrl?: string) => void
-  signOut: () => void
-  refreshProfile: () => Promise<void>
-}
+export const AuthContext: React.Context<AuthContextType | undefined>
+export function AuthProvider(props: { children: ReactNode }): JSX.Element
+export function useAuth(): AuthContextType
 ```
 
 ### [Governance]
-- **ClientOnly_Law:** Uses `'use client'` directive - browser-only auth context.
-- **SupabaseSSR_Law:** Uses `@supabase/ssr` `createBrowserClient` for cookie-based sessions.
-- **CallbackUrl_Law:** Supports `callbackUrl` for redirect after OAuth login.
-- **EventDriven_Law:** Auth state changes via `onAuthStateChange` subscription.
-- **ProfileAutoCreate_Law:** Auto-creates profile on first sign-in via `fetchProfile`.
-
-### [Implementation Notes]
-- **LazyLoad:** Supabase client loaded via dynamic `import()` inside `useEffect` to avoid build-time errors.
-- **useRef:** Stores supabase client instance in `useRef` to prevent recreation on re-renders.
-- **fetchProfile:** Fetches profile from Supabase, auto-creates if not found (PGRST116).
-- **onAuthStateChange:** Subscribes to auth events, handles signin/signout and profile fetch.
-- **sessionStorage:** Stores `callbackUrl` for redirect after OAuth flow.
-- **signIn:** Stores callbackUrl in sessionStorage before OAuth redirect.
-- **signOut:** Clears session via Supabase + server API, then full page redirect.
-- **refreshProfile:** Re-fetches profile data after updates.
+- **State_Silo_Law:** Primary source of truth for global authentication. Obsoletes Redux `authSlice`.
+- **Session_Refresh_Law:** Utilizes Supabase `onAuthStateChange` listener to hydrate local context.
+- **Provider_Boundary:** Wraps the core React tree.
 
 ### [Semantic Hash]
-Provides React Context for auth state using Supabase browser client with `onAuthStateChange` for reactive updates. Handles OAuth flow with callback URL support and integrates profile fetching.
+Provides global `<AuthContext.Provider>` for Supabase Google OAuth and User Profile syncing logic across the application.
 
 ### [Linkage]
-- **Used by:** `@root/src/app/layout.tsx`, `@root/src/components/layout/Header.tsx`, `@root/src/app/profile/page.tsx`, `@root/src/app/auth/signin/page.tsx`
-- **Dependencies:** `@supabase/ssr`, `@/lib/supabase/client.ts`, `@/types/database.types.ts`
+- **Dependencies:** `@supabase/ssr`, `lucide-react`, `React.createContext`, `Database` (types)
