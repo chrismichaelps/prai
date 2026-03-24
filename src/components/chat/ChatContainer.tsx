@@ -4,7 +4,8 @@
 
 import React, { useState, useRef, useEffect, useCallback } from 'react'
 import dynamic from 'next/dynamic'
-import { useAppSelector } from '@/store/hooks'
+import { useAppSelector, useAppDispatch } from '@/store/hooks'
+import { addChat, setCurrentChat } from '@/store/slices/chatSlice'
 import { useChatActions } from '@/lib/effect/ChatProvider'
 import { DiscoveryLoader } from './DiscoveryLoader'
 import { useI18n } from '@/lib/effect/I18nProvider'
@@ -12,6 +13,8 @@ import { MemoizedMessageBubble } from './MessageBubble'
 import { SourcesSidebar } from './SourcesSidebar'
 import { ArrowDown, AlertCircle, Loader2, Mic, Square } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useAuth } from '@/contexts/AuthContext'
+import { useRouter, usePathname } from 'next/navigation'
 
 /** @UI.Chat.AdaptiveCard.Lazy */
 const AdaptiveCard = dynamic(
@@ -126,6 +129,7 @@ export const Chat = {
         {/* @UI.Chat.Input */}
         <div className="w-full bg-[#1a1a1a] shadow-2xl pointer-events-auto flex flex-col border border-white/[0.08] hover:border-white/[0.12] transition-all duration-300 group overflow-hidden rounded-[1.5rem]">
           <div className="flex-1 flex flex-col px-1.5 max-h-[400px]">
+            {/** @UI.Chat.Input.Textarea */}
             <textarea
               ref={textareaRef}
               value={value}
@@ -147,6 +151,7 @@ export const Chat = {
           <div className="flex items-center justify-end px-3 pb-3">
 
             <div className="flex items-center gap-2">
+              {/** @UI.Chat.Action.Mic */}
               <button
                 onClick={onMicClick}
                 className={cn(
@@ -163,6 +168,7 @@ export const Chat = {
                   className={cn('w-5 h-5', isRecording && 'animate-pulse')}
                 />
               </button>
+              {/** @UI.Chat.Action.Send */}
               <button
                 onClick={isLoading ? stopResponse : () => onSend()}
                 disabled={!isLoading && !value.trim()}
@@ -191,10 +197,15 @@ export const Chat = {
 }
 
 export const ChatContainer: React.FC = () => {
-  const { messages, isLoading, error, activeAdaptiveData } = useAppSelector(
+  const { messages, isLoading, error, activeAdaptiveData, currentChatId } = useAppSelector(
     (state) => state.chat,
   )
-  const { sendMessage, stopResponse, clearHistory, editMessage, startVoice, stopVoice } = useChatActions()
+  /** @UI.Hooks.ChatActions */
+  const dispatch = useAppDispatch()
+  const { user } = useAuth()
+  const router = useRouter()
+  const pathname = usePathname()
+  const { sendMessage, stopResponse, editMessage, startVoice, stopVoice } = useChatActions()
   const { t } = useI18n()
 
   const [userInput, setUserInput] = useState('')
@@ -205,6 +216,37 @@ export const ChatContainer: React.FC = () => {
   const scrollAreaRef = useRef<HTMLDivElement>(null)
   const innerContainerRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  const createNewChat = useCallback(async () => {
+    if (!user) return null
+    try {
+      const res = await fetch('/api/chat/chats', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id, title: t('chat.new_chat') || 'New Chat' })
+      })
+      const data = await res.json()
+      
+      if (!res.ok) throw new Error(data.error)
+      dispatch(addChat(data))
+      dispatch(setCurrentChat(data.id))
+      router.push(`/chat/${data.id}`)
+      return data.id
+    } catch (err) {
+      console.error('Error creating chat:', err)
+      return null
+    }
+  }, [user, dispatch, router, t])
+
+  const ensureChatExists = useCallback(async () => {
+    if (currentChatId) {
+      if (!pathname.includes(currentChatId)) {
+        router.replace(`/chat/${currentChatId}`)
+      }
+      return currentChatId
+    }
+    return await createNewChat()
+  }, [currentChatId, createNewChat, router, pathname])
 
   /** @Logic.Chat.Input.Resize */
   useEffect(() => {
@@ -257,17 +299,26 @@ export const ChatContainer: React.FC = () => {
 
   /** @UI.Chat.ResizeObserver */
   useEffect(() => {
-    if (!innerContainerRef.current) return
+    if (!textareaRef.current) return
 
-    const observer = new ResizeObserver(() => {
-      if (isLockedToBottom) {
+    const observer = new ResizeObserver((entries) => {
+      for (const _entry of entries) {
         scrollToBottom('auto')
       }
     })
 
-    observer.observe(innerContainerRef.current)
+    if (innerContainerRef.current) {
+      observer.observe(innerContainerRef.current)
+    }
     return () => observer.disconnect()
   }, [isLockedToBottom, scrollToBottom])
+
+  /** @Logic.Chat.EnsureChatOnMount */
+  useEffect(() => {
+    if (user && !currentChatId) {
+      ensureChatExists()
+    }
+  }, [user, currentChatId, ensureChatExists])
 
   const handleMicClick = () => {
     if (isRecording) {
@@ -298,6 +349,8 @@ export const ChatContainer: React.FC = () => {
       setUserInput('')
     }
     setIsLockedToBottom(true)
+    
+    await ensureChatExists()
     await sendMessage(finalContent)
     scrollToBottom('smooth')
   }
