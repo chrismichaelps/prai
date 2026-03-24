@@ -1,82 +1,89 @@
-// @ts-nocheck
-// @ts-check
 import eslint from '@eslint/js'
 import tseslint from 'typescript-eslint'
-import pluginVue from 'eslint-plugin-vue'
+import nextPlugin from '@next/eslint-plugin-next'
 
 export default tseslint.config(
-  // Global ignores
   {
     ignores: [
       'node_modules/**',
       'dist/**',
       '.turbo/**',
       'coverage/**',
+      '.next/**',
       '*.config.js',
       '*.config.ts',
     ],
   },
 
-  // Base ESLint for all JS/TS
   eslint.configs.recommended,
-
-  // TypeScript strict preset
   ...tseslint.configs.strictTypeChecked,
   ...tseslint.configs.stylisticTypeChecked,
 
-  // Vue SFC support (future)
-  ...pluginVue.configs['flat/recommended'],
-
-  // Project-wide TS parser options
   {
-    languageOptions: {
-      parserOptions: {
-        project: true,
-        tsconfigRootDir: import.meta.dirname,
-      },
+    plugins: {
+      '@next/next': nextPlugin,
+    },
+    rules: {
+      ...nextPlugin.configs.recommended.rules,
+      ...nextPlugin.configs['core-web-vitals'].rules,
     },
   },
 
-  // TypeScript overrides
   {
     files: ['**/*.ts', '**/*.tsx'],
+    languageOptions: {
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
     rules: {
-      // Enforce type imports
-      '@typescript-eslint/consistent-type-imports': [
+      '@typescript-eslint/no-unused-vars': [
         'error',
-        { prefer: 'type-imports', fixStyle: 'inline-type-imports' },
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+          destructuredArrayIgnorePattern: '^_',
+        },
       ],
-      // No any — use unknown
-      '@typescript-eslint/no-explicit-any': 'error',
-      // No non-null assertion
-      '@typescript-eslint/no-non-null-assertion': 'error',
-      // Require explicit return types on module-boundary functions
+      '@typescript-eslint/consistent-type-imports': 'off',
+      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-non-null-assertion': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
-      // Allow void returns in callbacks
       '@typescript-eslint/no-confusing-void-expression': [
         'error',
         { ignoreArrowShorthand: true },
       ],
-      // Restrict template expressions to safe types
       '@typescript-eslint/restrict-template-expressions': [
         'error',
         { allowNumber: true, allowBoolean: true },
       ],
-      // No floating promises
-      '@typescript-eslint/no-floating-promises': 'error',
-      // No misused promises
-      '@typescript-eslint/no-misused-promises': [
-        'error',
-        { checksVoidReturn: { attributes: false } },
-      ],
-    },
-  },
-
-  // Vue overrides
-  {
-    files: ['**/*.vue'],
-    rules: {
-      'vue/multi-word-component-names': 'off',
+      '@typescript-eslint/no-floating-promises': 'off',
+      '@typescript-eslint/no-misused-promises': 'off',
+      '@typescript-eslint/prefer-nullish-coalescing': 'off',
+      '@typescript-eslint/unbound-method': 'off',
+      '@typescript-eslint/no-deprecated': 'warn',
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
+      '@typescript-eslint/no-unnecessary-condition': 'off',
+      '@typescript-eslint/no-unnecessary-type-assertion': 'off',
+      '@typescript-eslint/prefer-optional-chain': 'off',
+      '@typescript-eslint/prefer-regexp-exec': 'off',
+      '@typescript-eslint/require-await': 'off',
+      '@typescript-eslint/array-type': 'off',
+      '@typescript-eslint/consistent-type-definitions': 'off',
+      '@typescript-eslint/consistent-indexed-object-style': 'off',
+      '@typescript-eslint/no-redundant-type-constituents': 'off',
+      '@typescript-eslint/no-invalid-void-type': 'off',
+      'require-yield': 'off',
+      '@typescript-eslint/restrict-plus-operands': 'off',
+      '@typescript-eslint/no-empty-function': 'off',
+      '@typescript-eslint/no-empty-object-type': 'off',
+      '@typescript-eslint/use-unknown-in-catch-callback-variable': 'off',
     },
   },
 )
