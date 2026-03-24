@@ -55,6 +55,24 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "chat.edit": "Editar",
     "chat.save": "Guardar",
     "chat.cancel": "Cancelar",
+    "chat.new_chat": "Nueva Conversación",
+    "chat.history": "Historial",
+    "chat.no_chats": "Sin conversaciones aún",
+    "chat.untitled": "Sin título",
+    "chat.created": "Conversación creada",
+    "chat.create_error": "Error al crear conversación",
+    "chat.archived": "Conversación archivada",
+    "chat.archive_error": "Error al archivar",
+    "chat.deleted": "Conversación eliminada",
+    "chat.delete_error": "Error al eliminar",
+    "chat.archive": "Archivar",
+    "chat.delete": "Eliminar",
+    "chat.restore": "Restaurar",
+    "chat.restored": "Conversación restaurada",
+    "chat.restore_error": "Error al restaurar",
+    "chat.delete_permanently": "Eliminar permanentemente",
+    "chat.no_archived": "Sin conversaciones archivadas",
+    "chat.archived_title": "Archivadas",
 
     // Auth
     "auth.sign_in": "Iniciar sesión",
@@ -79,6 +97,14 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "profile.saved": "Perfil guardado exitosamente",
     "profile.save_error": "Error al guardar el perfil",
     "profile.avatar_hint": "Avatar de Google",
+    "profile.data_control": "Control de Datos",
+    "profile.chats": "conversaciones",
+    "profile.archive_all_chats": "Archivar Todas las Conversaciones",
+    "profile.delete_all_chats": "Eliminar Todas las Conversaciones",
+    "profile.confirm_delete_all_chats": "¿Estás seguro de que quieres eliminar todas tus conversaciones? Esta acción no se puede deshacer.",
+    "profile.all_chats_deleted": "Todas las conversaciones eliminadas",
+    "profile.all_chats_archived": "Todas las conversaciones archivadas",
+    "profile.data_warning": "Esta acción no se puede deshacer",
 
     // Thinking Statuses (Internal)
     "chat.thinking.analyzing": "Analizando la consulta...",
@@ -227,7 +253,25 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "chat.edit": "Edit",
     "chat.save": "Save",
     "chat.cancel": "Cancel",
- 
+    "chat.new_chat": "New Chat",
+    "chat.history": "History",
+    "chat.no_chats": "No chats yet",
+    "chat.untitled": "Untitled",
+    "chat.created": "Chat created",
+    "chat.create_error": "Error creating chat",
+    "chat.archived": "Chat archived",
+    "chat.archive_error": "Error archiving",
+    "chat.deleted": "Chat deleted",
+    "chat.delete_error": "Error deleting",
+    "chat.archive": "Archive",
+    "chat.delete": "Delete",
+    "chat.restore": "Restore",
+    "chat.restored": "Chat restored",
+    "chat.restore_error": "Error restoring",
+    "chat.delete_permanently": "Delete permanently",
+    "chat.no_archived": "No archived chats",
+    "chat.archived_title": "Archived",
+
     // Auth
     "auth.sign_in": "Sign in",
     "auth.sign_in_title": "Sign in to continue",
@@ -251,6 +295,14 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "profile.saved": "Profile saved successfully",
     "profile.save_error": "Error saving profile",
     "profile.avatar_hint": "Google avatar",
+    "profile.data_control": "Data Control",
+    "profile.chats": "chats",
+    "profile.archive_all_chats": "Archive All Chats",
+    "profile.delete_all_chats": "Delete All Chats",
+    "profile.confirm_delete_all_chats": "Are you sure you want to delete all your chats? This action cannot be undone.",
+    "profile.all_chats_deleted": "All chats deleted",
+    "profile.all_chats_archived": "All chats archived",
+    "profile.data_warning": "This action cannot be undone",
 
 
     // Thinking Statuses (Internal)
@@ -357,6 +409,7 @@ export const I18nLive = Layer.effect(
   I18n,
   Effect.gen(function* () {
     // Standard Next.js cookie: NEXT_LOCALE
+    /** @Logic.I18n.GetLocaleFromCookie */
     const getLocaleFromCookie = () => {
       if (typeof document === "undefined") return "es"
       const match = document.cookie.match(/NEXT_LOCALE=([^;]+)/)

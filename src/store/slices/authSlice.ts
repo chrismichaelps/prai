@@ -22,6 +22,7 @@ const initialState: AuthState = {
 }
 
 /** @Store.Thunk.Auth */
+/** @Logic.Store.Auth.FetchSessionThunk */
 export const fetchSession = createAsyncThunk<{ user: User | null; session: Session | null }, void, { rejectValue: string }>(
   'auth/fetchSession',
   async (_, { rejectWithValue }) => {
@@ -30,7 +31,7 @@ export const fetchSession = createAsyncThunk<{ user: User | null; session: Sessi
       const data = await res.json()
       if (data.error) return rejectWithValue(data.error)
       return { user: data.user, session: data.session }
-    } catch (error) {
+    } catch (_error) {
       return rejectWithValue('Failed to fetch session')
     }
   }
@@ -38,6 +39,7 @@ export const fetchSession = createAsyncThunk<{ user: User | null; session: Sessi
 
 
 /** @Store.Thunk.Auth */
+/** @Logic.Store.Auth.SignOutThunk */
 export const signOut = createAsyncThunk<void, void, { rejectValue: string }>(
   'auth/signOut',
   async (_, { rejectWithValue }) => {
@@ -45,7 +47,7 @@ export const signOut = createAsyncThunk<void, void, { rejectValue: string }>(
       const res = await fetch('/api/auth/signout', { method: 'POST' })
       const data = await res.json()
       if (data.error) return rejectWithValue(data.error)
-    } catch (error) {
+    } catch (_error) {
       return rejectWithValue('Failed to sign out')
     }
   }

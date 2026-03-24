@@ -3,7 +3,6 @@
 import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import type { User, Session, Profile } from '@/lib/effect/schemas/AuthSchema'
-import type { Database } from '@/types/database.types'
 import { PostgRErrorCodes } from '@/lib/effect/constants/PostgRErrorCodes'
 
 /** @Context.Auth */
@@ -23,7 +22,7 @@ const AuthContext = createContext<AuthContextValue | null>(null)
 
 /** @Provider.Auth */
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const router = useRouter()
+  useRouter()
   const [user, setUser] = useState<User | null>(null)
   const [session, setSession] = useState<Session | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
@@ -32,6 +31,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const supabaseRef = useRef<ReturnType<typeof import('@/lib/supabase/client').createSupabaseBrowserClient> | null>(null)
   const hasInitialized = useRef(false)
 
+  /** @Logic.UI.Auth.FetchProfile */
   const fetchProfile = useCallback(async (userId: string) => {
     const supabase = supabaseRef.current
     if (!supabase) return
@@ -114,6 +114,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       })
   }, [fetchProfile])
 
+  /** @Logic.UI.Auth.SignIn */
   const signIn = useCallback((callbackUrl?: string) => {
     if (callbackUrl) {
       sessionStorage.setItem('authCallbackUrl', callbackUrl)
@@ -126,6 +127,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     })
   }, [])
 
+  /** @Logic.UI.Auth.SignOut */
   const signOut = useCallback(async () => {
     supabaseRef.current?.auth.signOut()
     

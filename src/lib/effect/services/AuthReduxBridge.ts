@@ -1,9 +1,7 @@
 import { Effect, Layer, Context } from "effect"
-import { SupabaseService } from "../services/Supabase"
 import { AuthService } from "../services/Auth"
-import { AuthError } from "../errors"
 import { store } from "@/store"
-import { setSession, setUser, setLoading, setError, reset } from "@/store/slices/authSlice"
+import { setSession, setLoading, setError, reset } from "@/store/slices/authSlice"
 import type { User, Session } from "@supabase/supabase-js"
 
 /** @Type.Effect.Auth.ReduxBridge */
@@ -20,9 +18,10 @@ export const ReduxAuthBridgeService = Context.GenericTag<ReduxAuthBridge>("Redux
 export const ReduxAuthBridgeLayer = Layer.effect(
   ReduxAuthBridgeService,
   Effect.gen(function* () {
-    const auth = yield* AuthService
+    yield* AuthService
 
     return {
+      /** @Logic.Auth.Redux.Sync */
       syncToRedux: (session: Session | null) =>
         Effect.sync(() => {
           store.dispatch(setSession({ 
@@ -31,6 +30,7 @@ export const ReduxAuthBridgeLayer = Layer.effect(
           }))
         }),
 
+      /** @Logic.Auth.Redux.SignOut */
       dispatchSignOut: () =>
         Effect.sync(() => {
           store.dispatch(setLoading(true))
@@ -42,6 +42,7 @@ export const ReduxAuthBridgeLayer = Layer.effect(
             .catch(err => store.dispatch(setError(err.message)))
         }),
 
+      /** @Logic.Auth.Redux.FetchSession */
       dispatchFetchSession: () =>
         Effect.sync(() => {
           store.dispatch(setLoading(true))
