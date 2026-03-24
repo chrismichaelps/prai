@@ -41,6 +41,9 @@ const handleCauseError = (cause: Cause.Cause<ApiError>): never => {
 
 /** @Route.Auth.Callback.GET */
 export async function GET(request: NextRequest) {
+  console.log('[Auth Callback] Request received:', request.nextUrl.href)
+  console.log('[Auth Callback] Search params:', Object.fromEntries(request.nextUrl.searchParams))
+  
   /** @Logic.Effect.RunPromiseExit */
   const exit = await Effect.runPromiseExit(
     decodeSearchParams(
@@ -67,19 +70,24 @@ export async function GET(request: NextRequest) {
   }
 
   if (params.error) {
+    console.log('[Auth Callback] OAuth error params:', params)
     return handleError(new ValidationError({ 
       message: params.error_description || params.error 
     }))
   }
 
   if (!params.code) {
+    console.log('[Auth Callback] No authorization code in params')
     return handleError(new ValidationError({ message: "Missing authorization code" }))
   }
+
+  console.log('[Auth Callback] Got authorization code, exchanging for session')
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
   if (!supabaseUrl || !supabaseAnonKey) {
+    console.log('[Auth Callback] Missing Supabase config')
     return handleError(new ValidationError({ message: "Missing Supabase configuration" }))
   }
 
@@ -97,13 +105,16 @@ export async function GET(request: NextRequest) {
   })
   
   /** @Logic.Supabase.ExchangeCode */
+  console.log('[Auth Callback] Exchanging code for session...')
   const { error: sessionError } = await supabase.auth.exchangeCodeForSession(params.code)
 
   if (sessionError) {
+    console.log('[Auth Callback] Session exchange error:', sessionError)
     return handleError(new ValidationError({ message: sessionError.message }))
   }
   
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL
+  console.log('[Auth Callback] Session exchanged successfully, redirecting to:', `${siteUrl}/?auth=success`)
   const response = NextResponse.redirect(`${siteUrl}/?auth=success`)
   
   cookiesToSet.forEach(({ name, value, options }) => {

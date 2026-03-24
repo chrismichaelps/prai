@@ -115,16 +115,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [fetchProfile])
 
   /** @Logic.UI.Auth.SignIn */
-  const signIn = useCallback((callbackUrl?: string) => {
+  const signIn = useCallback(async (callbackUrl?: string) => {
+    console.log('[Auth] signIn called', { callbackUrl, origin: window.location.origin })
+    
     if (callbackUrl) {
       sessionStorage.setItem('authCallbackUrl', callbackUrl)
     }
-    supabaseRef.current?.auth.signInWithOAuth({
+    const supabase = supabaseRef.current
+    if (!supabase) {
+      console.error('[Auth] Supabase client not initialized')
+      return
+    }
+    
+    console.log('[Auth] Calling signInWithOAuth with redirectTo:', `${window.location.origin}/api/auth/callback`)
+    
+    const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
         redirectTo: `${window.location.origin}/api/auth/callback`
       }
     })
+    
+    console.log('[Auth] OAuth response:', { data, error })
+    
+    if (error) {
+      console.error('[Auth] OAuth error:', error)
+    }
+    if (data.url) {
+      console.log('[Auth] Redirecting to:', data.url)
+      window.location.href = data.url
+    } else {
+      console.error('[Auth] No URL returned from OAuth')
+    }
   }, [])
 
   /** @Logic.UI.Auth.SignOut */
