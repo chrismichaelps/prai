@@ -1,13 +1,18 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import { Header } from '@/components/layout/Header'
 import { ChatContainer } from '@/components/chat/ChatContainer'
+import { ChatSidebar } from '@/components/chat/ChatSidebar'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 
 /** @Route.Chat.Main */
 export default function ChatPage() {
+  /** @UI.State.SidebarOpen */
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+
   return (
+    /** @UI.Auth.Guard */
     <ProtectedRoute redirectTo="/">
       <div className="relative h-screen w-full overflow-hidden bg-black font-sans selection:bg-primary/30">
         {/* Ambient Glow */}
@@ -24,7 +29,7 @@ export default function ChatPage() {
 
         <div className="relative z-10 flex flex-col h-screen overflow-hidden">
           {/* Universal Header */}
-          <Header variant="chat" />
+          <Header variant="chat" onMenuClick={() => setIsSidebarOpen(true)} />
 
           <main className="flex-1 flex flex-col min-w-0 relative overflow-hidden">
             <div className="flex-1 w-full max-w-5xl mx-auto flex flex-col overflow-hidden relative">
@@ -32,6 +37,8 @@ export default function ChatPage() {
             </div>
           </main>
         </div>
+
+        <ChatSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       </div>
     </ProtectedRoute>
   )

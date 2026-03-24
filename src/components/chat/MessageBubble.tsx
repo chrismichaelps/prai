@@ -2,7 +2,7 @@
 
 /** @UI.Chat.Bubble */
 
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useState, useCallback, memo } from 'react'
 import { useI18n } from '@/lib/effect/I18nProvider'
 import MarkdownIt from 'markdown-it'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -44,53 +44,78 @@ interface MessageBubbleProps {
   onStop?: () => void
 }
 
-export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, index, onEdit, onStop }) => {
+export const MessageBubble: React.FC<MessageBubbleProps> = memo(({ message, index, onEdit, onStop }) => {
   const { t } = useI18n()
-  if (message.role === 'system') return null
-  const isUser = message.role === 'user'
+  const dispatch = useAppDispatch()
+  
   const [isThoughtOpen, setIsThoughtOpen] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
-  const [editContent, setEditContent] = useState(message.content)
-
-  const dispatch = useAppDispatch()
   const [isCopied, setIsCopied] = useState(false)
+  const [editContent, setEditContent] = useState(message.content)
+ 
+  const isUser = message.role === 'user'
+  const isSystem = message.role === 'system'
 
+  /** @Logic.UI.Chat.ContentStripping */
   const strippedContent = useMemo(() => {
-    /** @UI.Chat.StripJson */
+    if (isSystem) return ''
     return message.content.replace(/```json[\s\S]*?(?:```|$)/g, '').trim()
-  }, [message.content])
+  }, [message.content, isSystem])
 
+  /** @Logic.UI.Chat.MarkdownRender */
   const htmlContent = useMemo(() => {
+    if (isSystem) return { __html: '' }
     return { __html: md.render(strippedContent) }
-  }, [strippedContent])
-
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(strippedContent)
-    setIsCopied(true)
-    setTimeout(() => setIsCopied(false), 2000)
-  }
+  }, [strippedContent, isSystem])
 
   const thoughtUrls = useMemo(() => {
-    if (!message.metadata?.thought) return []
+    if (isSystem || !message.metadata?.thought) return []
     const urlRegex = /(https?:\/\/[^\s)<>"]+)/g
     const matches = message.metadata.thought.match(urlRegex)
     return Array.from(new Set(matches || []))
-  }, [message.metadata?.thought])
+  }, [message.metadata?.thought, isSystem])
 
   const visibleSources = useMemo((): SearchResult[] => {
+    if (isSystem) return []
     const contentSources = message.metadata?.sources?.filter((s) => s.url && s.url.startsWith('http')) || []
     const thoughtSourceUrls: SearchResult[] = thoughtUrls.map((url) => {
       const domain = (() => { try { return new URL(url).hostname.replace('www.', '') } catch { return url } })()
-      return {
-        url,
-        title: domain,
-        source: domain,
-      }
+      return { url, title: domain, source: domain }
     })
     const all = [...contentSources, ...thoughtSourceUrls]
     return [...new Map(all.map((s) => [s.url, s])).values()]
-  }, [message.metadata?.sources, thoughtUrls])
+  }, [message.metadata?.sources, thoughtUrls, isSystem])
 
+  const copyToClipboard = useCallback(() => {
+    navigator.clipboard.writeText(strippedContent)
+    setIsCopied(true)
+    setTimeout(() => setIsCopied(false), 2000)
+  }, [strippedContent])
+
+  const handleEditStart = useCallback(() => {
+    setEditContent(message.content)
+    setIsEditing(true)
+    if (typeof onStop === 'function') onStop()
+  }, [message.content, onStop])
+
+  const handleEditSave = useCallback(() => {
+    if (editContent.trim() && editContent !== message.content) {
+      if (typeof onEdit === 'function') onEdit(index, editContent)
+    }
+    setIsEditing(false)
+  }, [editContent, message.content, onEdit, index])
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      handleEditSave()
+    }
+    if (e.key === 'Escape') setIsEditing(false)
+  }, [handleEditSave])
+
+  if (isSystem) return null
+
+  /** @UI.Chat.Bubble.Render */
   return (
     <div
       className={cn(
@@ -98,9 +123,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, index, on
         isUser ? 'flex flex-col items-end' : 'flex flex-col items-start',
       )}
     >
-      {/* @UI.Chat.Bubble.Content */}
       <div className={cn('max-w-[92%] md:max-w-[85%] relative w-full')}>
-        {/* @UI.Chat.Bubble.Actions */}
         {!isUser && (
           <div className="absolute -top-1 w-full flex justify-end pointer-events-none z-10">
             <button
@@ -122,8 +145,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, index, on
           </div>
         )}
 
-        {/* @UI.Chat.Bubble.User */}
-        {isUser && (
+        {isUser ? (
           <div className="flex flex-col items-end gap-2 group/user">
             {!isEditing ? (
               <div className="relative">
@@ -135,14 +157,8 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, index, on
                     </span>
                   )}
                 </div>
-                
-                {/* Edit Button */}
                 <button
-                  onClick={() => {
-                    setEditContent(message.content)
-                    setIsEditing(true)
-                    if (typeof onStop === 'function') onStop()
-                  }}
+                  onClick={handleEditStart}
                   className="absolute -left-12 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/5 border border-white/10 text-white/20 hover:text-white hover:bg-white/10 transition-all opacity-0 group-hover/user:opacity-100 active:scale-90"
                   title={t('chat.edit')}
                 >
@@ -155,16 +171,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, index, on
                   autoFocus
                   value={editContent}
                   onChange={(e) => setEditContent(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault()
-                      if (editContent.trim() && editContent !== message.content) {
-                        if (typeof onEdit === 'function') onEdit(index, editContent)
-                      }
-                      setIsEditing(false)
-                    }
-                    if (e.key === 'Escape') setIsEditing(false)
-                  }}
+                  onKeyDown={handleKeyDown}
                   className="w-full bg-transparent border-none focus:ring-0 focus:outline-none outline-none text-[17px] text-white/90 p-4 resize-none min-h-[100px] font-sans leading-relaxed"
                   style={{ outline: 'none', boxShadow: 'none' }}
                 />
@@ -177,12 +184,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, index, on
                     {t('chat.cancel')}
                   </button>
                   <button
-                    onClick={() => {
-                      if (editContent.trim() && editContent !== message.content) {
-                        if (typeof onEdit === 'function') onEdit(index, editContent)
-                      }
-                      setIsEditing(false)
-                    }}
+                    onClick={handleEditSave}
                     disabled={!editContent.trim() || editContent === message.content}
                     className="px-4 py-2 rounded-xl bg-white/10 text-white hover:bg-white hover:text-slate-950 transition-all text-xs font-bold flex items-center gap-2 disabled:opacity-50 disabled:pointer-events-none"
                   >
@@ -193,14 +195,9 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, index, on
               </div>
             )}
           </div>
-        )}
-
-        {/* @UI.Chat.Bubble.Assistant */}
-        {!isUser && (
+        ) : (
           <div className="flex flex-col space-y-4 w-full">
-            {/* @UI.Chat.Bubble.Process */}
             <div className="flex flex-col space-y-2.5">
-              {/* @UI.Chat.Bubble.Thought */}
               {message.metadata?.thought && (
                 <div className="flex flex-col">
                   <button
@@ -236,12 +233,9 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, index, on
                         className="overflow-hidden"
                       >
                         <div className="ml-6 py-3 pb-5 border-l border-white/10 pl-5">
-                          {/* Render Thought Text */}
                           <div className="text-white/40 text-[14px] leading-relaxed font-light italic whitespace-pre-wrap">
                             {message.metadata.thought}
                           </div>
-
-                          {/* Render URL Bubbles */}
                           {thoughtUrls.length > 0 && (
                             <div className="mt-4 pt-4 border-t border-white/5">
                               <div className="flex items-center gap-2 text-white/30 text-[12px] uppercase tracking-wider font-bold mb-3">
@@ -251,9 +245,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, index, on
                               <div className="flex flex-wrap gap-2">
                                 {thoughtUrls.map((url, i) => {
                                   try {
-                                    const domain = new URL(
-                                      url,
-                                    ).hostname.replace('www.', '')
+                                    const domain = new URL(url).hostname.replace('www.', '')
                                     return (
                                       <a
                                         key={i}
@@ -266,7 +258,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, index, on
                                         <span>{domain}</span>
                                       </a>
                                     )
-                                  } catch (e) {
+                                  } catch {
                                     return null
                                   }
                                 })}
@@ -280,7 +272,6 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, index, on
                 </div>
               )}
 
-              {/* @UI.Chat.Bubble.Status */}
               {message.metadata?.steps?.map((step, idx) => (
                 <div
                   key={idx}
@@ -288,24 +279,15 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, index, on
                   style={{ animationDelay: `${idx * 150}ms` }}
                 >
                   <div className="w-5 h-5 flex items-center justify-center">
-                    {step.type === 'analyzed' && (
-                      <CheckCircle2 className="w-4 h-4 text-white/30" />
-                    )}
-                    {step.type === 'plan' && (
-                      <FileText className="w-4 h-4 text-white/30" />
-                    )}
-                    {step.type === 'search' && (
-                      <Search className="w-4 h-4 text-white/30" />
-                    )}
+                    {step.type === 'analyzed' && <CheckCircle2 className="w-4 h-4 text-white/30" />}
+                    {step.type === 'plan' && <FileText className="w-4 h-4 text-white/30" />}
+                    {step.type === 'search' && <Search className="w-4 h-4 text-white/30" />}
                   </div>
-                  <span className="text-[14px] tracking-tight">
-                    {step.label}
-                  </span>
+                  <span className="text-[14px] tracking-tight">{step.label}</span>
                 </div>
               ))}
             </div>
 
-            {/* @UI.Chat.Bubble.Response */}
             <div
               className={cn(
                 'prose prose-p:leading-relaxed prose-pre:bg-black/30 prose-pre:border prose-pre:border-white/[0.05]',
@@ -318,23 +300,19 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, index, on
               dangerouslySetInnerHTML={htmlContent}
             />
 
-            {/* @UI.Chat.Bubble.SourcesPill */}
-            {!isUser && visibleSources.length > 0 && (
+            {visibleSources.length > 0 && (
               <div className="flex flex-wrap gap-2 pt-4 mt-2 border-t border-white/[0.03]">
                 <button
                   onClick={() => {
                     dispatch(
                       openSources({
-                        query:
-                          message.metadata?.searchQuery ||
-                          message.content.slice(0, 50),
+                        query: message.metadata?.searchQuery || message.content.slice(0, 50),
                         sources: visibleSources,
                       }),
                     )
                   }}
                   className="group/sources flex items-center gap-2.5 px-3 py-1.5 bg-white/5 border border-white/10 hover:border-white/20 rounded-full transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-xl"
                 >
-                  {/* Favicon Stack */}
                   <div className="flex -space-x-2.5 overflow-hidden">
                     {visibleSources.slice(0, 3).map((s, i) => (
                       <div
@@ -355,21 +333,18 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, index, on
                       </div>
                     ))}
                   </div>
-
                   <span className="text-[13px] font-bold text-white/50 group-hover/sources:text-white transition-colors">
-                    {visibleSources.length}{' '}
-                    {t('chat.sources')}
+                    {visibleSources.length} {t('chat.sources')}
                   </span>
-
                   <ChevronRight className="w-3.5 h-3.5 text-white/20 group-hover/sources:text-white/60 transition-all transform group-hover/sources:translate-x-0.5" />
                 </button>
-                </div>
-              )}
+              </div>
+            )}
           </div>
         )}
       </div>
     </div>
   )
-}
+})
 
-export const MemoizedMessageBubble = React.memo(MessageBubble)
+export const MemoizedMessageBubble = MessageBubble
