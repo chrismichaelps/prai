@@ -149,8 +149,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     console.log('[Auth] Initializing Google One Tap')
     const google = (window as unknown as { google: { accounts: { id: { initialize: (config: unknown) => void; prompt: () => void } } } }).google
     
+    // Generate nonce for security
+    const nonce = btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(32))))
+    const encoder = new TextEncoder()
+    const encodedNonce = encoder.encode(nonce)
+    const hashBuffer = await crypto.subtle.digest('SHA-256', encodedNonce)
+    const hashArray = Array.from(new Uint8Array(hashBuffer))
+    const hashedNonce = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('')
+    
+    console.log('[Auth] Generated nonce:', nonce, 'hashed:', hashedNonce)
+    
     google.accounts.id.initialize({
       client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+      nonce: hashedNonce,
       callback: async (response: { credential?: string }) => {
         console.log('[Auth] Google credential received')
         
@@ -162,6 +173,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const { error } = await supabase.auth.signInWithIdToken({
           provider: 'google',
           token: response.credential,
+          nonce: nonce,
         })
         
         if (error) {
