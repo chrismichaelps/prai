@@ -118,7 +118,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signIn = useCallback(async (callbackUrl?: string) => {
     console.log('[Auth] signIn called')
     
-    const supabase = supabaseRef.current
+    // Ensure supabase client is initialized
+    let supabase = supabaseRef.current
+    if (!supabase) {
+      console.log('[Auth] Waiting for Supabase client to initialize...')
+      const { createSupabaseBrowserClient } = await import('@/lib/supabase/client')
+      supabaseRef.current = createSupabaseBrowserClient()
+      supabase = supabaseRef.current
+    }
+    
     if (!supabase) {
       console.error('[Auth] Supabase client not initialized')
       return
