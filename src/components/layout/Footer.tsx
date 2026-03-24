@@ -44,6 +44,11 @@ export function Footer({ className = "" }: FooterProps) {
                 </Link>
               </li>
               <li>
+                <Link href="/releases" className="text-sm hover:text-white transition-colors">
+                  {t('nav.releases')}
+                </Link>
+              </li>
+              <li>
                 <Link href="/chat" className="text-sm hover:text-white transition-colors">
                   {t('footer.chat')}
                 </Link>

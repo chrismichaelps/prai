@@ -27,6 +27,7 @@
   "dependencies": {
     "@effect/platform": "^0.95.0",
     "@effect/platform-browser": "0.75.0",
+    "@effect/platform-node": "^0.106.0",
     "@reduxjs/toolkit": "^2.11.2",
     "@supabase/ssr": "^0.9.0",
     "@supabase/supabase-js": "^2.99.3",

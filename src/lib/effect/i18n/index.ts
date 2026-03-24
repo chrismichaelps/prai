@@ -8,6 +8,9 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "brand.name": "PR\\AI",
     "brand.slogan": "Inteligencia Artificial de PR.",
     "brand.tagline": "Te ayudamos a descubrir todo sobre Puerto Rico con inteligencia artificial — playas, road trips, gastronomía, eventos y mucho más.",
+    "common.show_more": "Ver más",
+    "common.show_less": "Ver menos",
+
 
     // Header & Nav
     "nav.about": "Sobre PR\\AI",
@@ -18,6 +21,8 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "nav.share": "Compartir",
     "nav.menu": "Menú",
     "nav.actions": "Explora",
+    "nav.releases": "Novedades",
+
 
     // Hero
     "hero.cta_chat": "Empezar a chatear",
@@ -183,7 +188,22 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "info.limitation": "Nota: Sujeto a disponibilidad y latencia variable según la demanda global de OpenRouter.",
 
     // About Page
+    "releases.title": "Novedades de PR\\AI",
+    "releases.subtitle": "Última actualización: 23 de marzo de 2026",
+    "releases.breadcrumb": "Releasebot | Todas las Novedades",
+    "releases.products": "Productos de PR\\AI",
+    "releases.all_notes": "Todas las Novedades de PR\\AI",
+    "releases.product.claude": "PR\\AI Core",
+    "releases.product.apps": "PR\\AI Apps",
+    "releases.product.code": "PR\\AI Code",
+    "releases.product.platform": "PR\\AI Plataforma de Desarrolladores",
+    "releases.note_count": "novedades",
+    "releases.get_feed": "Obtener este feed:",
+    "releases.rss_feed": "RSS",
+    "releases.api_feed": "API",
+
     "about.title": "Sobre PR\\AI",
+
     "about.subtitle": "Un experimento Boricua que une tecnología de punta con el corazón de nuestra isla.",
     "about.description.p1": "PR\\AI nace con el propósito de democratizar el acceso a la información sobre Puerto Rico utilizando los modelos de lenguaje más avanzados del mundo. Este proyecto busca que cada rincón de nuestra isla —desde las playas más escondidas hasta los tesoros gastronómicos del interior— sea fácil de descubrir para locales y visitantes por igual.",
     "about.description.p2": "Creemos en la transparencia y en el poder de la comunidad, por lo que PR\\AI es un proyecto de código abierto. Invitamos a desarrolladores, apasionados de la tecnología y a toda la comunidad Boricua a colaborar en su desarrollo. Al ser un experimento en constante evolución, probamos las capacidades de los modelos multimodales en contextos locales, siempre con la meta de mejorar la precisión y utilidad de cada respuesta.",
@@ -208,6 +228,9 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "brand.name": "PR\\AI",
     "brand.slogan": "AI for PR.",
     "brand.tagline": "We help you discover everything about Puerto Rico with artificial intelligence — beaches, road trips, gastronomy, events and much more.",
+    "common.show_more": "Show more",
+    "common.show_less": "Show less",
+
 
     // Header & Nav
     "nav.about": "About PR\\AI",
@@ -218,6 +241,8 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "nav.share": "Share",
     "nav.menu": "Menu",
     "nav.actions": "Explore",
+    "nav.releases": "Updates",
+
 
     // Hero
     "hero.cta_chat": "Start chatting",
@@ -382,7 +407,22 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "info.limitation": "Note: Subject to availability and variable latency based on OpenRouter's global demand.",
 
     // About Page
+    "releases.title": "PR\\AI Release Notes",
+    "releases.subtitle": "Last updated: Mar 23, 2026",
+    "releases.breadcrumb": "Releasebot | All Release Notes",
+    "releases.products": "PR\\AI Products",
+    "releases.all_notes": "All PR\\AI Release Notes",
+    "releases.product.claude": "PR\\AI Core",
+    "releases.product.apps": "PR\\AI Apps",
+    "releases.product.code": "PR\\AI Code",
+    "releases.product.platform": "PR\\AI Developer Platform",
+    "releases.note_count": "release notes",
+    "releases.get_feed": "Get this feed:",
+    "releases.rss_feed": "RSS",
+    "releases.api_feed": "API",
+
     "about.title": "About PR\\AI",
+
     "about.subtitle": "A Boricua experiment merging cutting-edge technology with the heart of our island.",
     "about.description.p1": "PR\\AI was born with the purpose of democratizing access to information about Puerto Rico using the most advanced language models in the world. This project seeks to make every corner of our island —from hidden beaches to the gastronomic treasures of the interior— easy to discover for locals and visitors alike.",
     "about.description.p2": "We believe in transparency and the power of the community, which is why PR\\AI is an open-source project. We invite developers, tech enthusiasts, and the entire Boricua community to collaborate on its development. As a constantly evolving experiment, we test the capabilities of multimodal models in local contexts, always with the goal of improving the accuracy and usefulness of every response.",

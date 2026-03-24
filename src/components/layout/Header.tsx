@@ -44,7 +44,10 @@ export function Header({
     return undefined
   }
 
-  const navLinks = [{ label: t('nav.about'), key: 'about', href: '/about' }]
+  const navLinks = [
+    { label: t('nav.about'), key: 'about', href: '/about' },
+    { label: t('nav.releases'), key: 'releases', href: '/releases' }
+  ]
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen)
 
