@@ -1,5 +1,6 @@
 import { Effect, Context, Layer } from "effect"
-import { createClient, SupabaseClient } from "@supabase/supabase-js"
+import { SupabaseClient } from "@supabase/supabase-js"
+import { createBrowserClient } from "@supabase/ssr"
 import { ConfigError } from "../errors"
 
 /** @Type.Effect.Supabase */
@@ -14,26 +15,17 @@ export const SupabaseService = Context.GenericTag<Supabase>("Supabase")
 /** @Service.Effect.SupabaseAdmin */
 export const SupabaseAdminService = Context.GenericTag<SupabaseAdmin>("SupabaseAdmin")
 
+function createClient(): SupabaseClient {
+  return createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+}
+
 /** @Layer.Effect.Supabase */
 export const SupabaseLayer = Layer.effect(
   SupabaseService,
-  Effect.gen(function* () {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-    if (!supabaseUrl || !supabaseAnonKey) {
-      yield* Effect.fail(new ConfigError({ message: "Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY" }))
-    }
-
-    return createClient(supabaseUrl as string, supabaseAnonKey as string, {
-      auth: {
-        persistSession: true,
-        autoRefreshToken: true,
-        detectSessionInUrl: true,
-        flowType: 'pkce'
-      }
-    })
-  })
+  Effect.sync(() => createClient())
 )
 
 /** @Layer.Effect.SupabaseAdmin */
@@ -47,11 +39,21 @@ export const SupabaseAdminLayer = Layer.effect(
       yield* Effect.fail(new ConfigError({ message: "Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY" }))
     }
 
-    return createClient(supabaseUrl as string, serviceRoleKey as string, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false
-      }
-    })
+    return createBrowserClient(supabaseUrl!, serviceRoleKey!)
   })
 )
+
+let cachedClient: SupabaseClient | null = null
+
+/** @Logic.Supabase.GetBrowserClient */
+export function getSupabaseBrowserClient(): SupabaseClient {
+  if (typeof window === 'undefined') {
+    return createClient()
+  }
+  
+  if (!cachedClient) {
+    cachedClient = createClient()
+  }
+  
+  return cachedClient
+}

@@ -2,10 +2,10 @@
 
 import React, { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import { useRouter } from 'next/navigation'
+
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronDown, ArrowRight, Info, Menu, X, User, LogOut, Settings, LogIn } from 'lucide-react'
+import { ArrowRight, Info, Menu, X, User, LogOut, LogIn } from 'lucide-react'
 import { PraiLogo } from '@/components/brand/PraiLogo'
 import { useI18n } from '@/lib/effect/I18nProvider'
 import { useBuildInfo } from '@/lib/effect/hooks/useBuildInfo'
@@ -19,10 +19,12 @@ export function Header({
   className,
   transparent = true,
   variant = 'default',
+  onMenuClick,
 }: {
   className?: string
   transparent?: boolean
   variant?: 'default' | 'chat'
+  onMenuClick?: () => void
 }) {
   const router = useRouter()
   const { t } = useI18n()
@@ -31,8 +33,9 @@ export function Header({
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const buildHash = useBuildInfo()
-  const { user, isAuthenticated, isLoading, signIn, signOut } = useAuth()
+  const { user, isAuthenticated, signIn, signOut } = useAuth()
 
+  /** @Logic.UI.Auth.CallbackUrl */
   const getCallbackUrl = () => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search)
@@ -45,7 +48,7 @@ export function Header({
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen)
 
-  // Close dropdown when clicking outside
+  /** @Logic.UI.Lifecycle.ClickOutside */
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -127,6 +130,15 @@ export function Header({
         <div className="flex items-center gap-3">
           {variant === 'chat' ? (
             <div className="flex items-center gap-3">
+              {onMenuClick && (
+                <button
+                  onClick={onMenuClick}
+                  className="flex items-center justify-center w-10 h-10 text-white/70 hover:text-white transition-all bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 group"
+                  aria-label="Menu"
+                >
+                  <Menu className="w-4 h-4 text-white/70 group-hover:text-white" />
+                </button>
+              )}
               <button
                 onClick={() => dispatch(setModelInfoVisible(true))}
                 className="flex items-center justify-center w-10 h-10 text-white/70 hover:text-white transition-all bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 group"

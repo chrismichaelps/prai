@@ -2,11 +2,12 @@
 
 import { useEffect, useCallback } from 'react'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
-import { fetchSession, signOut, setSession, reset } from '@/store/slices/authSlice'
+import { fetchSession, setSession, reset } from '@/store/slices/authSlice'
 import { createClient } from '@supabase/supabase-js'
 import type { User, Session } from '@supabase/supabase-js'
 import type { Database } from '@/types/database.types'
 
+/** @Hook.Auth.Redux */
 export function useAuth() {
   const dispatch = useAppDispatch()
   const { user, session, isLoading, isAuthenticated, error, initialized } = useAppSelector(
@@ -43,6 +44,7 @@ export function useAuth() {
     return () => subscription.unsubscribe()
   }, [dispatch, supabase, initialized])
 
+  /** @Logic.Auth.Redux.SignIn */
   const handleSignIn = useCallback(async () => {
     try {
       const { data, error } = await supabase.auth.signInWithOAuth({
@@ -60,6 +62,7 @@ export function useAuth() {
     }
   }, [supabase])
 
+  /** @Logic.Auth.Redux.SignOut */
   const handleSignOut = useCallback(async () => {
     try {
       const { error } = await supabase.auth.signOut()
