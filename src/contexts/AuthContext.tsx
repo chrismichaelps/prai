@@ -183,7 +183,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           window.location.href = '/'
         }
       },
-      use_fedcm_for_prompt: true,
+      use_fedcm_for_prompt: false,
+      ux_mode: 'popup',
     })
     
     google.accounts.id.prompt()
