@@ -116,13 +116,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   /** @Logic.UI.Auth.SignIn */
   const signIn = useCallback(async (callbackUrl?: string) => {
-    console.log('[Auth] signIn called')
-    
     if (callbackUrl) {
       sessionStorage.setItem('authCallbackUrl', callbackUrl)
     }
     
-    // Use server-side OAuth redirect
     try {
       const res = await fetch('/api/auth/signin', { 
         method: 'POST',
@@ -130,17 +127,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       })
       const data = await res.json()
       
-      console.log('[Auth] Server signin response:', { hasUrl: !!data.url, error: data.error })
-      
       if (data.url) {
-        console.log('[Auth] Redirecting to:', data.url)
         window.location.href = data.url
       } else if (data.error) {
-        console.error('[Auth] Signin error:', data.error)
         alert('Sign in failed: ' + data.error)
       }
     } catch (err) {
-      console.error('[Auth] Signin exception:', err)
+      console.error('Sign in failed:', err)
     }
   }, [])
 
