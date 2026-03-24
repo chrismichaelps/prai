@@ -116,33 +116,57 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   /** @Logic.UI.Auth.SignIn */
   const signIn = useCallback(async (callbackUrl?: string) => {
-    console.log('[Auth] signIn called', { callbackUrl, origin: window.location.origin })
+    console.log('[Auth] signIn called')
     
-    if (callbackUrl) {
-      sessionStorage.setItem('authCallbackUrl', callbackUrl)
+    const supabase = supabaseRef.current
+    if (!supabase) {
+      console.error('[Auth] Supabase client not initialized')
+      return
     }
     
-    console.log('[Auth] Calling server-side signin endpoint')
-    
-    try {
-      const res = await fetch('/api/auth/signin', { 
-        method: 'POST',
-        credentials: 'include'
+    // Initialize Google Identity Services if not already loaded
+    if (typeof window !== 'undefined' && !(window as unknown as { google?: unknown }).google) {
+      console.log('[Auth] Loading Google script...')
+      const script = document.createElement('script')
+      script.src = 'https://accounts.google.com/gsi/client'
+      script.async = true
+      script.defer = true
+      document.head.appendChild(script)
+      
+      await new Promise((resolve) => {
+        script.onload = resolve
       })
-      const data = await res.json()
-      
-      console.log('[Auth] Server signin response:', { hasUrl: !!data.url, error: data.error })
-      
-      if (data.url) {
-        console.log('[Auth] Redirecting to:', data.url)
-        window.location.href = data.url
-      } else if (data.error) {
-        console.error('[Auth] Signin error:', data.error)
-        alert('Sign in failed: ' + data.error)
-      }
-    } catch (err) {
-      console.error('[Auth] Signin exception:', err)
     }
+    
+    console.log('[Auth] Initializing Google One Tap')
+    const google = (window as unknown as { google: { accounts: { id: { initialize: (config: unknown) => void; prompt: () => void } } } }).google
+    
+    google.accounts.id.initialize({
+      client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+      callback: async (response: { credential?: string }) => {
+        console.log('[Auth] Google credential received')
+        
+        if (!response.credential) {
+          console.error('[Auth] No credential in response')
+          return
+        }
+        
+        const { error } = await supabase.auth.signInWithIdToken({
+          provider: 'google',
+          token: response.credential,
+        })
+        
+        if (error) {
+          console.error('[Auth] SignInWithIdToken error:', error)
+        } else {
+          console.log('[Auth] Successfully signed in with Google')
+          window.location.href = '/'
+        }
+      },
+      use_fedcm_for_prompt: true,
+    })
+    
+    google.accounts.id.prompt()
   }, [])
 
   /** @Logic.UI.Auth.SignOut */
