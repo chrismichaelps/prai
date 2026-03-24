@@ -121,31 +121,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (callbackUrl) {
       sessionStorage.setItem('authCallbackUrl', callbackUrl)
     }
-    const supabase = supabaseRef.current
-    if (!supabase) {
-      console.error('[Auth] Supabase client not initialized')
-      return
-    }
     
-    console.log('[Auth] Calling signInWithOAuth with redirectTo:', `${window.location.origin}/api/auth/callback`)
+    console.log('[Auth] Calling server-side signin endpoint')
     
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/api/auth/callback`
+    try {
+      const res = await fetch('/api/auth/signin', { 
+        method: 'POST',
+        credentials: 'include'
+      })
+      const data = await res.json()
+      
+      console.log('[Auth] Server signin response:', { hasUrl: !!data.url, error: data.error })
+      
+      if (data.url) {
+        console.log('[Auth] Redirecting to:', data.url)
+        window.location.href = data.url
+      } else if (data.error) {
+        console.error('[Auth] Signin error:', data.error)
+        alert('Sign in failed: ' + data.error)
       }
-    })
-    
-    console.log('[Auth] OAuth response:', { data, error })
-    
-    if (error) {
-      console.error('[Auth] OAuth error:', error)
-    }
-    if (data.url) {
-      console.log('[Auth] Redirecting to:', data.url)
-      window.location.href = data.url
-    } else {
-      console.error('[Auth] No URL returned from OAuth')
+    } catch (err) {
+      console.error('[Auth] Signin exception:', err)
     }
   }, [])
 
