@@ -4,34 +4,38 @@
 import React, { useState, useCallback, useEffect } from 'react'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
-import { User as UserIcon, Pencil, Check, X, Loader2 } from 'lucide-react'
+import { User as UserIcon, Pencil, Check, X, Loader2, Trash2, Archive, AlertTriangle } from 'lucide-react'
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
 import { useI18n } from '@/lib/effect/I18nProvider'
+import type { Locale } from '@/lib/effect/services/I18n'
 import { useAuth } from '@/contexts/AuthContext'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 import heroImage from '@/assets/condado-ocean-dusk.png'
 import { useToast } from '@/components/ui/ToastProvider'
-import { createBrowserClient } from '@supabase/ssr'
-import type { Database } from '@/types/database.types'
+import { useAppSelector, useAppDispatch } from '@/store/hooks'
+import { setChats } from '@/store/slices/chatSlice'
 
-function getSupabaseClient() {
-  return createBrowserClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
+const toLocale = (value: string | undefined | null, fallback: Locale = 'es'): Locale => {
+  if (value === 'es' || value === 'en') return value
+  return fallback
 }
 
 export function ProfileClient() {
-  const { t, locale, setLocale } = useI18n()
+  const { t, setLocale } = useI18n()
   const { user, profile, isLoading, refreshProfile } = useAuth()
   const { showToast } = useToast()
+  const dispatch = useAppDispatch()
+  const chats = useAppSelector(state => state.chat.chats)
+  const [chatsCount, setChatsCount] = useState(0)
   
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [displayName, setDisplayName] = useState(profile?.display_name || user?.user_metadata?.name || '')
   const [bio, setBio] = useState(profile?.bio || '')
-  const [language, setLanguage] = useState(profile?.language || 'es')
+  const [language, setLanguage] = useState<Locale>(toLocale(profile?.language))
+  const [showDataControl, setShowDataControl] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   const avatarUrl = profile?.avatar_url || user?.user_metadata?.avatar_url
   const currentDisplayName = profile?.display_name || user?.user_metadata?.name || user?.user_metadata?.full_name || t('auth.explorer')
@@ -42,36 +46,110 @@ export function ProfileClient() {
     if (profile) {
       setDisplayName(profile.display_name || '')
       setBio(profile.bio || '')
-      setLanguage(profile.language || 'es')
+      setLanguage(toLocale(profile.language))
     }
   }, [profile])
 
+  useEffect(() => {
+    if (user) {
+      fetch(`${process.env.NEXT_PUBLIC_SITE_URL || ''}/api/chat/chats/count?userId=${user.id}`)
+        .then(res => res.json())
+        .then(data => setChatsCount(data.count || 0))
+        .catch(() => setChatsCount(chats.length))
+    }
+  }, [user, chats.length])
+
+  const handleDeleteAllChats = async () => {
+    if (!user) return
+    if (!confirm(t('profile.confirm_delete_all_chats') || 'Are you sure you want to delete all your chats? This cannot be undone.')) return
+    
+    setIsDeleting(true)
+    try {
+      const res = await fetch(`/api/chat/chats?userId=${user.id}`, {
+        method: 'DELETE'
+      })
+      
+      if (!res.ok) {
+        const text = await res.text()
+        throw new Error(text || `HTTP ${res.status}`)
+      }
+      
+      dispatch(setChats([]))
+      setChatsCount(0)
+      showToast(t('profile.all_chats_deleted') || 'All chats deleted', 'success')
+    } catch (err) {
+      console.error('Error deleting chats:', err)
+      showToast(t('profile.delete_error') || 'Failed to delete chats', 'error')
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
+  /** @Logic.UI.Chat.ArchiveAll */
+  const handleArchiveAllChats = async () => {
+    if (!user) return
+    if (!confirm(t('profile.confirm_archive_all_chats') || 'Are you sure you want to archive all your chats?')) return
+    
+    setIsDeleting(true)
+    try {
+      const res = await fetch('/api/chat/chats/archive', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id })
+      })
+      
+      if (!res.ok) {
+        const text = await res.text()
+        throw new Error(text || `HTTP ${res.status}`)
+      }
+      
+      dispatch(setChats([]))
+      setChatsCount(0)
+      showToast(t('profile.all_chats_archived') || 'All chats archived', 'success')
+    } catch (err) {
+      console.error('Error archiving chats:', err)
+      showToast(t('profile.archive_error') || 'Failed to archive chats', 'error')
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
   const handleLocaleChange = useCallback((newLocale: string) => {
-    setLanguage(newLocale)
-    setLocale(newLocale as 'es' | 'en')
+    const locale = toLocale(newLocale)
+    setLanguage(locale)
+    setLocale(locale)
   }, [setLocale])
 
   const handleEdit = useCallback(() => {
     setDisplayName(profile?.display_name || user?.user_metadata?.name || '')
     setBio(profile?.bio || '')
-    setLanguage(profile?.language || 'es')
+    setLanguage(toLocale(profile?.language))
     setIsEditing(true)
   }, [profile, user])
 
+  /** @Logic.UI.Profile.Save */
   const handleSave = useCallback(async () => {
     if (!user?.id) return
     
     setIsSaving(true)
     try {
-      const supabase = getSupabaseClient()
-      const { error } = await supabase
-        .from('profiles')
-        .update({ display_name: displayName, bio, language })
-        .eq('id', user.id)
+      const res = await fetch('/api/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user.id,
+          display_name: displayName,
+          bio,
+          language
+        })
+      })
 
-      if (error) throw error
+      if (!res.ok) {
+        const error = await res.json()
+        throw new Error(error.error)
+      }
       
-      setLocale(language as 'es' | 'en')
+      setLocale(language)
       showToast(t('profile.saved'), 'success')
       setIsEditing(false)
       refreshProfile?.()
@@ -256,6 +334,59 @@ export function ProfileClient() {
                       <p className="text-white/70 whitespace-pre-wrap">
                         {currentBio || <span className="italic text-white/40">{t('profile.no_bio')}</span>}
                       </p>
+                    </div>
+
+                    {/* Data Control Section */}
+                    <div className="pt-6 border-t border-white/10">
+                      <button
+                        onClick={() => setShowDataControl(!showDataControl)}
+                        className="flex items-center justify-between w-full text-left"
+                      >
+                        <p className="text-white/40 text-xs font-medium uppercase tracking-wider">
+                          {t('profile.data_control') || 'Data Control'}
+                        </p>
+                        <span className="text-white/40 text-sm">
+                          {chatsCount} {t('profile.chats') || 'chats'}
+                        </span>
+                      </button>
+
+                      {showDataControl && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          className="mt-4 space-y-3"
+                        >
+                          <button
+                            onClick={handleArchiveAllChats}
+                            disabled={isDeleting || chatsCount === 0}
+                            className="w-full flex items-center gap-3 px-4 py-3 bg-white/5 hover:bg-white/10 rounded-xl text-white/70 hover:text-white transition-all disabled:opacity-50"
+                          >
+                            <Archive className="w-5 h-5" />
+                            <span className="font-medium">{t('profile.archive_all_chats') || 'Archive All Chats'}</span>
+                          </button>
+                          
+                          <button
+                            onClick={handleDeleteAllChats}
+                            disabled={isDeleting || chatsCount === 0}
+                            className="w-full flex items-center gap-3 px-4 py-3 bg-red-500/10 hover:bg-red-500/20 rounded-xl text-red-400 hover:text-red-300 transition-all disabled:opacity-50"
+                          >
+                            {isDeleting ? (
+                              <Loader2 className="w-5 h-5 animate-spin" />
+                            ) : (
+                              <Trash2 className="w-5 h-5" />
+                            )}
+                            <span className="font-medium">{t('profile.delete_all_chats') || 'Delete All Chats'}</span>
+                          </button>
+
+                          {chatsCount > 0 && (
+                            <p className="text-white/30 text-xs text-center flex items-center justify-center gap-2">
+                              <AlertTriangle className="w-4 h-4" />
+                              {t('profile.data_warning') || 'This action cannot be undone'}
+                            </p>
+                          )}
+                        </motion.div>
+                      )}
                     </div>
                   </div>
                 </div>
