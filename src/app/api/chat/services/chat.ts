@@ -1,6 +1,6 @@
 import { Effect, pipe } from "effect"
 import { Data } from "effect"
-import { supabase } from "../../_lib/supabase/client"
+import { createClient } from "@/lib/supabase/server"
 import type { Database } from "@/types/database.types"
 
 type Chat = Database["public"]["Tables"]["chats"]["Row"]
@@ -20,6 +20,7 @@ export const chatService = {
     return pipe(
       Effect.tryPromise({
         try: async () => {
+          const supabase = await createClient()
           const { data, error } = await supabase
             .from("chats")
             .select("*")
@@ -40,6 +41,7 @@ export const chatService = {
     return pipe(
       Effect.tryPromise({
         try: async () => {
+          const supabase = await createClient()
           const { data, error } = await supabase
             .from("chats")
             .select("*")
@@ -60,6 +62,7 @@ export const chatService = {
     return pipe(
       Effect.tryPromise({
         try: async () => {
+          const supabase = await createClient()
           const { data, error } = await supabase
             .from("chats")
             .insert({ user_id: userId, title: title || "Nueva Conversación" })
@@ -82,6 +85,7 @@ export const chatService = {
     return pipe(
       Effect.tryPromise({
         try: async () => {
+          const supabase = await createClient()
           const { data, error } = await supabase
             .from("chats")
             .update(updates)
@@ -102,6 +106,7 @@ export const chatService = {
     return pipe(
       Effect.tryPromise({
         try: async () => {
+          const supabase = await createClient()
           const { error } = await supabase
             .from("chats")
             .delete()
@@ -118,6 +123,7 @@ export const chatService = {
     return pipe(
       Effect.tryPromise({
         try: async () => {
+          const supabase = await createClient()
           console.log('[ChatService] Deleting all chats for userId:', userId)
           const { error } = await supabase
             .from("chats")
@@ -140,6 +146,7 @@ export const chatService = {
     return pipe(
       Effect.tryPromise({
         try: async () => {
+          const supabase = await createClient()
           const { error } = await supabase
             .from("chats")
             .update({ is_archived: true })
@@ -157,6 +164,7 @@ export const chatService = {
     return pipe(
       Effect.tryPromise({
         try: async () => {
+          const supabase = await createClient()
           const { data, error } = await supabase
             .from("messages")
             .select("*")
@@ -179,6 +187,7 @@ export const chatService = {
     return pipe(
       Effect.tryPromise({
         try: async () => {
+          const supabase = await createClient()
           const insertData: MessageInsert = {
             chat_id: chatId,
             role: message.role,
@@ -204,6 +213,7 @@ export const chatService = {
     return pipe(
       Effect.tryPromise({
         try: async () => {
+          const supabase = await createClient()
           const { count, error } = await supabase
             .from("chats")
             .select("*", { count: "exact", head: true })
