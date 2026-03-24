@@ -1,7 +1,7 @@
 /** @Route.Profile */
 import type { NextRequest } from "next/server"
 import { NextResponse } from "next/server"
-import { supabase } from "@/app/api/_lib/supabase/client"
+import { createClient } from "@/lib/supabase/server"
 import { ValidationError } from "@/app/api/_lib/errors"
 import { decodeBody } from "@/app/api/_lib/validation"
 import { UpdateProfileSchema } from "./schemas"
@@ -28,6 +28,7 @@ export async function PATCH(request: NextRequest) {
       return pipe(
         Effect.tryPromise({
           try: async () => {
+            const supabase = await createClient()
             const { data, error } = await supabase
               .from("profiles")
               .update(dbUpdates)
