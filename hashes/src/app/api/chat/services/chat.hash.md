@@ -42,5 +42,5 @@ export const chatService: {
 Server-side database service for chat and message CRUD operations using Supabase. Provides typed Effect operations for all chat-related data access.
 
 ### [Linkage]
-- **Upstream:** `@/app/api/_lib/supabase/client`
+- **Upstream:** `@/lib/supabase/server`
 - **Downstream:** Chat API routes
