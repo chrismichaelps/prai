@@ -1,5 +1,5 @@
 ---
-State_ID: BigInt(0x2)
+State_ID: BigInt(0x0)
 Git_SHA: LATEST
 Grammar_Lock: "@root/hashes/grammar/next.hash.md"
 ---
@@ -10,11 +10,6 @@ Grammar_Lock: "@root/hashes/grammar/next.hash.md"
 | Handler | Description |
 |---------|-------------|
 | `page.tsx` | About page with app description |
-
-### [Signatures]
-```tsx
-export default function AboutPage(): JSX.Element
-```
 
 ### [Governance]
 - **UI_Law:** Full-page hero with background image from `@/assets`.
