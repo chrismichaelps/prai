@@ -11,7 +11,8 @@ export class OpenRouter extends Effect.Service<OpenRouter>()("OpenRouter", {
     const baseClient = yield* HttpClient.HttpClient
     const config = yield* ConfigService
 
-    const chat = (messages: readonly ChatMessage[]): Stream.Stream<string, OpenRouterError, never> => {
+    /** @Logic.Chat.OpenRouter.Stream */
+    const chat = (messages: readonly ChatMessage[]): Stream.Stream<string, OpenRouterError> => {
       const responseEffect = HttpClientRequest.post(`${config.openRouterBaseUrl}/chat/completions`).pipe(
         HttpClientRequest.setHeader("Authorization", `Bearer ${config.apiKey}`),
         HttpClientRequest.setHeader("HTTP-Referer", config.siteUrl),
@@ -49,7 +50,7 @@ export class OpenRouter extends Effect.Service<OpenRouter>()("OpenRouter", {
             })
           )
         })
-      ) as Stream.Stream<string, OpenRouterError, never>
+      ) as Stream.Stream<string, OpenRouterError>
     }
 
     return { chat } as const

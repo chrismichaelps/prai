@@ -10,6 +10,7 @@ interface AuthState {
   isAuthenticated: boolean
 }
 
+/** @Hook.Auth.FetchSession */
 export function useAuth() {
   const [state, setState] = useState<AuthState>({
     user: null,
@@ -18,6 +19,7 @@ export function useAuth() {
     isAuthenticated: false
   })
 
+  /** @Logic.Auth.FetchSession */
   const fetchSession = useCallback(async () => {
     try {
       const res = await fetch('/api/auth/session')
@@ -28,7 +30,7 @@ export function useAuth() {
         isLoading: false,
         isAuthenticated: !!data.session
       })
-    } catch (error) {
+    } catch (_error) {
       setState(prev => ({ ...prev, isLoading: false }))
     }
   }, [])
@@ -40,6 +42,7 @@ export function useAuth() {
     return () => clearInterval(checkInterval)
   }, [fetchSession])
 
+  /** @Logic.Auth.SignIn */
   const signIn = useCallback(async () => {
     try {
       const res = await fetch('/api/auth/signin', { method: 'POST' })
@@ -54,6 +57,7 @@ export function useAuth() {
     }
   }, [])
 
+  /** @Logic.Auth.SignOut */
   const signOut = useCallback(async () => {
     try {
       await fetch('/api/auth/signout', { method: 'POST' })

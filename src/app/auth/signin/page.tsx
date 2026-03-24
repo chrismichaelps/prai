@@ -11,11 +11,13 @@ export default function SignInPage() {
   const router = useRouter()
   const { isAuthenticated, isLoading, initialized, signIn } = useAuth()
 
+  /** @Logic.Auth.AutoRedirect */
   if (initialized && isAuthenticated) {
     router.push('/')
     return null
   }
 
+  /** @UI.Auth.LoadingState */
   if (isLoading && initialized) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
@@ -39,6 +41,7 @@ export default function SignInPage() {
             <p className="text-white/60">{t('auth.sign_in_title')}</p>
           </div>
 
+          {/** @UI.Auth.Action.GoogleSignin */}
           <button
             onClick={() => signIn()}
             className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-white text-slate-900 font-bold rounded-xl hover:bg-white/90 transition-all active:scale-[0.98] shadow-xl"
