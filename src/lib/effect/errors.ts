@@ -53,3 +53,9 @@ export class AuthError extends Data.TaggedError("AuthError")<{
   readonly message: string
   readonly cause?: unknown
 }> {}
+
+/** @Error.Effect.Changelog */
+export class ChangelogError extends Data.TaggedError("ChangelogError")<{
+  readonly message: string
+  readonly cause?: unknown
+}> {}
