@@ -2,10 +2,20 @@
 
 import React, { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowRight, Info, Menu, X, User, LogOut, LogIn } from 'lucide-react'
+import {
+  ArrowRight,
+  Info,
+  Menu,
+  X,
+  User,
+  LogOut,
+  LogIn,
+  Bug,
+} from 'lucide-react'
 import { PraiLogo } from '@/components/brand/PraiLogo'
 import { useI18n } from '@/lib/effect/I18nProvider'
 import { useBuildInfo } from '@/lib/effect/hooks/useBuildInfo'
@@ -13,8 +23,11 @@ import { cn } from '@/lib/utils'
 import { useAppDispatch } from '@/store/hooks'
 import { setModelInfoVisible } from '@/store/slices/uiSlice'
 import { useAuth } from '@/contexts/AuthContext'
+import { NotificationBell } from '@/components/notifications/NotificationBell'
 
 /** @UI.Layout.Header */
+import type { HeaderVariant } from '@/types/ui'
+
 export function Header({
   className,
   transparent = true,
@@ -23,7 +36,7 @@ export function Header({
 }: {
   className?: string
   transparent?: boolean
-  variant?: 'default' | 'chat'
+  variant?: HeaderVariant
   onMenuClick?: () => void
 }) {
   const router = useRouter()
@@ -33,7 +46,9 @@ export function Header({
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const buildHash = useBuildInfo()
-  const { user, isAuthenticated, signIn, signOut } = useAuth()
+  const { user, isAuthenticated, signIn, signOut, profile } = useAuth()
+
+  const isAdmin = profile?.is_admin === true
 
   /** @Logic.UI.Auth.CallbackUrl */
   const getCallbackUrl = () => {
@@ -46,7 +61,7 @@ export function Header({
 
   const navLinks = [
     { label: t('nav.about'), key: 'about', href: '/about' },
-    { label: t('nav.releases'), key: 'releases', href: '/releases' }
+    { label: t('nav.releases'), key: 'releases', href: '/releases' },
   ]
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen)
@@ -54,7 +69,10 @@ export function Header({
   /** @Logic.UI.Lifecycle.ClickOutside */
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsDropdownOpen(false)
       }
     }
@@ -75,7 +93,11 @@ export function Header({
   }, [isMenuOpen])
 
   const avatarUrl = user?.user_metadata?.avatar_url
-  const userName = user?.user_metadata?.name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || t('auth.explorer')
+  const userName =
+    user?.user_metadata?.name ||
+    user?.user_metadata?.full_name ||
+    user?.email?.split('@')[0] ||
+    t('auth.explorer')
   const initials = userName
     .split(' ')
     .map((w: string) => w[0])
@@ -110,7 +132,7 @@ export function Header({
             )}
           </div>
 
-          {variant === 'default' && (
+          {(variant === 'default' || variant === 'releases') && (
             <div className="hidden md:flex items-center gap-6">
               {navLinks.map((link) => (
                 <Link
@@ -121,6 +143,7 @@ export function Header({
                     transparent
                       ? 'text-primary-foreground/80 hover:text-primary-foreground'
                       : 'text-slate-600 hover:text-brand-blue',
+                    variant === link.key ? 'text-white' : '',
                   )}
                 >
                   {link.label}
@@ -152,8 +175,8 @@ export function Header({
             </div>
           ) : (
             <>
-              {/* Desktop Actions */}
-              <div className="hidden md:flex items-center gap-3">
+              {/* Desktop & Mobile Actions */}
+              <div className="flex items-center gap-2 md:gap-3">
                 <AnimatePresence mode="wait">
                   {isAuthenticated ? (
                     <motion.div
@@ -162,45 +185,55 @@ export function Header({
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.9 }}
                       transition={{ duration: 0.2 }}
-                      className="flex items-center gap-3"
+                      className="flex items-center gap-2 md:gap-3"
                     >
                       <button
                         onClick={() => router.push('/chat')}
                         className={cn(
-                          'flex items-center gap-2 px-4 py-2 text-sm font-medium border rounded-lg transition-colors',
+                          'hidden sm:flex items-center gap-2 px-4 py-2 text-sm font-medium border rounded-lg transition-colors',
                           transparent
                             ? 'text-primary-foreground border-primary-foreground/30 hover:bg-primary-foreground/10'
-                            : 'text-white border-transparent bg-brand-blue hover:scale-[1.02] active:scale-[0.98]'
+                            : 'text-white border-transparent bg-brand-blue hover:scale-[1.02] active:scale-[0.98]',
                         )}
                       >
                         {t('nav.open_chat')}
                         <ArrowRight className="w-3.5 h-3.5" />
                       </button>
 
+                      {/* Notification Bell */}
+                      <NotificationBell />
+
                       {/* Avatar Dropdown */}
-                      <div className="relative" ref={dropdownRef}>
+                      <div
+                        className="relative"
+                        ref={dropdownRef}
+                      >
                         <button
                           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                           className={cn(
-                            "flex items-center justify-center w-9 h-9 rounded-full overflow-hidden border-2 transition-all focus:outline-none focus:ring-2",
-                            transparent 
-                              ? "border-primary-foreground/30 focus:ring-primary-foreground/30"
-                              : "border-brand-blue/30 focus:ring-brand-blue/30"
+                            'flex items-center justify-center w-9 h-9 rounded-full overflow-hidden border-2 transition-all focus:outline-none focus:ring-2',
+                            transparent
+                              ? 'border-primary-foreground/30 focus:ring-primary-foreground/30'
+                              : 'border-brand-blue/30 focus:ring-brand-blue/30',
                           )}
                         >
                           {avatarUrl ? (
-                            <img
+                            <Image
                               src={avatarUrl}
                               alt={userName}
+                              width={36}
+                              height={36}
                               className="w-full h-full object-cover"
                             />
                           ) : (
-                            <div className={cn(
-                              "w-full h-full flex items-center justify-center text-xs font-semibold",
-                              transparent 
-                                ? "bg-primary-foreground/20 text-primary-foreground"
-                                : "bg-brand-blue/10 text-brand-blue"
-                            )}>
+                            <div
+                              className={cn(
+                                'w-full h-full flex items-center justify-center text-xs font-semibold',
+                                transparent
+                                  ? 'bg-primary-foreground/20 text-primary-foreground'
+                                  : 'bg-brand-blue/10 text-brand-blue',
+                              )}
+                            >
                               {initials}
                             </div>
                           )}
@@ -214,16 +247,41 @@ export function Header({
                               animate={{ opacity: 1, y: 0, scale: 1 }}
                               exit={{ opacity: 0, y: -10, scale: 0.95 }}
                               transition={{ duration: 0.15 }}
-                              className="absolute right-0 top-full mt-2 w-56 bg-[#1a1a1a] border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
+                              className={cn(
+                                "fixed md:absolute left-4 right-4 md:left-auto md:right-0 top-[76px] md:top-full md:mt-2 w-auto md:w-56",
+                                "bg-[#1a1a1a] border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-[110] origin-top md:origin-top-right transform-gpu"
+                              )}
                             >
-                              {/* User Info */}
                               <div className="px-4 py-3 border-b border-white/10">
-                                <p className="text-sm font-bold text-white truncate">{userName}</p>
-                                <p className="text-xs text-white/40 truncate">{user?.email}</p>
+                                <div className="flex items-center gap-2">
+                                  <p className="text-sm font-bold text-white truncate">
+                                    {userName}
+                                  </p>
+                                  <span className={cn(
+                                    "text-[10px] px-1.5 py-0.5 rounded-full font-semibold",
+                                    isAdmin 
+                                      ? "bg-yellow-400/20 text-yellow-400" 
+                                      : "bg-white/10 text-white/40"
+                                  )}>
+                                    {isAdmin ? t('auth.role_admin') : t('auth.role_user')}
+                                  </span>
+                                </div>
+                                <p className="text-xs text-white/40 truncate">
+                                  {user?.email}
+                                </p>
                               </div>
 
-                              {/* Menu Items */}
                               <div className="py-2">
+                                <button
+                                  onClick={() => {
+                                    setIsDropdownOpen(false)
+                                    router.push('/issues')
+                                  }}
+                                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-yellow-400/70 hover:text-yellow-400 hover:bg-yellow-400/5 transition-colors border-b border-white/5"
+                                >
+                                  <Bug className="w-4 h-4" />
+                                  {t('nav.issues')}
+                                </button>
                                 <button
                                   onClick={() => {
                                     setIsDropdownOpen(false)
@@ -264,7 +322,7 @@ export function Header({
                           'flex items-center gap-2 px-4 py-2 text-sm font-medium border rounded-lg transition-colors',
                           transparent
                             ? 'text-primary-foreground border-primary-foreground/30 hover:bg-primary-foreground/10'
-                            : 'text-white border-transparent bg-brand-blue hover:scale-[1.02] active:scale-[0.98]'
+                            : 'text-white border-transparent bg-brand-blue hover:scale-[1.02] active:scale-[0.98]',
                         )}
                       >
                         <LogIn className="w-3.5 h-3.5" />
@@ -273,42 +331,42 @@ export function Header({
                     </motion.div>
                   )}
                 </AnimatePresence>
-              </div>
 
-              {/* Mobile Hamburger Toggle */}
-              <button
-                onClick={toggleMenu}
-                className={cn(
-                  'md:hidden p-2 rounded-xl transition-all active:scale-90 z-[120]',
-                  transparent || isMenuOpen
-                    ? 'text-white hover:bg-white/10'
-                    : 'text-slate-900 hover:bg-slate-100',
-                )}
-              >
-                <AnimatePresence mode="wait">
-                  {isMenuOpen ? (
-                    <motion.div
-                      key="close"
-                      initial={{ scale: 0.5, rotate: -90, opacity: 0 }}
-                      animate={{ scale: 1, rotate: 0, opacity: 1 }}
-                      exit={{ scale: 0.5, rotate: 90, opacity: 0 }}
-                      transition={{ type: 'spring', damping: 15 }}
-                    >
-                      <X className="w-8 h-8" />
-                    </motion.div>
-                  ) : (
-                    <motion.div
-                      key="menu"
-                      initial={{ scale: 0.5, rotate: 90, opacity: 0 }}
-                      animate={{ scale: 1, rotate: 0, opacity: 1 }}
-                      exit={{ scale: 0.5, rotate: -90, opacity: 0 }}
-                      transition={{ type: 'spring', damping: 15 }}
-                    >
-                      <Menu className="w-8 h-8" />
-                    </motion.div>
+                {/* Mobile Hamburger Toggle */}
+                <button
+                  onClick={toggleMenu}
+                  className={cn(
+                    'md:hidden p-2 rounded-xl transition-all active:scale-90 z-[120]',
+                    transparent || isMenuOpen
+                      ? 'text-white hover:bg-white/10'
+                      : 'text-slate-900 hover:bg-slate-100',
                   )}
-                </AnimatePresence>
-              </button>
+                >
+                  <AnimatePresence mode="wait">
+                    {isMenuOpen ? (
+                      <motion.div
+                        key="close"
+                        initial={{ scale: 0.5, rotate: -90, opacity: 0 }}
+                        animate={{ scale: 1, rotate: 0, opacity: 1 }}
+                        exit={{ scale: 0.5, rotate: 90, opacity: 0 }}
+                        transition={{ type: 'spring', damping: 15 }}
+                      >
+                        <X className="w-6 h-6" />
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        key="menu"
+                        initial={{ scale: 0.5, rotate: 90, opacity: 0 }}
+                        animate={{ scale: 1, rotate: 0, opacity: 1 }}
+                        exit={{ scale: 0.5, rotate: -90, opacity: 0 }}
+                        transition={{ type: 'spring', damping: 15 }}
+                      >
+                        <Menu className="w-6 h-6" />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </button>
+              </div>
             </>
           )}
         </div>
