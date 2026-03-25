@@ -16,6 +16,7 @@ export const IssueCommentSchema = Schema.Struct({
   body: Schema.String,
   is_admin_reply: Schema.Boolean,
   created_at: Schema.String,
+  deleted_at: Schema.optional(Schema.String),
   author: Schema.optional(
     Schema.Struct({
       display_name: Schema.optional(Schema.String),
