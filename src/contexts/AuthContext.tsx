@@ -50,10 +50,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } else if (error?.code === PostgRErrorCodes.SINGLETON_NOT_FOUND) {
       const { data: userData } = await supabase.auth.getUser()
       const avatarUrl = userData?.user?.user_metadata?.avatar_url
+      const email = userData?.user?.email ?? ''
+      const handle = email.split('@')[0] || `user_${userId.slice(0, 8)}`
 
       const { data: newProfile, error: insertError } = await supabase
         .from('profiles')
-        .insert({ id: userId, avatar_url: avatarUrl })
+        .insert({ id: userId, avatar_url: avatarUrl, handle })
         .select()
         .single()
 

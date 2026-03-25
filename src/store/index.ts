@@ -3,6 +3,7 @@ import chatReducer from './slices/chatSlice';
 import passportReducer from './slices/passportSlice';
 import uiReducer from './slices/uiSlice';
 import authReducer from './slices/authSlice';
+import issuesReducer from './slices/issuesSlice';
 
 /** @Store.Redux.Root */
 export const store = configureStore({
@@ -11,6 +12,7 @@ export const store = configureStore({
     passport: passportReducer,
     ui: uiReducer,
     auth: authReducer,
+    issues: issuesReducer,
   },
 });
 
