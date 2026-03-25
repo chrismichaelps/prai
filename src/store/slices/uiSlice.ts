@@ -1,9 +1,10 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
+import type { UIActiveTab } from '@/types/ui';
 
 export interface UIState {
   isSidebarOpen: boolean;
-  activeTab: string;
+  activeTab: UIActiveTab;
   isModelInfoVisible: boolean;
   apiError: {
     code: number;
@@ -29,7 +30,7 @@ export const uiSlice = createSlice({
     setSidebarOpen: (state, action: PayloadAction<boolean>) => {
       state.isSidebarOpen = action.payload;
     },
-    setActiveTab: (state, action: PayloadAction<string>) => {
+    setActiveTab: (state, action: PayloadAction<UIActiveTab>) => {
       state.activeTab = action.payload;
     },
     setModelInfoVisible: (state, action: PayloadAction<boolean>) => {

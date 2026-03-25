@@ -340,7 +340,7 @@ export function ReleasesPage({ releases }: { releases: Release[] }) {
         <Background />
 
         <div className="relative z-10 flex flex-col min-h-screen">
-          <Header transparent={true} />
+          <Header transparent={true} variant="releases" />
 
           <section className="flex-1 px-6 md:px-10 lg:px-16 max-w-6xl mx-auto pt-32 pb-40 w-full animate-in fade-in duration-1000">
             <Breadcrumb />
