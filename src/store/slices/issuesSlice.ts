@@ -153,7 +153,7 @@ export const addComment = createAsyncThunk(
   'issues/addComment',
   async (
     { issueId, body }: { issueId: string; body: string },
-    { dispatch, rejectWithValue }
+    { rejectWithValue }
   ) => {
     const res = await fetch(`/api/issues/${issueId}/comments`, {
       method: 'POST',
@@ -161,7 +161,7 @@ export const addComment = createAsyncThunk(
       body: JSON.stringify({ body }),
     });
     if (!res.ok) return rejectWithValue('Failed to post comment');
-    await dispatch(fetchIssueDetail(issueId));
+    return res.json() as Promise<IssueComment>;
   }
 );
 
@@ -170,7 +170,7 @@ export const updateComment = createAsyncThunk(
   'issues/updateComment',
   async (
     { issueId, commentId, body }: { issueId: string; commentId: string; body: string },
-    { dispatch, rejectWithValue }
+    { rejectWithValue }
   ) => {
     const res = await fetch(`/api/issues/${issueId}/comments/${commentId}`, {
       method: 'PATCH',
@@ -181,7 +181,7 @@ export const updateComment = createAsyncThunk(
       const error = await res.json().catch(() => ({ error: 'Failed to update comment' }))
       return rejectWithValue(error.error || 'Failed to update comment');
     }
-    await dispatch(fetchIssueDetail(issueId));
+    return res.json() as Promise<IssueComment>;
   }
 );
 
@@ -190,7 +190,7 @@ export const deleteComment = createAsyncThunk(
   'issues/deleteComment',
   async (
     { issueId, commentId }: { issueId: string; commentId: string },
-    { dispatch, rejectWithValue }
+    { rejectWithValue }
   ) => {
     const res = await fetch(`/api/issues/${issueId}/comments/${commentId}`, {
       method: 'DELETE',
@@ -199,7 +199,7 @@ export const deleteComment = createAsyncThunk(
       const error = await res.json().catch(() => ({ error: 'Failed to delete comment' }))
       return rejectWithValue(error.error || 'Failed to delete comment');
     }
-    await dispatch(fetchIssueDetail(issueId));
+    return { commentId };
   }
 );
 
@@ -301,8 +301,32 @@ export const issuesSlice = createSlice({
 
     builder
       .addCase(addComment.pending, (state) => { state.submittingComment = true; })
-      .addCase(addComment.fulfilled, (state) => { state.submittingComment = false; })
+      .addCase(addComment.fulfilled, (state, action) => { 
+        state.submittingComment = false;
+        state.comments = [...state.comments, action.payload];
+        if (state.currentIssue) {
+          state.currentIssue.comments = [...(state.currentIssue.comments ?? []), action.payload];
+        }
+      })
       .addCase(addComment.rejected, (state) => { state.submittingComment = false; });
+
+    builder
+      .addCase(updateComment.fulfilled, (state, action) => {
+        const idx = state.comments.findIndex(c => c.id === action.payload.id);
+        if (idx !== -1) state.comments[idx] = action.payload;
+        if (state.currentIssue?.comments) {
+          const ci = state.currentIssue.comments.findIndex(c => c.id === action.payload.id);
+          if (ci !== -1) state.currentIssue.comments[ci] = action.payload;
+        }
+      });
+
+    builder
+      .addCase(deleteComment.fulfilled, (state, action) => {
+        state.comments = state.comments.filter(c => c.id !== action.payload.commentId);
+        if (state.currentIssue?.comments) {
+          state.currentIssue.comments = state.currentIssue.comments.filter(c => c.id !== action.payload.commentId);
+        }
+      });
 
     builder
       .addCase(deleteIssue.fulfilled, (state, action) => {
