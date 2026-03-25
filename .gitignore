@@ -52,4 +52,3 @@ yarn-error.log*
 FMCF-MASTER-SEED.md
 
 # Supabase (private - contains migrations with schema details)
-supabase/
