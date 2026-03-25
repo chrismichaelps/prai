@@ -10,6 +10,7 @@ import type {
   ForeignKeyError,
   InternalError
 } from "../errors"
+import { IssueDbError, NotificationDbError, UsersDbError, ChatDbError, AccountDbError } from "../errors/services"
 
 type ApiError =
   | ValidationError
@@ -19,6 +20,11 @@ type ApiError =
   | UniqueConstraintError
   | ForeignKeyError
   | InternalError
+  | IssueDbError
+  | NotificationDbError
+  | UsersDbError
+  | ChatDbError
+  | AccountDbError
 
 const errorStatusMap: Record<string, number> = {
   ValidationError: HttpStatus.BAD_REQUEST,
@@ -27,7 +33,12 @@ const errorStatusMap: Record<string, number> = {
   UniqueConstraintError: HttpStatus.CONFLICT,
   ForeignKeyError: HttpStatus.BAD_REQUEST,
   SupabaseError: HttpStatus.INTERNAL_SERVER_ERROR,
-  InternalError: HttpStatus.INTERNAL_SERVER_ERROR
+  InternalError: HttpStatus.INTERNAL_SERVER_ERROR,
+  IssueDbError: HttpStatus.INTERNAL_SERVER_ERROR,
+  NotificationDbError: HttpStatus.INTERNAL_SERVER_ERROR,
+  UsersDbError: HttpStatus.INTERNAL_SERVER_ERROR,
+  ChatDbError: HttpStatus.INTERNAL_SERVER_ERROR,
+  AccountDbError: HttpStatus.INTERNAL_SERVER_ERROR
 }
 
 const errorMessageMap: Record<string, (error: ApiError) => string> = {
@@ -37,7 +48,12 @@ const errorMessageMap: Record<string, (error: ApiError) => string> = {
   UniqueConstraintError: (e) => `Duplicate value: ${(e as UniqueConstraintError).field}`,
   ForeignKeyError: (e) => `Invalid reference: ${(e as ForeignKeyError).field}`,
   SupabaseError: () => "Database error",
-  InternalError: (e) => e.message
+  InternalError: (e) => e.message,
+  IssueDbError: () => "Database error",
+  NotificationDbError: () => "Database error",
+  UsersDbError: () => "Database error",
+  ChatDbError: () => "Database error",
+  AccountDbError: () => "Account operation failed"
 }
 
 /** @Logic.Api.HandleError */

@@ -16,10 +16,12 @@ export type User = Schema.Schema.Type<typeof UserSchema>
 /** @Type.Effect.Auth.Profile */
 export const ProfileSchema = Schema.Struct({
   id: Schema.String,
+  handle: Schema.optional(Schema.String),
   display_name: Schema.optional(Schema.String),
   bio: Schema.optional(Schema.String),
   language: Schema.optional(Schema.String),
   avatar_url: Schema.optional(Schema.String),
+  is_admin: Schema.optional(Schema.Boolean),
   created_at: Schema.optional(Schema.String),
   updated_at: Schema.optional(Schema.String)
 })
