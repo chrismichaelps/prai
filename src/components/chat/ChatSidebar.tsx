@@ -29,6 +29,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useI18n } from '@/lib/effect/I18nProvider'
 import { useToast } from '@/components/ui/ToastProvider'
 import { useRouter } from 'next/navigation'
+import { SidebarProfile } from './SidebarProfile'
 
 interface ChatSidebarProps {
   isOpen: boolean
@@ -397,6 +398,9 @@ export function ChatSidebar({ isOpen, onClose }: ChatSidebarProps) {
                 </div>
               )}
             </div>
+
+            {/* User Profile Section */}
+            <SidebarProfile onSignOut={onClose} />
           </motion.aside>
         </>
       )}

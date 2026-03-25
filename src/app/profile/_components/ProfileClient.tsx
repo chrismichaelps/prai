@@ -23,7 +23,7 @@ const toLocale = (value: string | undefined | null, fallback: Locale = 'es'): Lo
 
 export function ProfileClient() {
   const { t, setLocale } = useI18n()
-  const { user, profile, isLoading, refreshProfile } = useAuth()
+  const { user, profile, isLoading, refreshProfile, signOut } = useAuth()
   const { showToast } = useToast()
   const dispatch = useAppDispatch()
   const chats = useAppSelector(state => state.chat.chats)
@@ -36,6 +36,8 @@ export function ProfileClient() {
   const [language, setLanguage] = useState<Locale>(toLocale(profile?.language))
   const [showDataControl, setShowDataControl] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [showDeleteAccount, setShowDeleteAccount] = useState(false)
+  const [confirmHandle, setConfirmHandle] = useState('')
 
   const avatarUrl = profile?.avatar_url || user?.user_metadata?.avatar_url
   const currentDisplayName = profile?.display_name || user?.user_metadata?.name || user?.user_metadata?.full_name || t('auth.explorer')
@@ -82,6 +84,39 @@ export function ProfileClient() {
       showToast(t('profile.delete_error') || 'Failed to delete chats', 'error')
     } finally {
       setIsDeleting(false)
+    }
+  }
+
+  const handleDeleteAccount = async () => {
+    if (!user || !profile?.handle) return
+    if (confirmHandle !== profile.handle) {
+      showToast(t('profile.handle_mismatch') || 'Handle does not match', 'error')
+      return
+    }
+
+    setIsDeleting(true)
+    try {
+      const res = await fetch('/api/users/account', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ confirmHandle: profile.handle })
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        throw new Error(data.error || `HTTP ${res.status}`)
+      }
+
+      showToast(t('profile.account_deleted') || 'Account deleted successfully', 'success')
+      signOut()
+      window.location.href = '/'
+    } catch (err) {
+      console.error('Error deleting account:', err)
+      showToast(t('profile.delete_account_error') || 'Failed to delete account', 'error')
+    } finally {
+      setIsDeleting(false)
+      setShowDeleteAccount(false)
     }
   }
 
@@ -388,6 +423,22 @@ export function ProfileClient() {
                         </motion.div>
                       )}
                     </div>
+
+                    {/* Delete Account Section */}
+                    <div className="pt-6 border-t border-red-500/20 mt-6">
+                      <p className="text-white/30 text-xs mb-3">{t('profile.danger_zone') || 'Danger Zone'}</p>
+                      <button
+                        onClick={() => setShowDeleteAccount(true)}
+                        disabled={isDeleting}
+                        className="w-full flex items-center gap-3 px-4 py-3 bg-red-600/20 hover:bg-red-600/30 rounded-xl text-red-400 hover:text-red-300 transition-all disabled:opacity-50"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                        <span className="font-medium">{t('profile.delete_account') || 'Delete Account'}</span>
+                      </button>
+                      <p className="text-white/30 text-xs mt-2 text-center">
+                        {t('profile.delete_account_warning') || 'This will permanently delete your account and all data'}
+                      </p>
+                    </div>
                   </div>
                 </div>
               )}
@@ -395,6 +446,55 @@ export function ProfileClient() {
           </section>
 
           <Footer className="mt-auto bg-transparent border-t-0 py-10" />
+
+          {/* Delete Account Modal */}
+          {showDeleteAccount && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+              <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowDeleteAccount(false)} />
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="relative bg-[#1a1a1a] border border-red-500/30 rounded-2xl p-6 w-full max-w-md shadow-2xl"
+              >
+                <h3 className="text-xl font-bold text-white mb-2">
+                  {t('profile.delete_account') || 'Delete Account'}
+                </h3>
+                <p className="text-white/60 text-sm mb-4">
+                  {t('profile.delete_account_confirm') || 'This action cannot be undone. All your data will be permanently deleted.'}
+                </p>
+                <div className="mb-4">
+                  <label className="text-white/40 text-xs uppercase tracking-wider">
+                    {t('profile.type_handle')} (@{profile?.handle})
+                  </label>
+                  <input
+                    type="text"
+                    value={confirmHandle}
+                    onChange={(e) => setConfirmHandle(e.target.value)}
+                    placeholder={profile?.handle}
+                    className="w-full mt-1 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/20 focus:outline-none focus:border-red-500/50"
+                  />
+                </div>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => {
+                      setShowDeleteAccount(false)
+                      setConfirmHandle('')
+                    }}
+                    className="flex-1 px-4 py-3 bg-white/5 hover:bg-white/10 rounded-xl text-white/70 font-medium transition-colors"
+                  >
+                    {t('common.cancel') || 'Cancel'}
+                  </button>
+                  <button
+                    onClick={handleDeleteAccount}
+                    disabled={isDeleting || confirmHandle !== profile?.handle}
+                    className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 rounded-xl text-white font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isDeleting ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : t('profile.delete_account') || 'Delete'}
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          )}
         </div>
       </main>
     </ProtectedRoute>
