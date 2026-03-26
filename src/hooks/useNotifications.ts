@@ -27,6 +27,15 @@ export function useNotifications() {
   const [unreadCount, setUnreadCount] = useState(0)
   const channelRef = useRef<ReturnType<ReturnType<typeof createSupabaseBrowserClient>['channel']> | null>(null)
 
+  /** @Logic.Notifications.FetchCount */
+  const fetchUnreadCount = useCallback(async () => {
+    if (!isAuthenticated) return
+    const res = await fetch('/api/notifications/count')
+    if (!res.ok) return
+    const data: { count: number } = await res.json()
+    setUnreadCount(data.count)
+  }, [isAuthenticated])
+
   /** @Logic.Notifications.Fetch */
   const fetchNotifications = useCallback(async () => {
     if (!isAuthenticated) return
@@ -34,7 +43,9 @@ export function useNotifications() {
     if (!res.ok) return
     const data: { notifications: Notification[] } = await res.json()
     setNotifications(data.notifications)
-    setUnreadCount(data.notifications.filter((n) => !n.is_read).length)
+    if (data.notifications.length < 20) {
+      setUnreadCount(data.notifications.filter((n) => !n.is_read).length)
+    }
   }, [isAuthenticated])
 
   /** @Logic.Notifications.Realtime */
@@ -42,6 +53,7 @@ export function useNotifications() {
     if (!isAuthenticated || !user) return
 
     fetchNotifications()
+    fetchUnreadCount()
 
     const supabase = createSupabaseBrowserClient()
     const channel = supabase
@@ -56,6 +68,7 @@ export function useNotifications() {
         },
         () => {
           void fetchNotifications()
+          void fetchUnreadCount()
         }
       )
       .subscribe()
@@ -65,7 +78,7 @@ export function useNotifications() {
     return () => {
       void supabase.removeChannel(channel)
     }
-  }, [isAuthenticated, user, fetchNotifications])
+  }, [isAuthenticated, user, fetchNotifications, fetchUnreadCount])
 
   /** @Logic.Notifications.MarkRead */
   const markRead = useCallback(async (id: string) => {
@@ -76,14 +89,19 @@ export function useNotifications() {
 
   /** @Logic.Notifications.MarkAllRead */
   const markAllRead = useCallback(async () => {
-    await fetch('/api/notifications', { method: 'PATCH' })
-    setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })))
-    setUnreadCount(0)
+    const res = await fetch('/api/notifications', { method: 'PATCH' })
+    if (res.ok) {
+      setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })))
+      setUnreadCount(0)
+    }
   }, [])
 
   /** @Logic.Notifications.MarkSeen */
   const markSeen = useCallback(async () => {
-    await fetch('/api/notifications/seen', { method: 'POST' })
+    const res = await fetch('/api/notifications/seen', { method: 'POST' })
+    if (res.ok) {
+      /** */
+    }
   }, [])
 
   return { notifications, unreadCount, markRead, markAllRead, markSeen }
