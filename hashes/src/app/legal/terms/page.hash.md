@@ -1,10 +1,10 @@
 ---
-State_ID: BigInt(0x0fc98cc)
+State_ID: BigInt(0x0fc98e2)
 Git_SHA: LATEST
 Grammar_Lock: "@root/hashes/grammar/typescript.hash.md"
 ---
 
-## @App.Legal.Terms
+## @Legal.Terms
 
 ### [Signatures]
 ```ts
@@ -12,11 +12,11 @@ export default function TermsPage(): JSX.Element
 ```
 
 ### [Governance]
-- **Static_Page_Law:** Generates purely static HTML at build time. 
-- **Disclaimer_Law:** Clearly delineates that PR\\AI AI responses are synthetically generated and may require human verification for real-time travel planning in Puerto Rico.
+- **I18n_Boundary:** Mandates `useI18n()` resolution for all compliance-related clauses to ensure legal accuracy across languages.
+- **Motion_Entrance_Law:** Consistent with the `legal` module, it enforces a standard `y: 20` entrance reveal for the main article boundary.
 
 ### [Semantic Hash]
-Terms of Service document. Establishes usage limitations, AI liability disclaimers, and intellectual property constraints for the OpenRouter/Supabase stack.
+The UI boundary for the Terms and Conditions. It serves as the primary agreement document for the community, providing a clean, multi-step layout for user rights and responsibilities.
 
 ### [Linkage]
-- **Dependencies:** `@/components/layout/Header`, `@/components/layout/Footer`, `@/lib/effect/I18nProvider`
+- **Dependencies:** `@/lib/effect/I18nProvider`, `framer-motion`

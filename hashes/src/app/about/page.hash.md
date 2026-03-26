@@ -1,29 +1,22 @@
 ---
-State_ID: BigInt(0x2)
+State_ID: BigInt(0x0fc98e6)
 Git_SHA: LATEST
-Grammar_Lock: "@root/hashes/grammar/next.hash.md"
+Grammar_Lock: "@root/hashes/grammar/typescript.hash.md"
 ---
 
-## @Route.About
-
-### [Routes]
-| Handler | Description |
-|---------|-------------|
-| `page.tsx` | About page with app description |
+## @About.Page
 
 ### [Signatures]
-```tsx
+```ts
 export default function AboutPage(): JSX.Element
 ```
 
 ### [Governance]
-- **UI_Law:** Full-page hero with background image from `@/assets`.
-- **I18n_Law:** All text content via `useI18n()`.
-- **Action_Law:** CTA buttons link to `/chat` and GitHub repo.
+- **Brand_Atmosphere_Sync:** Mandates the use of thematic San Juan hero imagery and specific primary-to-accent gradients to maintain visual continuity with the landing experience.
+- **Motion_Entrance_Law:** Enforces standard entrance animations via `framer-motion` for all content sections.
 
 ### [Semantic Hash]
-Public about page at `/about` showcasing app mission, description, and call-to-action.
+The UI boundary for the platform's vision and background. it provides a high-fidelity narrative layout, localized via the I18n provider, explaining the "why" behind PR\\AI.
 
 ### [Linkage]
-- **Upstream:** `Header`, `Footer` components, `useI18n`
-- **Downstream:** Chat page, GitHub repo
+- **Dependencies:** `@/lib/effect/I18nProvider`, `framer-motion`, `next/image`
