@@ -22,12 +22,14 @@ export async function POST(request: NextRequest) {
       })
     )(request),
     Effect.flatMap((data) => 
-      pipe(
-        chatService.archiveAllChats(data.userId),
-        Effect.mapError((e) => new ChatDbError({ error: e }))
-      )
+      chatService.archiveAllChats(data.userId)
     )
   )
 
-  return exitResponse(() => new NextResponse(null, { status: HttpStatus.NO_CONTENT }))(program)
+  return exitResponse(() => new NextResponse(null, { status: HttpStatus.NO_CONTENT }), {
+    spanName: "chat.chats.archiveAll",
+    method: "POST",
+    path: request.url,
+    payload: await request.clone().json().catch(() => undefined)
+  })(program)
 }

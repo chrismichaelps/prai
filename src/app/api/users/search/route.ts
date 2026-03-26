@@ -75,5 +75,10 @@ export async function GET(request: NextRequest) {
     )
   )
 
-  return exitResponse((data: unknown) => NextResponse.json(data))(program)
+  return exitResponse((data: unknown) => NextResponse.json(data), {
+    spanName: "users.search",
+    method: "GET",
+    path: request.url,
+    searchParams: request.nextUrl.searchParams
+  })(program)
 }

@@ -9,7 +9,8 @@ import { NotificationDbError } from "../services/notification"
 type ApiError = UnauthorizedError | NotificationDbError
 
 /** @Route.Notifications.Seen.POST */
-export async function POST() {
+export async function POST(request: Request) {
+  const { searchParams } = new URL(request.url)
   const program: Effect.Effect<unknown, ApiError> = pipe(
     Effect.tryPromise({
       try: async () => {
@@ -37,5 +38,10 @@ export async function POST() {
     )
   )
 
-  return exitResponse((data: unknown) => NextResponse.json(data))(program)
+  return exitResponse((data: unknown) => NextResponse.json(data), {
+    spanName: "notifications.seen",
+    method: "POST",
+    path: request.url,
+    searchParams
+  })(program)
 }

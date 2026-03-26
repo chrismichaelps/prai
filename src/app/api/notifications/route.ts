@@ -24,7 +24,8 @@ export interface Notification {
 }
 
 /** @Route.Notifications.GET */
-export async function GET() {
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url)
   const program: Effect.Effect<unknown, ApiError> = pipe(
     Effect.tryPromise({
       try: async () => {
@@ -39,7 +40,7 @@ export async function GET() {
       Effect.tryPromise({
         try: async () => {
           const supabase = await createClient()
-          
+
           const { data: notifications, error } = await supabase.rpc("get_notifications", {
             p_user_id: user.id,
             p_limit: 20,
@@ -55,11 +56,17 @@ export async function GET() {
     )
   )
 
-  return exitResponse((data: unknown) => NextResponse.json(data))(program)
+  return exitResponse((data: unknown) => NextResponse.json(data), {
+    spanName: "notifications.get",
+    method: "GET",
+    path: request.url,
+    searchParams
+  })(program)
 }
 
-/** @Route.Notifications.PATCH - Mark all as read */
-export async function PATCH() {
+/** @Route.Notifications.PATCH */
+export async function PATCH(request: Request) {
+  const { searchParams } = new URL(request.url)
   const program: Effect.Effect<unknown, ApiError> = pipe(
     Effect.tryPromise({
       try: async () => {
@@ -74,7 +81,7 @@ export async function PATCH() {
       Effect.tryPromise({
         try: async () => {
           const supabase = await createClient()
-          
+
           const { error } = await supabase.rpc("mark_notifications_read", {
             p_user_id: user.id,
             p_notification_ids: null
@@ -88,5 +95,10 @@ export async function PATCH() {
     )
   )
 
-  return exitResponse((data: unknown) => NextResponse.json(data))(program)
+  return exitResponse((data: unknown) => NextResponse.json(data), {
+    spanName: "notifications.patchAll",
+    method: "PATCH",
+    path: request.url,
+    searchParams
+  })(program)
 }

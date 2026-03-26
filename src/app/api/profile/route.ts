@@ -45,5 +45,10 @@ export async function PATCH(request: NextRequest) {
     })
   )
 
-  return exitResponse(NextResponse.json)(program)
+  return exitResponse(NextResponse.json, {
+    spanName: "profile.patch",
+    method: "PATCH",
+    path: request.url,
+    payload: await request.clone().json().catch(() => undefined)
+  })(program)
 }

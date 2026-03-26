@@ -19,17 +19,23 @@ const idParamSchema = S.Struct({
 
 /** @Route.Issues.GET */
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const resolvedParams = await params
+  const { searchParams } = new URL(request.url)
 
   const program: Effect.Effect<unknown, ApiError> = pipe(
     decodeParams(idParamSchema)(resolvedParams),
     Effect.flatMap(({ id }) => issueService.getIssueById(id))
   )
 
-  return exitResponse(NextResponse.json)(program)
+  return exitResponse(NextResponse.json, {
+    spanName: "issues.getById",
+    method: "GET",
+    path: request.url,
+    searchParams
+  })(program)
 }
 
 /** @Route.Issues.PATCH */
@@ -94,15 +100,21 @@ export async function PATCH(
     )
   )
 
-  return exitResponse(NextResponse.json)(program)
+  return exitResponse(NextResponse.json, {
+    spanName: "issues.patch",
+    method: "PATCH",
+    path: request.url,
+    payload: await request.clone().json().catch(() => undefined)
+  })(program)
 }
 
 /** @Route.Issues.DELETE */
 export async function DELETE(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const resolvedParams = await params
+  const { searchParams } = new URL(request.url)
 
   const program: Effect.Effect<unknown, ApiError> = pipe(
     decodeParams(idParamSchema)(resolvedParams),
@@ -140,5 +152,10 @@ export async function DELETE(
     )
   )
 
-  return exitResponse(NextResponse.json)(program)
+  return exitResponse(NextResponse.json, {
+    spanName: "issues.delete",
+    method: "DELETE",
+    path: request.url,
+    searchParams
+  })(program)
 }

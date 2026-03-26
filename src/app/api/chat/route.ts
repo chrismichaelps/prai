@@ -9,6 +9,7 @@ type ApiError = ValidationError
 /** @Route.Chat.Completions.POST */
 export async function POST(req: Request) {
   /** @Logic.Chat.StreamProgram */
+  const { searchParams } = new URL(req.url)
   const program: Effect.Effect<Response, ApiError> = pipe(
     decodeBody(
       S.Struct({
@@ -60,5 +61,11 @@ export async function POST(req: Request) {
   )
 
   /** @Logic.Effect.ExitResponse */
-  return exitResponse((response: Response) => response)(program)
+  return exitResponse((response: Response) => response, {
+    spanName: "chat.completions",
+    method: "POST",
+    path: req.url,
+    searchParams,
+    payload: await req.clone().json().catch(() => undefined)
+  })(program)
 }

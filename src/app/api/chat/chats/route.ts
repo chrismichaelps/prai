@@ -25,14 +25,16 @@ export async function GET(request: NextRequest) {
       })
     )(searchParams),
     Effect.flatMap((params) => 
-      pipe(
-        chatService.getChats(params.userId),
-        Effect.mapError((e) => new ChatDbError({ error: e }))
-      )
+      chatService.getChats(params.userId)
     )
   )
 
-  return exitResponse(NextResponse.json)(program)
+  return exitResponse(NextResponse.json, { 
+    spanName: "chat.chats.get",
+    method: "GET",
+    path: request.url,
+    searchParams
+  })(program)
 }
 
 /** @Route.Chat.Chats.POST */
@@ -41,14 +43,16 @@ export async function POST(request: NextRequest) {
   const program: Effect.Effect<unknown, ApiError> = pipe(
     decodeBody(CreateChatSchema)(request),
     Effect.flatMap((data) => 
-      pipe(
-        chatService.createChat(data.userId, data.title),
-        Effect.mapError((e) => new ChatDbError({ error: e }))
-      )
+      chatService.createChat(data.userId, data.title)
     )
   )
 
-  return exitResponse((value) => NextResponse.json(value, { status: HttpStatus.CREATED }))(program)
+  return exitResponse((value) => NextResponse.json(value, { status: HttpStatus.CREATED }), {
+    spanName: "chat.chats.create",
+    method: "POST",
+    path: request.url,
+    payload: await request.clone().json().catch(() => undefined)
+  })(program)
 }
 
 /** @Route.Chat.Chats.PATCH */
@@ -65,14 +69,16 @@ export async function PATCH(request: NextRequest) {
         return Effect.fail<ApiError>(new ValidationError({ message: "No updates provided" }))
       }
       
-      return pipe(
-        chatService.updateChat(data.chatId, updates),
-        Effect.mapError((e) => new ChatDbError({ error: e }))
-      )
+      return chatService.updateChat(data.chatId, updates)
     })
   )
 
-  return exitResponse(NextResponse.json)(program)
+  return exitResponse(NextResponse.json, {
+    spanName: "chat.chats.patch",
+    method: "PATCH",
+    path: request.url,
+    payload: await request.clone().json().catch(() => undefined)
+  })(program)
 }
 
 /** @Route.Chat.Chats.DELETE */
@@ -89,12 +95,14 @@ export async function DELETE(request: NextRequest) {
       })
     )(searchParams),
     Effect.flatMap((params) => 
-      pipe(
-        chatService.deleteAllChats(params.userId),
-        Effect.mapError((e) => new ChatDbError({ error: e }))
-      )
+      chatService.deleteAllChats(params.userId)
     )
   )
 
-  return exitResponse(() => new NextResponse(null, { status: HttpStatus.NO_CONTENT }))(program)
+  return exitResponse(() => new NextResponse(null, { status: HttpStatus.NO_CONTENT }), {
+    spanName: "chat.chats.deleteAll",
+    method: "DELETE",
+    path: request.url,
+    searchParams
+  })(program)
 }
