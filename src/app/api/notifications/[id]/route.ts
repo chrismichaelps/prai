@@ -18,7 +18,7 @@ const idParamSchema = S.Struct({
 
 /** @Route.Notifications.[id].PATCH */
 export async function PATCH(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const resolvedParams = await params
@@ -54,5 +54,9 @@ export async function PATCH(
     )
   )
 
-  return exitResponse((data: unknown) => NextResponse.json(data))(program)
+  return exitResponse((data: unknown) => NextResponse.json(data), {
+    spanName: "notifications.patchRead",
+    method: "PATCH",
+    path: request.url
+  })(program)
 }

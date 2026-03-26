@@ -23,12 +23,14 @@ export async function GET(request: NextRequest) {
       })
     )(searchParams),
     Effect.flatMap((params) => 
-      pipe(
-        chatService.getChatsCount(params.userId),
-        Effect.mapError((e) => new ChatDbError({ error: e }))
-      )
+      chatService.getChatsCount(params.userId)
     )
   )
 
-  return exitResponse((count) => NextResponse.json({ count }))(program)
+  return exitResponse((count) => NextResponse.json({ count }), {
+    spanName: "chat.chats.count",
+    method: "GET",
+    path: request.url,
+    searchParams
+  })(program)
 }

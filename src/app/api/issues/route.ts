@@ -37,7 +37,12 @@ export async function GET(request: NextRequest) {
     })
   )
 
-  return exitResponse(NextResponse.json)(program)
+  return exitResponse(NextResponse.json, {
+    spanName: "issues.list",
+    method: "GET",
+    path: request.url,
+    searchParams: new URL(request.url).searchParams
+  })(program)
 }
 
 /** @Route.Issues.POST */
@@ -75,5 +80,10 @@ export async function POST(request: NextRequest) {
     )
   )
 
-  return exitResponse((data) => NextResponse.json(data, { status: 201 }))(program)
+  return exitResponse((data) => NextResponse.json(data, { status: 201 }), {
+    spanName: "issues.create",
+    method: "POST",
+    path: request.url,
+    payload: await request.clone().json().catch(() => undefined)
+  })(program)
 }

@@ -3,6 +3,7 @@ import { getChangelogReleasesSync } from '@/lib/effect/services/Changelog'
 import { HttpStatus } from '@/app/api/_lib/constants/status-codes'
 
 /** @Route.Api.Releases */
+/** @Route.Api.Releases.GET */
 export async function GET(): Promise<NextResponse> {
   try {
     const releases = getChangelogReleasesSync()

@@ -63,5 +63,10 @@ export async function POST(
     )
   )
 
-  return exitResponse((data) => NextResponse.json(data, { status: 201 }))(program)
+  return exitResponse((data) => NextResponse.json(data, { status: 201 }), {
+    spanName: "issues.comments.create",
+    method: "POST",
+    path: request.url,
+    payload: await request.clone().json().catch(() => undefined)
+  })(program)
 }

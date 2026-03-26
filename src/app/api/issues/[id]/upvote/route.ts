@@ -19,7 +19,7 @@ const idParamSchema = S.Struct({
 
 /** @Route.Issues.Upvote.POST */
 export async function POST(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const resolvedParams = await params
@@ -47,5 +47,9 @@ export async function POST(
     })
   )
 
-  return exitResponse(NextResponse.json)(program)
+  return exitResponse(NextResponse.json, {
+    spanName: "issues.upvote",
+    method: "POST",
+    path: request.url
+  })(program)
 }

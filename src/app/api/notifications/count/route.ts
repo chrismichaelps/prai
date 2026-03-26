@@ -9,7 +9,8 @@ import { NotificationDbError } from "../services/notification"
 type ApiError = UnauthorizedError | NotificationDbError
 
 /** @Route.Notifications.Count.GET */
-export async function GET() {
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url)
   const program: Effect.Effect<unknown, ApiError> = pipe(
     Effect.tryPromise({
       try: async () => {
@@ -38,5 +39,10 @@ export async function GET() {
     )
   )
 
-  return exitResponse((data: unknown) => NextResponse.json(data))(program)
+  return exitResponse((data: unknown) => NextResponse.json(data), {
+    spanName: "notifications.count",
+    method: "GET",
+    path: request.url,
+    searchParams
+  })(program)
 }

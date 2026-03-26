@@ -17,18 +17,20 @@ export async function POST(request: NextRequest) {
   const program: Effect.Effect<unknown, ApiError> = pipe(
     decodeBody(CreateMessageSchema)(request),
     Effect.flatMap((msg) => 
-      pipe(
-        chatService.addMessage(msg.chatId, { 
-          role: msg.role, 
-          content: msg.content, 
-          metadata: msg.metadata 
-        }),
-        Effect.mapError((e) => new ChatDbError({ error: e }))
-      )
+      chatService.addMessage(msg.chatId, { 
+        role: msg.role, 
+        content: msg.content, 
+        metadata: msg.metadata 
+      })
     )
   )
 
-  return exitResponse((data) => NextResponse.json(data, { status: HttpStatus.CREATED }))(program)
+  return exitResponse((data) => NextResponse.json(data, { status: HttpStatus.CREATED }), {
+    spanName: "chat.messages.create",
+    method: "POST",
+    path: request.url,
+    payload: await request.clone().json().catch(() => undefined)
+  })(program)
 }
 
 /** @Route.Chat.Messages.GET */
@@ -45,12 +47,14 @@ export async function GET(request: NextRequest) {
       })
     )(searchParams),
     Effect.flatMap((params) => 
-      pipe(
-        chatService.getMessages(params.chatId),
-        Effect.mapError((e) => new ChatDbError({ error: e }))
-      )
+      chatService.getMessages(params.chatId)
     )
   )
 
-  return exitResponse(NextResponse.json)(program)
+  return exitResponse(NextResponse.json, {
+    spanName: "chat.messages.list",
+    method: "GET",
+    path: request.url,
+    searchParams
+  })(program)
 }

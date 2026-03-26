@@ -60,15 +60,21 @@ export async function PATCH(
     )
   )
 
-  return exitResponse((data) => NextResponse.json(data))(program)
+  return exitResponse((data) => NextResponse.json(data), {
+    spanName: "issues.comments.patch",
+    method: "PATCH",
+    path: request.url,
+    payload: await request.clone().json().catch(() => undefined)
+  })(program)
 }
 
 /** @Route.Issues.Comments.DELETE */
 export async function DELETE(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string; commentId: string }> }
 ) {
   const resolvedParams = await params
+  const { searchParams } = new URL(request.url)
 
   const program: Effect.Effect<unknown, ApiError> = pipe(
     decodeParams(ParamsSchema)(resolvedParams),
@@ -91,5 +97,10 @@ export async function DELETE(
     )
   )
 
-  return exitResponse((data) => NextResponse.json(data))(program)
+  return exitResponse((data) => NextResponse.json(data), {
+    spanName: "issues.comments.delete",
+    method: "DELETE",
+    path: request.url,
+    searchParams
+  })(program)
 }
