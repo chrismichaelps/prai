@@ -97,7 +97,7 @@ export const chatService = {
       })
     )
   },
-
+  
   /** @Logic.Api.Chat.DeleteChat */
   deleteChat: (chatId: string): Effect.Effect<void, ChatDbError> => {
     return pipe(

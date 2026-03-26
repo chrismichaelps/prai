@@ -172,7 +172,11 @@ export function ChatSidebar({ isOpen, onClose }: ChatSidebarProps) {
         const text = await res.text()
         throw new Error(text || `HTTP ${res.status}`)
       }
+      
       dispatch(removeChat(chatId))
+      if (currentChatId === chatId) {
+        dispatch(clearHistory())
+      }
       showToast(t('chat.archived') || 'Chat archived', 'success')
       setActiveMenu(null)
     } catch (err) {
