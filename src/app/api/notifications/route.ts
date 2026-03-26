@@ -3,8 +3,10 @@ import { NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { UnauthorizedError } from "@/app/api/_lib/errors"
 import { exitResponse } from "@/app/api/_lib/response"
-import { Effect, pipe as pipeEffect } from "effect"
+import { Effect, pipe } from "effect"
 import { NotificationDbError } from "./services/notification"
+
+type ApiError = UnauthorizedError | NotificationDbError
 
 export interface Notification {
   id: string
@@ -23,7 +25,7 @@ export interface Notification {
 
 /** @Route.Notifications.GET */
 export async function GET() {
-  const program = pipeEffect(
+  const program: Effect.Effect<unknown, ApiError> = pipe(
     Effect.tryPromise({
       try: async () => {
         const supabase = await createClient()
@@ -58,7 +60,7 @@ export async function GET() {
 
 /** @Route.Notifications.PATCH - Mark all as read */
 export async function PATCH() {
-  const program = pipeEffect(
+  const program: Effect.Effect<unknown, ApiError> = pipe(
     Effect.tryPromise({
       try: async () => {
         const supabase = await createClient()
