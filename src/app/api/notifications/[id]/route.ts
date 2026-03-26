@@ -2,16 +2,18 @@
 import type { NextRequest } from "next/server"
 import { NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
+import type { ValidationError } from "@/app/api/_lib/errors"
 import { UnauthorizedError } from "@/app/api/_lib/errors"
 import { decodeParams, S } from "@/app/api/_lib/validation"
+import { UuidSchema } from "@/app/api/_lib/validation/common"
 import { exitResponse } from "@/app/api/_lib/response"
-import { Effect, pipe as pipeEffect } from "effect"
+import { Effect, pipe } from "effect"
 import { NotificationDbError } from "../services/notification"
 
+type ApiError = ValidationError | UnauthorizedError | NotificationDbError
+
 const idParamSchema = S.Struct({
-  id: S.String.pipe(
-    S.filter((s: string) => s.trim().length > 0, { message: () => "Invalid notification ID" })
-  ),
+  id: UuidSchema,
 })
 
 /** @Route.Notifications.[id].PATCH */
@@ -21,24 +23,23 @@ export async function PATCH(
 ) {
   const resolvedParams = await params
 
-  const program = pipeEffect(
+  const program: Effect.Effect<unknown, ApiError> = pipe(
     decodeParams(idParamSchema)(resolvedParams),
-    Effect.flatMap(() =>
+    Effect.flatMap(({ id }) =>
       Effect.tryPromise({
         try: async () => {
           const supabase = await createClient()
           const { data: { session } } = await supabase.auth.getSession()
           if (!session?.user) throw new UnauthorizedError({ message: "Authentication required" })
-          return session.user
+          return { id, user: session.user }
         },
         catch: (e) => e instanceof UnauthorizedError ? e : new UnauthorizedError({ message: "Authentication required" }),
       })
     ),
-    Effect.flatMap((user) =>
+    Effect.flatMap(({ id, user }) =>
       Effect.tryPromise({
         try: async () => {
           const supabase = await createClient()
-          const { id } = resolvedParams
           
           const { error } = await supabase.rpc("mark_notifications_read", {
             p_user_id: user.id,

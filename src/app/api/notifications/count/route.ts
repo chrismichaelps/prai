@@ -1,4 +1,4 @@
-/** @Route.Notifications.Seen */
+/** @Route.Notifications.Count */
 import { NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { UnauthorizedError } from "@/app/api/_lib/errors"
@@ -8,8 +8,8 @@ import { NotificationDbError } from "../services/notification"
 
 type ApiError = UnauthorizedError | NotificationDbError
 
-/** @Route.Notifications.Seen.POST */
-export async function POST() {
+/** @Route.Notifications.Count.GET */
+export async function GET() {
   const program: Effect.Effect<unknown, ApiError> = pipe(
     Effect.tryPromise({
       try: async () => {
@@ -25,12 +25,13 @@ export async function POST() {
         try: async () => {
           const supabase = await createClient()
           
-          const { error } = await supabase.rpc("mark_notifications_seen", {
+          const { data: count, error } = await supabase.rpc("get_unread_notification_count", {
             p_user_id: user.id
           })
 
           if (error) throw new NotificationDbError({ error })
-          return { success: true }
+
+          return { count: count ?? 0 }
         },
         catch: (e) => new NotificationDbError({ error: e }),
       })

@@ -1,3 +1,4 @@
+-- Recreate get_notifications to fix is_read column mapping
 DROP FUNCTION IF EXISTS get_notifications(UUID, INT, INT) CASCADE;
 
 CREATE FUNCTION get_notifications(p_user_id UUID, p_limit INT DEFAULT 20, p_offset INT DEFAULT 0)
@@ -33,7 +34,7 @@ BEGIN
     n.actor_id,
     p.handle AS actor_handle,
     p.avatar_url AS actor_avatar_url,
-    n.read AS is_read,
+    (n.read_at IS NOT NULL) AS is_read,
     n.created_at
   FROM notifications n
   LEFT JOIN profiles p ON p.id = n.actor_id
