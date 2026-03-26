@@ -162,8 +162,8 @@ export function NotificationList() {
           transition={{ duration: 0.15 }}
           className={cn(
             "fixed md:absolute left-4 right-4 md:left-auto md:right-0 top-[76px] md:top-full md:mt-3 w-auto md:w-80 lg:w-96",
-            "bg-[#141414]/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden z-[110] origin-top md:origin-top-right transform-gpu",
-            "max-h-[70vh] flex flex-col"
+            "bg-[#141414]/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-[110] origin-top md:origin-top-right transform-gpu",
+            "max-h-[50vh] md:max-h-[70vh] flex flex-col"
           )}
         >
           <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
