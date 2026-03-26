@@ -1,26 +1,22 @@
 ---
-State_ID: BigInt(0xe4281d08)
-Git_SHA: e14bd7ccd7a813335a9fa967470e8061bd2124a0
+State_ID: BigInt(0x0fc98e3)
+Git_SHA: LATEST
 Grammar_Lock: "@root/hashes/grammar/typescript.hash.md"
 ---
 
-## @app.legal.cookies.page
+## @Legal.Cookies
 
 ### [Signatures]
 ```ts
-export default function CookiesPage() {
-  const { t } = useI18n();
+export default function CookiesPage(): JSX.Element
 ```
 
 ### [Governance]
-- **Encapsulation_Law:** Strictly adheres to file-level opacity rules.
-- **Grammar_Bridge:** Mirrors `@root/hashes/grammar/typescript.hash.md`
+- **I18n_Boundary:** Strictly resolves all cookie-related descriptions through the `useI18n()` hook, ensuring consistency with the global cookie banner.
+- **Motion_Entrance_Law:** Standard module-level entrance animation via `framer-motion`.
 
 ### [Semantic Hash]
-FMCF auto-generated constraint registry for app/legal/cookies/page.tsx
+The UI boundary for the Cookie Policy. It specifies the categories and intents of data storage used by the platform, organized in a high-fidelity visual article.
 
 ### [Linkage]
-- **Dependencies:** 
-  - react
-  - framer-motion
-  - @/lib/effect/I18nProvider
+- **Dependencies:** `@/lib/effect/I18nProvider`, `framer-motion`

@@ -1,10 +1,10 @@
 ---
-State_ID: BigInt(0x0fc98cc)
+State_ID: BigInt(0x0fc98e0)
 Git_SHA: LATEST
 Grammar_Lock: "@root/hashes/grammar/typescript.hash.md"
 ---
 
-## @App.Legal.Layout
+## @Legal.Layout
 
 ### [Signatures]
 ```ts
@@ -12,11 +12,11 @@ export default function LegalLayout({ children }: { children: React.ReactNode })
 ```
 
 ### [Governance]
-- **Static_Route_Law:** Pure server-side layout. Provides a consistent typographical container (`prose`, max-width constraints) for all descending legal documents.
-- **Seo_Inheritance:** Inherits global metadata from `RootLayout` but scopes UI changes (like minimal headers) out of the main App flow.
+- **Brand_Atmosphere_Sync:** Mandates the use of the `heroMorro` asset and a specific `primary/80` to `accent/70` gradient overlay to maintain visual alignment with the application's core aesthetic.
+- **Structural_Persistence:** Enforces a persistent `Header` and `Footer` placement around the legal content buffer.
 
 ### [Semantic Hash]
-Global wrapper for the `/legal/*` routing segment, ensuring consistent spacing and readability for dense text pages like Privacy and Terms.
+The architectural boundary for all legal and compliance content. It establishes a high-fidelity, thematic background that remains consistent across privacy, terms, and cookie policy pages.
 
 ### [Linkage]
-- **Dependencies:** `react`
+- **Dependencies:** `@/components/layout/Header`, `@/components/layout/Footer`, `next/image`

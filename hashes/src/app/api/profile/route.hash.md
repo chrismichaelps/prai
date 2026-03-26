@@ -1,34 +1,13 @@
----
-State_ID: BigInt(0x0)
-Git_SHA: LATEST
-Grammar_Lock: "@root/hashes/grammar/typescript.hash.md"
----
+# Contract: src/app/api/profile/route.ts
+- **Signature**: `app_api_profile_route`
+- **Role**: Profile management API.
 
-## @Route.Profile
+## Linkage
+- **Grammar**: [typescript.hash.md](file:///Users/chrismperez/Desktop/chris-projects/prai/hashes/grammar/typescript.hash.md)
+- **Dependencies**:
+  - `next/server`
+  - `@supabase/ssr`
+  - `./schemas`
 
-### [Routes]
-| Method | Handler | Description |
-|--------|---------|-------------|
-| PATCH | `PATCH` | Update user profile |
-
-### [Signatures]
-```ts
-export async function PATCH(request: NextRequest): Promise<NextResponse>
-```
-
-### [Governance]
-- **Schema_Law:** Input validated via `UpdateProfileSchema` from `./schemas`.
-- **Response_Law:** Uses `exitResponse` helper for Effect → NextResponse conversion.
-- **Validation_Law:** Rejects requests with no valid update fields.
-
-### [Implementation Notes]
-- **PATCH:** Updates profile fields (display_name, bio, language) via Supabase.
-- **Validation:** Returns `ValidationError` if no valid fields provided.
-- **RLS:** Uses server-side Supabase client with service role key.
-
-### [Semantic Hash]
-API route for user profile updates. Accepts partial updates for display_name, bio, and language fields.
-
-### [Linkage]
-- **Upstream:** `@/app/api/_lib/validation`, `@/app/api/_lib/response`
-- **Downstream:** Profile component (`src/app/profile/`)
+## Architectural Hash
+- Logic: GET and PATCH for profile data. Secure via Supabase session.

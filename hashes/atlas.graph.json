@@ -827,6 +827,41 @@
       "type": "LAYER_DEPENDENCY",
       "impact": "HIGH",
       "reason": "Binds the architectural execution flow directly to the downstream dependency."
+    },
+    {
+      "from": "@root/src/app/issues/page.tsx",
+      "to": "@root/src/app/issues/IssuesClient.tsx",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Anchors the Issue Tracker list view to the interactive client component."
+    },
+    {
+      "from": "@root/src/app/issues/[id]/page.tsx",
+      "to": "@root/src/app/issues/[id]/IssueDetailClient.tsx",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Anchors the Issue Detail view to the interactive client component."
+    },
+    {
+      "from": "@root/src/app/api/issues/route.ts",
+      "to": "@root/src/app/api/issues/services/issue.ts",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Delegates domain logic and database operations to the Issue Service layer."
+    },
+    {
+      "from": "@root/src/app/api/notifications/route.ts",
+      "to": "@root/src/app/api/notifications/services/notification.ts",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Delegates domain logic and notification dispatching to the Service layer."
+    },
+    {
+      "from": "@root/src/app/api/profile/route.ts",
+      "to": "@root/src/app/api/profile/schemas/profile.schemas.ts",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Enforces DTO validation constraints on profile payloads."
     }
   ]
 }
