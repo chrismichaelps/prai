@@ -29,6 +29,7 @@ export class SeoService extends Effect.Service<SeoService>()("Seo", {
           { path: "/chat", priority: 0.9, changeFrequency: "daily" },
           { path: "/releases", priority: 0.8, changeFrequency: "weekly" },
           { path: "/about", priority: 0.7, changeFrequency: "weekly" },
+          { path: "/issues", priority: 0.6, changeFrequency: "weekly" },
           { path: "/legal/terms", priority: 0.5, changeFrequency: "monthly" },
           { path: "/legal/privacy", priority: 0.5, changeFrequency: "monthly" },
           { path: "/legal/cookies", priority: 0.5, changeFrequency: "monthly" }
@@ -51,7 +52,7 @@ export class SeoService extends Effect.Service<SeoService>()("Seo", {
           rules: {
             userAgent: "*",
             allow: "/",
-            disallow: ["/api/"],
+            disallow: ["/api/", "/profile/", "/auth/"],
           },
           sitemap: `${baseUrl}/sitemap.xml`,
         }
