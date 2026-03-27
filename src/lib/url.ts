@@ -29,15 +29,24 @@ export const extractUrls = (text: string): string[] => {
   return [...new Set(urls)]
 }
 
-export const toSource = (url: string, verified = false): SearchResult => {
+export const toSource = (
+  url: string, 
+  verified = false, 
+  title?: string, 
+  snippet?: string
+): SearchResult => {
   try {
     const domain = new URL(url).hostname.replace("www.", "")
     return {
-      title: domain, url, source: domain, verified,
+      title: title || domain,
+      url, 
+      source: domain, 
+      verified,
+      snippet,
       icon: `https://www.google.com/s2/favicons?domain=${domain}&sz=32`
     }
   } catch {
-    return { title: url, url, verified }
+    return { title: title || url, url, verified, snippet }
   }
 }
 

@@ -1,6 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import type { ChatMessage, AdaptiveData, Suggestion, SearchResult } from '@/types/chat';
+import { ChatRole } from '@/types/chat';
 
 /** @Type.Chat */
 export interface Chat {
@@ -89,7 +90,7 @@ export const chatSlice = createSlice({
     /** @Store.Action.Chat.UpdateLastMessage */
     updateLastMessage: (state, action: PayloadAction<string | { content?: string; metadata?: ChatMessage['metadata'] }>) => {
       const last = state.messages[state.messages.length - 1];
-      if (last && last.role === 'assistant') {
+      if (last && last.role === ChatRole.ASSISTANT) {
         if (typeof action.payload === 'string') {
           last.content = action.payload;
         } else {
@@ -150,7 +151,7 @@ export const chatSlice = createSlice({
         edited: true,
       };
       const lastIndex = state.messages.length - 1;
-      if (state.messages[lastIndex]?.role === 'assistant') {
+      if (state.messages[lastIndex]?.role === ChatRole.ASSISTANT) {
         state.messages.pop();
       }
       state.activeAdaptiveData = [];

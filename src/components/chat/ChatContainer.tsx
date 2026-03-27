@@ -303,7 +303,9 @@ export const ChatContainer: React.FC = () => {
 
     const observer = new ResizeObserver((entries) => {
       for (const _entry of entries) {
-        scrollToBottom('auto')
+        if (isLockedToBottom) {
+          scrollToBottom('auto')
+        }
       }
     })
 
