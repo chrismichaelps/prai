@@ -273,7 +273,17 @@ export type Database = {
           id: string
           is_admin: boolean
           language: string | null
+          last_reset_date: string
+          messages_limit: number
+          messages_used: number
           preferences: Json | null
+          reset_interval: string
+          subscription_end_date: string | null
+          subscription_start_date: string | null
+          subscription_status: string
+          subscription_tier: string
+          total_cost: number
+          total_tokens_used: number
           updated_at: string | null
         }
         Insert: {
@@ -285,7 +295,17 @@ export type Database = {
           id: string
           is_admin?: boolean
           language?: string | null
+          last_reset_date?: string
+          messages_limit?: number
+          messages_used?: number
           preferences?: Json | null
+          reset_interval?: string
+          subscription_end_date?: string | null
+          subscription_start_date?: string | null
+          subscription_status?: string
+          subscription_tier?: string
+          total_cost?: number
+          total_tokens_used?: number
           updated_at?: string | null
         }
         Update: {
@@ -297,7 +317,17 @@ export type Database = {
           id?: string
           is_admin?: boolean
           language?: string | null
+          last_reset_date?: string
+          messages_limit?: number
+          messages_used?: number
           preferences?: Json | null
+          reset_interval?: string
+          subscription_end_date?: string | null
+          subscription_start_date?: string | null
+          subscription_status?: string
+          subscription_tier?: string
+          total_cost?: number
+          total_tokens_used?: number
           updated_at?: string | null
         }
         Relationships: []
@@ -329,6 +359,33 @@ export type Database = {
       get_unread_notification_count: {
         Args: { p_user_id: string }
         Returns: number
+      }
+      get_user_usage: {
+        Args: { p_user_id: string }
+        Returns: {
+          can_send: boolean
+          last_reset_date: string
+          messages_limit: number
+          messages_remaining: number
+          messages_used: number
+          reset_interval: string
+          subscription_tier: string
+          usage_percentage: number
+        }[]
+      }
+      increment_token_usage: {
+        Args: { p_cost?: number; p_tokens?: number; p_user_id: string }
+        Returns: undefined
+      }
+      increment_user_usage: {
+        Args: { p_amount?: number; p_user_id: string }
+        Returns: {
+          can_send: boolean
+          messages_limit: number
+          messages_remaining: number
+          messages_used: number
+          usage_percentage: number
+        }[]
       }
       mark_notifications_read: {
         Args: { p_notification_ids?: string[]; p_user_id: string }

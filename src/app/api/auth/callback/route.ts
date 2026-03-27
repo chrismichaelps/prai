@@ -129,6 +129,11 @@ export async function GET(request: NextRequest) {
       display_name: displayName,
       avatar_url: (meta?.avatar_url as string | undefined) || null,
       handle: handle,
+      subscription_tier: 'free',
+      subscription_status: 'active',
+      messages_limit: 100,
+      reset_interval: 'daily',
+      last_reset_date: new Date().toISOString(),
     }, { onConflict: 'id' })
     
     if (profileError) {
