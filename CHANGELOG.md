@@ -1,5 +1,33 @@
 # Changelog
 
+## 2026-03-27
+
+- Added full 1:1 FMCF Hash Registry conformity ensuring all `src/` modules strictly mirror corresponding `.hash.md` architectural contracts
+- Improved `atlas.graph.json` registry map by manually refining dependency node reasons with context-specific rationale
+- Configured OpenRouter native web search with structured contexts for richer tourism domain accuracy
+- Fixed chat UI usability bugs during active streaming (improved markdown link visibility and removed aggressive auto-scroll hijacking)
+
+## 2026-03-26
+
+- Fixed chat memory loss bugs to preserve messages when archiving and restoring chat sessions (#60)
+- Added Effect-native telemetry logging and tracing via `@vercel/otel` and `Effect.withSpan` (#59)
+
+## 2026-03-25
+
+- Added core issue tracker frontend and database migrations (#47)
+- Added complete notification system v2 and v3 featuring optimistic read status and accurately synchronized unread badges (#43, #51)
+- Added user search functionality and synchronized database types (#44)
+- Added admin badges and restricted issue status updates to administrative roles only (#42)
+- Added optimistic UI updates for appending and editing issue comments to avoid full-screen reloads (#50)
+- Removed monolithic tracking of `supabase/` definitions to clean up repository state (#54, #48)
+- Added `google-site-verification` meta tag for SEO indexing
+
+## 2026-03-24
+
+- Added dedicated Release Notes UI implementation, Metadata blocks, and API endpoints (#38)
+- Fixed Google OAuth authentication flows using popup mode, One Tap, and server-side sign-in fallbacks to improve production stability
+- Fixed Supabase client import resolution paths for robust build environments (#40)
+
 ## 2026-03-23
 
 - Added comprehensive validation layer integrated into `src/app/api/_lib/validation/` (`common.ts` and `params.ts`)
