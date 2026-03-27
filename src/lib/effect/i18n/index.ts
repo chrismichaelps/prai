@@ -28,6 +28,7 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "nav.actions": "Explora",
     "nav.releases": "Novedades",
     "nav.issues": "Reportes",
+    "nav.usage": "Uso",
 
 
     // Hero
@@ -289,7 +290,32 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "error.api.502": "El modelo seleccionado no está disponible. Intenta con otro.",
     "error.api.503": "No hay proveedores disponibles. Intenta más tarde.",
     "error.api.unknown": "Ocurrió un error inesperado. Por favor, intenta de nuevo.",
-    "error.api.close": "Cerrar"
+    "error.api.close": "Cerrar",
+
+    // Usage
+    "usage.title": "Tu Uso",
+    "usage.used": "Has usado",
+    "usage.of": "de",
+    "usage.messages": "mensajes",
+    "usage.remaining": "Te quedan",
+    "usage.limit_reached": "Límite alcanzado",
+    "usage.upgrade": "Actualizar plan",
+    "usage.warning": "Casi llegas a tu límite",
+    "usage.daily_reset": "Se renueva diariamente",
+    "usage.description": "Gestiona tu uso de mensajes",
+    "usage.sign_in_required": "Inicia sesión para continuar",
+    "usage.report_issue": "¿Problemas? Repórtanos",
+    "usage.messages_used": "Mensajes utilizados",
+    "usage.last_reset": "Último reset:",
+    "usage.next_reset": "Próximo reset:",
+    "usage.remaining_label": "Restantes",
+    "usage.limit_label": "Límite",
+    "usage.report_quota_issue": "¿Problemas con tu cuota? Repórtanos",
+    "usage.reached_limit": "Has alcanzado tu límite",
+    "usage.reached_limit_messages": "Has alcanzado tu límite de mensajes",
+    "usage.almost_limit": "Casi llegas a tu límite",
+    "usage.almost_limit_messages": "Casi llegas a tu límite de mensajes",
+    "usage.daily_reset_notice": "Tu cuota se reinicia diariamente."
   },
   en: {
     // Brand & General
@@ -316,6 +342,7 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "nav.actions": "Explore",
     "nav.releases": "Updates",
     "nav.issues": "Issues",
+    "nav.usage": "Usage",
 
 
     // Hero
@@ -576,7 +603,32 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "error.api.502": "Selected model is unavailable. Try another.",
     "error.api.503": "No providers available. Try again later.",
     "error.api.unknown": "An unexpected error occurred. Please try again.",
-    "error.api.close": "Close"
+    "error.api.close": "Close",
+
+    // Usage
+    "usage.title": "Your Usage",
+    "usage.used": "You have used",
+    "usage.of": "of",
+    "usage.messages": "messages",
+    "usage.remaining": "You have",
+    "usage.limit_reached": "Limit reached",
+    "usage.upgrade": "Upgrade plan",
+    "usage.warning": "Almost at your limit",
+    "usage.daily_reset": "Resets daily",
+    "usage.description": "Manage your message usage",
+    "usage.sign_in_required": "Sign in to continue",
+    "usage.report_issue": "Problems? Report them",
+    "usage.messages_used": "Messages used",
+    "usage.last_reset": "Last reset:",
+    "usage.next_reset": "Next reset:",
+    "usage.remaining_label": "Remaining",
+    "usage.limit_label": "Limit",
+    "usage.report_quota_issue": "Problems with your quota? Report them",
+    "usage.reached_limit": "You have reached your limit",
+    "usage.reached_limit_messages": "You have reached your message limit",
+    "usage.almost_limit": "Almost at your limit",
+    "usage.almost_limit_messages": "Almost at your message limit",
+    "usage.daily_reset_notice": "Your quota resets daily."
   }
 }
 

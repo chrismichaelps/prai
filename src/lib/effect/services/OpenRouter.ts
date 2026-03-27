@@ -11,6 +11,7 @@ import { createSearchContext, createSearchMessage, getDiscoveryQuery } from "./s
 
 export interface ChatResponse {
   readonly content: string
+  readonly reasoning?: string
   readonly annotations: readonly {
     readonly type: string
     readonly url_citation?: {
@@ -38,7 +39,8 @@ export class OpenRouter extends Effect.Service<OpenRouter>()("OpenRouter", {
 
     const chat = (
       messages: readonly ChatMessage[],
-      searchOptions?: PuertoRicoSearchOptions
+      searchOptions?: PuertoRicoSearchOptions,
+      sessionId?: string
     ): Stream.Stream<ChatResponse, OpenRouterError> => {
       const systemPrompt = buildSystemPrompt(searchOptions)
       const enhancedMessages: ChatMessage[] = [
@@ -46,32 +48,21 @@ export class OpenRouter extends Effect.Service<OpenRouter>()("OpenRouter", {
         ...messages
       ]
 
-      const requestBody = {
+      /** @Logic.Chat.BuildRequestBody */
+      const requestBody: Record<string, unknown> = {
         model: config.models.default,
         messages: enhancedMessages,
         stream: config.chatRequestConfig.stream,
         temperature: config.chatRequestConfig.temperature,
         max_tokens: config.chatRequestConfig.maxTokens,
-        plugins: [{
-          id: "web",
-          enabled: true,
-          max_results: 3,
-          include_domains: [
-            "discoverpuertorico.com",
-            "seepuertorico.com",
-            "elnuevodia.com",
-            "primerahora.com",
-            "lonelyplanet.com/puerto-rico",
-            "booking.com/puerto-rico",
-            "youtube.com",
-            "instagram.com",
-            "facebook.com"
-          ]
-        }],
         provider: {
           allow_fallbacks: true,
           data_collection: "deny"
         }
+      }
+
+      if (sessionId) {
+        requestBody.session_id = sessionId
       }
 
       const responseEffect = HttpClientRequest.post(`${config.openRouterBaseUrl}/chat/completions`).pipe(
@@ -105,14 +96,16 @@ export class OpenRouter extends Effect.Service<OpenRouter>()("OpenRouter", {
           try {
             const parsed = JSON.parse(jsonStr)
             const content = parsed.choices?.[0]?.delta?.content || ""
+            /** @Logic.Chat.ExtractReasoning */
+            const reasoning = parsed.choices?.[0]?.delta?.reasoning || ""
             // OpenRouter may return annotations on either delta or message depending on the chunk type
             const annotations =
               parsed.choices?.[0]?.delta?.annotations ||
               parsed.choices?.[0]?.message?.annotations ||
               []
 
-            if (content || annotations.length > 0) {
-              return Option.some({ content, annotations } as ChatResponse)
+            if (content || reasoning || annotations.length > 0) {
+              return Option.some({ content, reasoning: reasoning || undefined, annotations } as ChatResponse)
             }
             return Option.none()
           } catch {

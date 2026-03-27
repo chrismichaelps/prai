@@ -15,6 +15,8 @@ import heroImage from '@/assets/condado-ocean-dusk.png'
 import { useToast } from '@/components/ui/ToastProvider'
 import { useAppSelector, useAppDispatch } from '@/store/hooks'
 import { setChats } from '@/store/slices/chatSlice'
+import { useUsage } from '@/hooks/useUsage'
+import { TierBadge } from '@/components/usage/TierBadge'
 
 const toLocale = (value: string | undefined | null, fallback: Locale = 'es'): Locale => {
   if (value === 'es' || value === 'en') return value
@@ -27,6 +29,7 @@ export function ProfileClient() {
   const { showToast } = useToast()
   const dispatch = useAppDispatch()
   const chats = useAppSelector(state => state.chat.chats)
+  const { usage, fetchUsage } = useUsage()
   const [chatsCount, setChatsCount] = useState(0)
   
   const [isEditing, setIsEditing] = useState(false)
@@ -51,6 +54,10 @@ export function ProfileClient() {
       setLanguage(toLocale(profile.language))
     }
   }, [profile])
+
+  useEffect(() => {
+    fetchUsage()
+  }, [fetchUsage])
 
   useEffect(() => {
     if (user) {
@@ -352,7 +359,10 @@ export function ProfileClient() {
                       <p className="text-white/40 text-xs mb-1 font-medium uppercase tracking-wider">
                         {t('profile.display_name')}
                       </p>
-                      <p className="text-xl font-semibold text-white">{currentDisplayName}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-xl font-semibold text-white">{currentDisplayName}</p>
+                        <TierBadge tier={usage?.subscription_tier} />
+                      </div>
                     </div>
 
                     <div>

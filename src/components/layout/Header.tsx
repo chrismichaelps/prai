@@ -15,6 +15,7 @@ import {
   LogOut,
   LogIn,
   Bug,
+  BarChart3,
 } from 'lucide-react'
 import { PraiLogo } from '@/components/brand/PraiLogo'
 import { useI18n } from '@/lib/effect/I18nProvider'
@@ -272,6 +273,16 @@ export function Header({
                               </div>
 
                               <div className="py-2">
+                                <button
+                                  onClick={() => {
+                                    setIsDropdownOpen(false)
+                                    router.push('/usage')
+                                  }}
+                                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-white/70 hover:text-white hover:bg-white/5 transition-colors border-b border-white/5"
+                                >
+                                  <BarChart3 className="w-4 h-4" />
+                                  {t('nav.usage')}
+                                </button>
                                 <button
                                   onClick={() => {
                                     setIsDropdownOpen(false)

@@ -10,10 +10,13 @@ import {
   FileText,
   Bug,
   PenLine,
+  BarChart3,
 } from 'lucide-react'
 import Image from 'next/image'
 import { useAuth } from '@/contexts/AuthContext'
 import { useI18n } from '@/lib/effect/I18nProvider'
+import { useUsage } from '@/hooks/useUsage'
+import { TierBadge } from '@/components/usage/TierBadge'
 import { cn } from '@/lib/utils'
 
 interface SidebarProfileProps {
@@ -23,6 +26,7 @@ interface SidebarProfileProps {
 export function SidebarProfile({ onSignOut }: SidebarProfileProps) {
   const { t } = useI18n()
   const { user, profile, signOut } = useAuth()
+  const { usage, fetchUsage } = useUsage()
   const [isPopoverOpen, setIsPopoverOpen] = useState(false)
   const [activeTab, setActiveTab] = useState<'main' | 'help'>('main')
   const popoverRef = useRef<HTMLDivElement>(null)
@@ -43,6 +47,10 @@ export function SidebarProfile({ onSignOut }: SidebarProfileProps) {
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
+
+  useEffect(() => {
+    fetchUsage()
+  }, [fetchUsage])
 
   if (!user) return null
 
@@ -171,6 +179,7 @@ export function SidebarProfile({ onSignOut }: SidebarProfileProps) {
                           <p className="text-sm font-bold text-white truncate">
                             {userName}
                           </p>
+                          <TierBadge tier={usage?.subscription_tier} />
                           <span className={cn(
                             "text-[10px] px-1.5 py-0.5 rounded-full font-semibold flex-shrink-0",
                             isAdmin 
@@ -199,6 +208,17 @@ export function SidebarProfile({ onSignOut }: SidebarProfileProps) {
                         </span>
                       </div>
                       <span>{t('auth.profile')}</span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setIsPopoverOpen(false)
+                        window.open('/usage', '_blank')
+                      }}
+                      className="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/5 text-white/80 hover:text-white transition-all text-sm group"
+                    >
+                      <BarChart3 className="w-4 h-4" />
+                      <span>{t('nav.usage')}</span>
                     </button>
 
                     <div className="h-px bg-white/5 my-1" />
