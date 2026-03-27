@@ -862,6 +862,97 @@
       "type": "LAYER_DEPENDENCY",
       "impact": "HIGH",
       "reason": "Enforces DTO validation constraints on profile payloads."
+    },
+    {
+      "from": "@root/src/components/chat/SidebarProfile.tsx",
+      "to": "@/contexts/AuthContext",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Binds the user identity context to conditionally render the profile sidebar."
+    },
+    {
+      "from": "@root/src/components/chat/SidebarProfile.tsx",
+      "to": "@/lib/effect/I18nProvider",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Consumes internationalization context for localized profile actions and labels."
+    },
+    {
+      "from": "@root/src/components/mentions/MentionInput.tsx",
+      "to": "@/lib/utils",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Utilizes tailwind merge and class name utilities for dynamic UI styling."
+    },
+    {
+      "from": "@root/src/components/notifications/NotificationBell.tsx",
+      "to": "@/hooks/useNotifications",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Delegates all real-time notification fetching and read-status logic to the custom hook."
+    },
+    {
+      "from": "@root/src/hooks/useNotifications.ts",
+      "to": "@/lib/supabase/client",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Initializes the Supabase browser connection to subscribe to postgres_changes."
+    },
+    {
+      "from": "@root/src/hooks/useNotifications.ts",
+      "to": "@/contexts/AuthContext",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Extracts the active user ID to strictly scope notification channel subscriptions."
+    },
+    {
+      "from": "@root/src/instrumentation.ts",
+      "to": "@vercel/otel",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Registers the telemetry execution layer for Next.js metrics and tracing."
+    },
+    {
+      "from": "@root/src/lib/effect/constants/SearchConstants.ts",
+      "to": "../types/search",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Enforces strict structural typing on search categories and media types."
+    },
+    {
+      "from": "@root/src/lib/effect/schemas/IssueSchema.ts",
+      "to": "effect",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Imports Schema constructors to declaratively define the Issue domain models."
+    },
+    {
+      "from": "@root/src/lib/effect/services/search.ts",
+      "to": "../types/search",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Consumes the search domain definitions to configure PuertoRicoSearchOptions."
+    },
+    {
+      "from": "@root/src/lib/effect/services/search.ts",
+      "to": "../constants/SearchConstants",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Imports the static LLM instructions, categories, and priority sources for the search prompt builder."
+    },
+    {
+      "from": "@root/src/lib/effect/types/search.ts",
+      "to": "effect",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Extends Data.Class from the effect library to create immutable configuration classes."
+    },
+    {
+      "from": "@root/src/store/slices/issuesSlice.ts",
+      "to": "@/lib/effect/schemas/IssueSchema",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Leverages the core domain issue and comment types to strictly type the Redux state."
     }
   ]
 }
