@@ -15,6 +15,7 @@ export function Header(props: { className?: string, transparent?: boolean, varia
 - **Client_Law:** Pure `'use client'` component managing layout interactions.
 - **Auth_Hook_Integration:** Utilizes `useAuth()` to dynamically render SignIn, Profile Dropdown, or LogOut options based on Supabase session state.
 - **Z_Index_Stacking:** Mandates `z-[100]` to explicitly resolve overlap with Chat Sidebar and Map components.
+- **Usage_Law:** Authenticated users see Usage link in dropdown menu (navigates to `/usage`).
 
 ### [Semantic Hash]
 Global application header handling brand navigation, responsive hamburger menu, and authentication gateways. Dynamic dropdowns scale based on user roles and locale strings.

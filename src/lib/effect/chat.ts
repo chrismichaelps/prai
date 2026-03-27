@@ -78,19 +78,20 @@ export const initChat = Effect.gen(function* () {
 
 /** @Logic.Chat.GenerateResponse.Internal */
 /** @Logic.Chat.GenerateResponse */
-const generateResponse: Effect.Effect<void, OpenRouterError, OpenRouter | Redux> = Effect.gen(function* () {
+const generateResponse = (sessionId?: string): Effect.Effect<void, OpenRouterError | void, OpenRouter | Redux> => Effect.gen(function* () {
   /** @Logic.OpenRouter.Client */
   const openRouter = yield* OpenRouter
   /** @Store.Selector.Chat.Messages */
   const messages = yield* Redux.getState().pipe(Effect.map((s) => s.chat.messages))
   /** @Logic.OpenRouter.ChatStream */
-  const stream = openRouter.chat(messages)
+  const stream = openRouter.chat(messages, undefined, sessionId)
 
   /** @Store.Action.Chat.AddAssistantMessage */
   yield* Redux.dispatch(addMessage({ role: ChatRole.ASSISTANT, content: "" }))
 
   /** @Logic.Chat.Refs */
   const contentRef = yield* Ref.make("")
+  const reasoningRef = yield* Ref.make("")
 
   /** @Logic.Chat.SourceTracking */
   const sourcesRef = yield* Ref.make<SearchResult[]>([])
@@ -107,7 +108,17 @@ const generateResponse: Effect.Effect<void, OpenRouterError, OpenRouter | Redux>
   yield* Stream.runForEach(stream, (response: ChatResponse) =>
     Effect.gen(function* () {
       const content = response.content
+      const reasoning = response.reasoning
       const annotations = response.annotations
+
+      /** @Logic.Chat.ProcessReasoning */
+      if (reasoning) {
+        yield* Ref.update(reasoningRef, (prev) => prev + reasoning)
+        const currentReasoning = yield* Ref.get(reasoningRef)
+        yield* Redux.dispatch(updateLastMessage({ 
+          metadata: { thought: currentReasoning, isThinking: true } 
+        }))
+      }
 
       /** @Logic.Chat.ProcessAnnotations */
       if (annotations?.length) {
@@ -146,8 +157,27 @@ const generateResponse: Effect.Effect<void, OpenRouterError, OpenRouter | Redux>
   /** @Logic.Chat.PostStream */
   const assistantContent = yield* Ref.get(contentRef)
 
-  // Flush final sources from annotations
+  /** @Logic.Chat.ClearThinking */
+  yield* Redux.dispatch(updateLastMessage({ 
+    metadata: { isThinking: false } 
+  }))
+
+  /** @Logic.Chat.FlushSources */
   yield* syncSources()
+
+  /** @Logic.Chat.TrackUsage */
+  yield* Effect.asVoid(Effect.tryPromise({
+    try: async () => {
+      await fetch('/api/user/usage/increment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: 1, tokens: 0, cost: 0 })
+      })
+    },
+    catch: () => {
+      // Silent failure - usage tracking should not block chat
+    }
+  }))
 
   const matches = [...assistantContent.matchAll(/```json\n([\s\S]*?)\n```\n/g)]
 
@@ -245,7 +275,7 @@ export const sendChatMessage = (
       }
     }
 
-    yield* generateResponse
+    yield* generateResponse(currentChatId ?? undefined)
 
     if (currentChatId) {
       const state = yield* Redux.getState()
@@ -304,7 +334,9 @@ export const regenerateResponse: Effect.Effect<void, never, OpenRouter | Redux |
     yield* Redux.dispatch(setError(null))
     yield* Redux.dispatch(setSuggestions([]))
 
-    yield* generateResponse
+    const state = yield* Redux.getState()
+    const currentChatId = state.chat.currentChatId
+    yield* generateResponse(currentChatId ?? undefined)
   }).pipe(
     Effect.ensuring(Redux.dispatch(setLoading(false))),
     Effect.catchAll((err) =>

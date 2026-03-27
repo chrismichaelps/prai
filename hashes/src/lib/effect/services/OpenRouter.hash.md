@@ -19,7 +19,7 @@ export class OpenRouter extends Effect.Service<OpenRouter>()("OpenRouter", {
 **Interface:**
 ```ts
 interface OpenRouterShape {
-  readonly chat: (messages: readonly ChatMessage[]) => Stream.Stream<string, OpenRouterError, never>
+  readonly chat: (messages: readonly ChatMessage[], searchOptions?: PuertoRicoSearchOptions, sessionId?: string) => Stream.Stream<ChatResponse, OpenRouterError, never>
 }
 ```
 
@@ -31,9 +31,11 @@ interface OpenRouterShape {
 
 ### [Implementation Notes]
 - **HTTP Referer:** The HTTP-Referer header is dynamically sourced from `ConfigService.siteUrl` rather than hardcoded to ensure full portability across environments.
+- **Session_ID:** Optional `session_id` parameter passed to OpenRouter for grouping generations into sessions (debug chains, full conversation tracking).
+- **Response:** Returns `ChatResponse` containing `content`, `reasoning`, and `annotations` (not raw string).
 
 ### [Semantic Hash]
-OpenAI-compatible streaming chat completion via OpenRouter.ai HTTP API. Returns `Stream<string, OpenRouterError>` of raw SSE chunks.
+OpenAI-compatible streaming chat completion via OpenRouter.ai HTTP API. Returns `Stream<ChatResponse, OpenRouterError>` with content, reasoning, and annotations. Supports optional session_id for conversation grouping.
 
 ### [Linkage]
 - **Upstream:** `@root/src/lib/effect/services/Config.ts`, `@root/src/lib/effect/errors.ts`

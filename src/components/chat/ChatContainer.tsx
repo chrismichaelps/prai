@@ -11,10 +11,18 @@ import { DiscoveryLoader } from './DiscoveryLoader'
 import { useI18n } from '@/lib/effect/I18nProvider'
 import { MemoizedMessageBubble } from './MessageBubble'
 import { SourcesSidebar } from './SourcesSidebar'
-import { ArrowDown, AlertCircle, Loader2, Mic, Square } from 'lucide-react'
+import { ArrowDown, AlertCircle, Loader2, Mic, Square, X } from 'lucide-react'
+/** @Module.UI.Motion */
+import { motion } from 'framer-motion'
+/** @Module.UI.Utils */
 import { cn } from '@/lib/utils'
+/** @Module.Context.Auth */
 import { useAuth } from '@/contexts/AuthContext'
+/** @Module.Next.Navigation */
 import { useRouter, usePathname } from 'next/navigation'
+/** @Module.Hook.Usage */
+import { useUsage } from '@/hooks/useUsage'
+import type { UserUsage } from '@/hooks/useUsage'
 
 /** @UI.Chat.AdaptiveCard.Lazy */
 const AdaptiveCard = dynamic(
@@ -25,6 +33,7 @@ const AdaptiveCard = dynamic(
   },
 )
 
+/** @UI.Chat.Root */
 export const Chat = {
   Root: ({
     children,
@@ -42,6 +51,7 @@ export const Chat = {
       {children}
     </main>
   ),
+  /** @UI.Chat.Messages */
   Messages: ({
     children,
     scrollAreaRef,
@@ -72,6 +82,7 @@ export const Chat = {
       </div>
     </div>
   ),
+  /** @UI.Chat.Input */
   Input: ({
     value,
     onChange,
@@ -85,11 +96,16 @@ export const Chat = {
     onMicClick,
     stopResponse,
     t,
+    isAtLimit,
+    isAuthenticated,
+    usage,
+    isUsageVisible,
+    onToggleUsage,
   }: {
     value: string
     onChange: (val: string) => void
     onScrollToBottom: () => void
-    suggestions?: any[]
+    suggestions?: { label: string; action?: string }[]
     onSend: (text?: string) => void
     isLoading: boolean
     showScrollButton: boolean
@@ -98,6 +114,11 @@ export const Chat = {
     onMicClick: () => void
     stopResponse: () => void
     t: (key: string) => string
+    isAtLimit: boolean
+    isAuthenticated: boolean
+    usage: UserUsage | null
+    isUsageVisible: boolean
+    onToggleUsage: () => void
   }) => (
     <footer className="w-full h-fit flex flex-col items-center z-30 pointer-events-none pb-12 px-6">
       {showScrollButton && (
@@ -113,7 +134,7 @@ export const Chat = {
         {/* @UI.Chat.Suggestions */}
         {!isLoading && suggestions && suggestions.length > 0 && (
           <div className="flex flex-wrap justify-center gap-3 pointer-events-auto animate-in fade-in slide-in-from-bottom-4 duration-1000">
-            {suggestions.map((suggestion: any, idx: number) => (
+            {suggestions.map((suggestion, idx) => (
               <button
                 key={suggestion.label + idx}
                 onClick={() => onSend(suggestion.action || suggestion.label)}
@@ -126,8 +147,42 @@ export const Chat = {
           </div>
         )}
 
-        {/* @UI.Chat.Input */}
-        <div className="w-full bg-[#1a1a1a] shadow-2xl pointer-events-auto flex flex-col border border-white/[0.08] hover:border-white/[0.12] transition-all duration-300 group overflow-hidden rounded-[1.5rem]">
+        {/* @UI.Chat.Usage.Pill */}
+        {isAuthenticated && usage && isUsageVisible && (
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            className="w-full pointer-events-auto"
+          >
+            <div className="bg-[#1a1a1a] border border-white/[0.08] rounded-t-[1.5rem] border-b-0 px-6 py-3 flex items-center justify-between shadow-2xl">
+              <div className="flex items-center gap-2 text-[13px] text-white/40 overflow-hidden">
+                <span className="font-bold text-white shrink-0">
+                  {usage.messages_remaining} {t('usage.remaining_label').toLowerCase()} {t('usage.messages').toLowerCase()}.
+                </span>
+                <span className="truncate opacity-60 hidden sm:inline">
+                  {t('usage.daily_reset_notice')}
+                </span>
+              </div>
+              
+              <div className="flex items-center gap-4 shrink-0">
+                <button 
+                  onClick={onToggleUsage}
+                  className="text-white/20 hover:text-white/60 transition-colors p-1"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* @UI.Chat.Input.Box */}
+        <div className={cn(
+          "w-full bg-[#1a1a1a] shadow-2xl pointer-events-auto flex flex-col border border-white/[0.08] hover:border-white/[0.12] transition-all duration-300 group overflow-hidden",
+          isAuthenticated && usage && isUsageVisible ? "rounded-b-[1.5rem]" : "rounded-[1.5rem]",
+          isAtLimit && "opacity-50"
+        )}>
           <div className="flex-1 flex flex-col px-1.5 max-h-[400px]">
             {/** @UI.Chat.Input.Textarea */}
             <textarea
@@ -135,14 +190,18 @@ export const Chat = {
               value={value}
               onChange={(e) => onChange(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
+                if (e.key === 'Enter' && !e.shiftKey && !isAtLimit) {
                   e.preventDefault()
                   onSend()
                 }
               }}
               rows={1}
-              className="flex-1 bg-transparent border-none focus:ring-0 focus:outline-none text-[17px] font-normal py-5 px-5 text-white placeholder:text-white/20 resize-none font-sans leading-relaxed transition-[height] duration-200 overflow-hidden"
-              placeholder={t('chat.placeholder')}
+              disabled={isAtLimit}
+              className={cn(
+                "flex-1 bg-transparent border-none focus:ring-0 focus:outline-none text-[17px] font-normal py-5 px-5 text-white placeholder:text-white/20 resize-none font-sans leading-relaxed transition-[height] duration-200 overflow-hidden",
+                isAtLimit && "opacity-50 cursor-not-allowed"
+              )}
+              placeholder={isAtLimit ? (t('usage.limit_reached') || 'Límite alcanzado') : t('chat.placeholder')}
               style={{ height: 'auto', outline: 'none', boxShadow: 'none' }}
             />
           </div>
@@ -171,10 +230,10 @@ export const Chat = {
               {/** @UI.Chat.Action.Send */}
               <button
                 onClick={isLoading ? stopResponse : () => onSend()}
-                disabled={!isLoading && !value.trim()}
+                disabled={(!isLoading && !value.trim()) || isAtLimit}
                 className={cn(
                   'w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 shadow-xl relative overflow-hidden group shrink-0',
-                  !isLoading && !value.trim()
+                  (!isLoading && !value.trim()) || isAtLimit
                     ? 'bg-white/5 text-white/10'
                     : 'bg-white/10 text-white hover:bg-white hover:text-slate-950 active:scale-95',
                 )}
@@ -196,6 +255,7 @@ export const Chat = {
   ),
 }
 
+/** @UI.Chat.Container.Main */
 export const ChatContainer: React.FC = () => {
   const { messages, isLoading, error, activeAdaptiveData, currentChatId } = useAppSelector(
     (state) => state.chat,
@@ -207,7 +267,8 @@ export const ChatContainer: React.FC = () => {
   const pathname = usePathname()
   const { sendMessage, stopResponse, editMessage, startVoice, stopVoice } = useChatActions()
   const { t } = useI18n()
-
+  const { usage, isAtLimit, setUsage } = useUsage()
+  const [isUsageVisible, setIsUsageVisible] = useState(true)
   const [userInput, setUserInput] = useState('')
   const [isRecording, setIsRecording] = useState(false)
   const [isLockedToBottom, setIsLockedToBottom] = useState(true)
@@ -338,24 +399,35 @@ export const ChatContainer: React.FC = () => {
     }
   }
 
-  const handleSend = async (text?: string) => {
-    if (isRecording) {
-      /** @UI.Chat.MicCleanup */
-      handleMicClick()
-    }
-    const finalContent = text || userInput
-    if (!finalContent.trim()) return
-    if (!text && isLoading) return
+  const handleSend = useCallback(
+    async (text?: string) => {
+      if (isRecording) {
+        /** @UI.Chat.MicCleanup */
+        handleMicClick()
+      }
+      const content = text || userInput
+      if (!content.trim() || isAtLimit) return
 
-    if (!text) {
+      // Optimistic usage update
+      if (usage && usage.messages_remaining > 0) {
+        setUsage({
+          ...usage,
+          messages_used: usage.messages_used + 1,
+          messages_remaining: usage.messages_remaining - 1,
+          usage_percentage: Math.min(((usage.messages_used + 1) / usage.messages_limit) * 100, 100),
+          can_send: (usage.messages_remaining - 1) > 0
+        })
+      }
+
       setUserInput('')
-    }
-    setIsLockedToBottom(true)
-    
-    await ensureChatExists()
-    await sendMessage(finalContent)
-    scrollToBottom('smooth')
-  }
+      setIsLockedToBottom(true)
+      
+      await ensureChatExists()
+      await sendMessage(content)
+      scrollToBottom('smooth')
+    },
+    [isRecording, userInput, isAtLimit, usage, setUsage, ensureChatExists, sendMessage, scrollToBottom, handleMicClick]
+  )
 
   return (
     <Chat.Root>
@@ -368,7 +440,7 @@ export const ChatContainer: React.FC = () => {
           <div className="h-full flex flex-col items-center justify-center py-32 animate-in fade-in duration-1000" />
         )}
 
-        {messages.map((msg, index: number) => (
+        {messages.map((msg, index) => (
           <MemoizedMessageBubble 
             key={index} 
             message={msg} 
@@ -433,6 +505,11 @@ export const ChatContainer: React.FC = () => {
         onMicClick={handleMicClick}
         stopResponse={stopResponse}
         t={t}
+        isAtLimit={isAtLimit}
+        isAuthenticated={!!user}
+        usage={usage}
+        isUsageVisible={isUsageVisible}
+        onToggleUsage={() => setIsUsageVisible(false)}
       />
       <SourcesSidebar />
     </Chat.Root>
