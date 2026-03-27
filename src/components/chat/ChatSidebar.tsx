@@ -25,6 +25,7 @@ import {
   setMessages,
   type Chat,
 } from '@/store/slices/chatSlice'
+import { ChatRole } from '@/types/chat'
 import { useAuth } from '@/contexts/AuthContext'
 import { useI18n } from '@/lib/effect/I18nProvider'
 import { useToast } from '@/components/ui/ToastProvider'
@@ -145,7 +146,7 @@ export function ChatSidebar({ isOpen, onClose }: ChatSidebarProps) {
           content: string
           metadata: Record<string, unknown> | null
         }) => ({
-          role: msg.role as 'user' | 'assistant',
+          role: msg.role as typeof ChatRole.USER | typeof ChatRole.ASSISTANT,
           content: msg.content,
           metadata: msg.metadata as Record<string, unknown> | undefined,
         }),

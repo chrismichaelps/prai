@@ -11,8 +11,16 @@ export interface SearchResult {
   verified?: boolean;
 }
 
+export const ChatRole = {
+  USER: 'user',
+  ASSISTANT: 'assistant',
+  SYSTEM: 'system'
+} as const;
+
+export type ChatRoleType = typeof ChatRole[keyof typeof ChatRole];
+
 export interface ChatMessage {
-  role: 'user' | 'assistant' | 'system';
+  role: ChatRoleType;
   content: string;
   metadata?: {
     thought?: string;

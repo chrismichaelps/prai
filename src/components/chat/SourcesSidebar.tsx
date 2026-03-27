@@ -123,54 +123,53 @@ export const SourcesSidebar: React.FC = () => {
                         target="_blank"
                         rel="noopener noreferrer"
                         className={cn(
-                          'group/card block rounded-2xl p-4 transition-all duration-300 hover:translate-x-1',
+                          'group/card flex gap-3 rounded-2xl p-4 transition-all duration-300 hover:translate-x-1',
                           source.verified
                             ? 'bg-[#1a1a1a]/40 hover:bg-[#1a1a1a]/80 border border-white/[0.05] hover:border-primary/20'
                             : 'bg-[#1a1a1a]/40 hover:bg-[#1a1a1a]/60 border border-white/[0.05] hover:border-white/10',
                         )}
                       >
-                        <div className="flex flex-col gap-3">
-                          <div className="flex items-start justify-between gap-4">
-                            <div className="flex items-center gap-2">
-                              {source.verified ? (
-                                <div className="w-4 h-4 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center">
-                                  <CheckCircle2 className="w-2.5 h-2.5 text-primary" />
-                                </div>
-                              ) : (
-                                <div className="w-4 h-4 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
-                                  <Globe className="w-2.5 h-2.5 text-white/30" />
-                                </div>
-                              )}
-                              <h3 className="text-[15px] font-bold leading-snug group-hover/card:text-white transition-colors line-clamp-2 text-white/90">
-                                {source.title}
-                              </h3>
-                            </div>
-                            <ExternalLink className="w-4 h-4 text-white/10 group-hover/card:text-white/40 transition-colors shrink-0 mt-1" />
+                        {/* Favicon */}
+                        <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/[0.06] flex items-center justify-center p-1.5 overflow-hidden shrink-0 mt-0.5">
+                          {source.icon ? (
+                            <img
+                              src={source.icon}
+                              alt=""
+                              className="w-full h-full object-contain"
+                              onError={(e) => {
+                                const img = e.target as HTMLImageElement
+                                img.style.display = 'none'
+                                const globe = img.nextElementSibling as HTMLElement | null
+                                if (globe) globe.style.removeProperty('display')
+                              }}
+                            />
+                          ) : null}
+                          <Globe
+                            className="w-3.5 h-3.5 text-white/30"
+                            style={{ display: source.icon ? 'none' : undefined }}
+                          />
+                        </div>
+
+                        {/* Content */}
+                        <div className="flex flex-col gap-1.5 flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-2">
+                            <h3 className="text-[14px] font-semibold leading-snug group-hover/card:text-white transition-colors line-clamp-2 text-white/90">
+                              {source.title || domain}
+                            </h3>
+                            <ExternalLink className="w-3.5 h-3.5 text-white/15 group-hover/card:text-white/40 transition-colors shrink-0 mt-0.5" />
                           </div>
 
                           {source.snippet && (
-                            <p className="text-[13px] text-white/40 leading-relaxed line-clamp-3 font-light pl-6">
+                            <p className="text-[12px] text-white/40 leading-relaxed line-clamp-2 font-light">
                               {source.snippet}
                             </p>
                           )}
 
-                          <div className="flex items-center gap-2 pt-1 pl-6">
-                            <div className="w-5 h-5 rounded-md bg-white/5 flex items-center justify-center p-1 overflow-hidden">
-                              {source.icon ? (
-                                <img
-                                  src={source.icon}
-                                  alt=""
-                                  className="w-full h-full object-contain"
-                                  onError={(e) => {
-                                    ;(
-                                      e.target as HTMLImageElement
-                                    ).style.display = 'none'
-                                  }}
-                                />
-                              ) : null}
-                              <Globe className="w-3 h-3 text-white/40" />
-                            </div>
-                            <span className="text-[12px] font-medium text-white/50 group-hover/card:text-white/70 transition-colors">
+                          <div className="flex items-center gap-1.5 mt-0.5">
+                            {source.verified && (
+                              <CheckCircle2 className="w-3 h-3 text-primary/70 shrink-0" />
+                            )}
+                            <span className="text-[11px] font-medium text-white/35 group-hover/card:text-white/55 transition-colors truncate">
                               {domain}
                             </span>
                           </div>
