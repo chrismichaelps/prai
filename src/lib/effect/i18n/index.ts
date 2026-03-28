@@ -32,6 +32,7 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "hero.cta_chat": "Empezar a chatear",
     "hero.alt_mountains": "Montañas de Puerto Rico al atardecer",
     "hero.alt_condado": "Agua del océano en Condado",
+    "hero.alt_logo": "Logo de PR\\AI",
 
     /** @Logic.I18n.Section.Chat */
     "chat.placeholder": "Pregunta sobre turismo, gastronomía o cultura local...",
@@ -241,6 +242,9 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "releases.subtitle": "Última actualización: 23 de marzo de 2026",
     "releases.rss_feed": "RSS",
     "releases.api_feed": "API",
+    "releases.all_notes": "Todas las notas",
+    "releases.get_feed": "Obtener feed",
+    "releases.product.code": "Código del producto",
 
     "about.title": "Sobre PR\\AI",
 
@@ -569,6 +573,9 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "releases.subtitle": "Last updated: Mar 23, 2026",
     "releases.rss_feed": "RSS",
     "releases.api_feed": "API",
+    "releases.all_notes": "All notes",
+    "releases.get_feed": "Get feed",
+    "releases.product.code": "Product code",
 
     "about.title": "About PR\\AI",
 
@@ -601,6 +608,7 @@ const dictionary: Record<Locale, Record<string, string>> = {
 
     /** @Logic.I18n.Section.Personalization */
     "personalization.title": "Personalization",
+    "personalization.sidebar.general": "General",
     "personalization.sidebar.notifications": "Notifications",
     "personalization.sidebar.personalization": "Personalization",
     "personalization.sidebar.apps": "Apps",
