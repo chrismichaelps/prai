@@ -1,5 +1,8 @@
+import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getChangelogReleasesSync } from '@/lib/effect/services/Changelog'
+import { HttpStatus } from '@/app/api/_lib/constants/status-codes'
+import { checkRateLimit } from '@/app/api/_lib/utils/rate-limit'
 
 export const dynamic = 'force-static'
 
@@ -62,7 +65,23 @@ function generateRSS(releases: Array<{ date: string; content: string }>): string
 }
 
 /** @Route.Feed.RSS */
-export async function GET(): Promise<NextResponse> {
+export async function GET(request: NextRequest): Promise<NextResponse> {
+  const clientIp = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() 
+    || request.headers.get('x-real-ip') 
+    || 'unknown'
+  
+  const rateLimit = checkRateLimit(clientIp)
+  
+  if (!rateLimit.allowed) {
+    return new NextResponse('<?xml version="1.0" encoding="UTF-8"?><error>Too many requests</error>', {
+      status: HttpStatus.TOO_MANY_REQUESTS,
+      headers: {
+        'Content-Type': 'application/rss+xml; charset=utf-8',
+        'Retry-After': String(Math.ceil((rateLimit.resetTime - Date.now()) / 1000))
+      },
+    })
+  }
+
   try {
     const releases = getChangelogReleasesSync()
     const rss = generateRSS(releases)
@@ -72,6 +91,7 @@ export async function GET(): Promise<NextResponse> {
       headers: {
         'Content-Type': 'application/rss+xml; charset=utf-8',
         'Cache-Control': 'public, max-age=3600, s-maxage=3600',
+        'X-RateLimit-Remaining': String(rateLimit.remaining),
       },
     })
   } catch (error) {
