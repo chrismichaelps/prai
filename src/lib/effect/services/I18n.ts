@@ -6,7 +6,7 @@ export type Locale = "es" | "en"
 export class I18n extends Context.Tag("I18n")<
   I18n,
   {
-    readonly t: (key: string) => string
+    readonly t: (key: string, params?: Record<string, string>) => string
     readonly locale: Effect.Effect<Locale>
     readonly setLocale: (locale: Locale) => Effect.Effect<void>
   }

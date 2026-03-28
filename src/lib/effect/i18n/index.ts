@@ -4,7 +4,7 @@ import { I18n, type Locale } from "../services/I18n"
 /** @Logic.I18n.Dictionary */
 const dictionary: Record<Locale, Record<string, string>> = {
   es: {
-    // Brand & General
+    /** @Logic.I18n.Section.Brand */
     "brand.name": "PR\\AI",
     "brand.slogan": "Inteligencia Artificial de PR.",
     "brand.tagline": "Te ayudamos a descubrir todo sobre Puerto Rico con inteligencia artificial — playas, road trips, gastronomía, eventos y mucho más.",
@@ -17,13 +17,10 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "common.delete": "Eliminar",
 
 
-    // Header & Nav
+    /** @Logic.I18n.Section.Nav */
     "nav.about": "Sobre PR\\AI",
-    "nav.contact": "Contacto",
     "nav.open_chat": "Abrir Chat",
     "nav.initial_chat": "Chat Inicial",
-    "nav.export": "Exporta",
-    "nav.share": "Compartir",
     "nav.menu": "Menú",
     "nav.actions": "Explora",
     "nav.releases": "Novedades",
@@ -31,25 +28,20 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "nav.usage": "Uso",
 
 
-    // Hero
+    /** @Logic.I18n.Section.Hero */
     "hero.cta_chat": "Empezar a chatear",
     "hero.alt_mountains": "Montañas de Puerto Rico al atardecer",
     "hero.alt_condado": "Agua del océano en Condado",
 
-    // Chat
+    /** @Logic.I18n.Section.Chat */
     "chat.placeholder": "Pregunta sobre turismo, gastronomía o cultura local...",
     "chat.loading": "AI analizando",
     "chat.discovering": "Descubriendo tesoros para ti...",
     "chat.copy": "Copiar",
     "chat.copied": "Copiado",
-    "chat.videos_found": "videos analizados",
-    "chat.web_pages": "Páginas web analizadas",
     "chat.sources": "Fuentes",
     "chat.search_context": "Contexto de búsqueda",
     "chat.no_sources": "No se encontraron fuentes adicionales",
-    "chat.visit_source": "Visitar fuente",
-    "chat.close_sidebar": "Cerrar fuentes",
-    "chat.view_all_sources": "Ver todas las fuentes",
     "chat.view_more_results": "Ver más resultados",
     "chat.thinking": "Pensando...",
     "chat.no_image": "Sin imagen disponible",
@@ -87,7 +79,7 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "chat.archived_title": "Archivadas",
     "chat.back_to_menu": "Volver",
 
-    // Issues
+    /** @Logic.I18n.Section.Issues */
     "issues.title": "Reportar un Error",
     "issues.subtitle": "Ayúdanos a mejorar PR\\AI. Reporta errores, sugiere mejoras o haz preguntas.",
     "issues.new": "Nuevo reporte",
@@ -96,16 +88,6 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "issues.open": "Abierto",
     "issues.in_progress": "En proceso",
     "issues.closed": "Cerrado",
-    "issues.label.bug": "Error",
-    "issues.label.feature": "Mejora",
-    "issues.label.question": "Pregunta",
-    "issues.label.docs": "Documentación",
-    "issues.no_issues": "No hay reportes por aquí todavía.",
-    "issues.be_first": "¡Sé el primero en reportar algo!",
-    "issues.upvotes": "votos",
-    "issues.comments": "comentarios",
-    "issues.comment": "comentario",
-    "issues.add_comment": "Añadir comentario",
     "issues.comment_placeholder": "Escribe tu comentario aquí... (Markdown soportado)",
     "issues.submit_comment": "Enviar comentario",
     "issues.new_title": "Título",
@@ -135,12 +117,10 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "issues.login_to_upvote": "Inicia sesión para votar",
     "issues.confirm_delete": "¿Estás seguro de que quieres eliminar este reporte?",
 
-    // Auth
+    /** @Logic.I18n.Section.Auth */
     "auth.sign_in": "Iniciar sesión",
-    "auth.sign_in_title": "Inicia sesión para continuar",
     "auth.sign_in_with_google": "Continuar con Google",
     "auth.sign_out": "Cerrar sesión",
-    "auth.welcome": "Bienvenido",
     "auth.terms_notice": "Al iniciar sesión, aceptas nuestros términos de servicio y política de privacidad.",
     "auth.profile": "Perfil",
     "auth.explorer": "Explorador",
@@ -151,7 +131,7 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "auth.role_admin": "Admin",
     "auth.role_user": "Usuario",
 
-    // Profile
+    /** @Logic.I18n.Section.Profile */
     "profile.title": "Mi Perfil",
     "profile.edit_title": "Editar Perfil",
     "profile.display_name": "Nombre",
@@ -180,7 +160,7 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "profile.account_deleted": "Cuenta eliminada exitosamente",
     "profile.delete_account_error": "Error al eliminar la cuenta",
 
-    // Thinking Statuses (Internal)
+    /** @Logic.I18n.Section.Thinking */
     "chat.thinking.analyzing": "Analizando la consulta...",
     "chat.thinking.searching": "Buscando la mejor respuesta...",
     "chat.thinking.structuring": "Estructurando la información...",
@@ -189,7 +169,7 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "chat.thinking.prefix": "Pensando...",
     "chat.thinking.completed": "Pensado durante",
 
-    // Footer
+    /** @Logic.I18n.Section.Footer */
     "footer.rights": "Todos los derechos reservados.",
     "footer.legal": "Documentación Legal",
     "footer.terms": "Términos",
@@ -200,14 +180,14 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "footer.chat": "Chat",
     "footer.explore": "Explorar",
 
-    // Cookies
+    /** @Logic.I18n.Section.Cookies */
     "cookies.title": "Control de Cookies",
     "cookies.desc": "Utilizamos cookies para mejorar tu experiencia de navegación y analizar nuestro tráfico. Tú decides qué permites.",
     "cookies.accept": "Aceptar",
     "cookies.decline": "Rechazar",
     "cookies.view": "Ver Política de Cookies",
 
-    // Legal - Privacy
+    /** @Logic.I18n.Section.Privacy */
     "privacy.title": "Privacidad PR\\AI.",
     "privacy.subtitle": "Cómo protegemos tus datos y aseguramos una exploración segura de nuestra Isla.",
     "privacy.s1.title": "Recolección de Datos",
@@ -219,7 +199,7 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "privacy.cookies.title": "Cookies",
     "privacy.cookies.desc": "Utilizamos cookies para recordar sus preferencias y sesiones de exploración. Puede configurar su navegador para rechazar todas las cookies, pero esto podría afectar algunas funcionalidades del servicio.",
 
-    // Legal - Terms
+    /** @Logic.I18n.Section.Terms */
     "terms.title": "Términos de Servicio.",
     "terms.subtitle": "Nuestras reglas para asegurar una experiencia transparente y segura al explorar Puerto Rico con PR\\AI.",
     "terms.s1.title": "Aceptación de los Términos",
@@ -231,7 +211,7 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "terms.note.title": "Nota Importante",
     "terms.note.desc": "PR\\AI utiliza modelos de lenguaje avanzados. Aunque nos esforzamos por la precisión, la información proporcionada puede contener errores. Siempre verifique información crítica con fuentes oficiales directamente.",
 
-    // Legal - Cookies
+    /** @Logic.I18n.Section.LegalCookies */
     "legal.cookies.title": "Política de Cookies.",
     "legal.cookies.subtitle": "Transparencia total sobre cómo utilizamos la tecnología para mejorar tu exploración de Puerto Rico.",
     "legal.cookies.s1.title": "¿Qué son las Cookies?",
@@ -241,7 +221,7 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "legal.cookies.note.title": "Control Total",
     "legal.cookies.note.desc": "Usted tiene el control. Puede borrar o bloquear las cookies en cualquier momento desde la configuración de su navegador. Tenga en cuenta que esto podría limitar su experiencia interactiva.",
 
-    // 404
+    /** @Logic.I18n.Section.NotFound */
     "404.title": "Te perdiste en el Morro.",
     "404.desc": "Parece que esta ruta no existe. No te preocupes, hasta los mejores exploradores necesitan un guía de vez en cuando.",
     "404.back": "Volver al Inicio",
@@ -251,23 +231,14 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "locale.es": "es",
     "locale.en": "en",
 
-    // Model Info Toast
+    /** @Logic.I18n.Section.ModelInfo */
     "info.title": "Transparencia en Inteligencia Artificial",
     "info.description": "En PR\\AI estamos comprometidos con el acceso abierto. Utilizamos el enrutador gratuito de OpenRouter, un sistema inteligente que selecciona dinámicamente entre los modelos más avanzados de la industria (como Trinity de Arcee, Step 3.5 de Stepfun o Nemotron de NVIDIA) para ofrecerte capacidades de visión, análisis y razonamiento complejo sin costo.",
     "info.limitation": "Nota: Sujeto a disponibilidad y latencia variable según la demanda global de OpenRouter.",
 
-    // About Page
+    /** @Logic.I18n.Section.About */
     "releases.title": "Novedades de PR\\AI",
     "releases.subtitle": "Última actualización: 23 de marzo de 2026",
-    "releases.breadcrumb": "Releasebot | Todas las Novedades",
-    "releases.products": "Productos de PR\\AI",
-    "releases.all_notes": "Todas las Novedades de PR\\AI",
-    "releases.product.claude": "PR\\AI Core",
-    "releases.product.apps": "PR\\AI Apps",
-    "releases.product.code": "PR\\AI Code",
-    "releases.product.platform": "PR\\AI Plataforma de Desarrolladores",
-    "releases.note_count": "novedades",
-    "releases.get_feed": "Obtener este feed:",
     "releases.rss_feed": "RSS",
     "releases.api_feed": "API",
 
@@ -278,28 +249,11 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "about.description.p2": "Creemos en la transparencia y en el poder de la comunidad, por lo que PR\\AI es un proyecto de código abierto. Invitamos a desarrolladores, apasionados de la tecnología y a toda la comunidad Boricua a colaborar en su desarrollo. Al ser un experimento en constante evolución, probamos las capacidades de los modelos multimodales en contextos locales, siempre con la meta de mejorar la precisión y utilidad de cada respuesta.",
     "about.description.p3": "Es importante recordar que PR\\AI es una herramienta en etapa experimental. Aunque nos esforzamos por la excelencia técnica, las respuestas son generadas por inteligencia artificial y pueden contener imprecisiones. Te invitamos a explorar con curiosidad y a ser parte de este viaje tecnológico hecho 'de la isla, para el mundo'.",
 
-    // API Errors
-    "error.api.title": "Error de API",
-    "error.api.400": "Solicitud inválida. Verifica los parámetros e intenta de nuevo.",
-    "error.api.401": "Credenciales inválidas. Verifica tu API key.",
-    "error.api.402": "Créditos insuficientes.",
-    "error.api.403": "Tu contenido fue marcado por moderación.",
-    "error.api.408": "Tiempo de espera agotado. Intenta de nuevo.",
-    "error.api.429": "Demasiadas solicitudes. Espera un momento e intenta de nuevo.",
-    "error.api.500": "Error interno del servidor. Intenta de nuevo en unos minutos.",
-    "error.api.502": "El modelo seleccionado no está disponible. Intenta con otro.",
-    "error.api.503": "No hay proveedores disponibles. Intenta más tarde.",
-    "error.api.unknown": "Ocurrió un error inesperado. Por favor, intenta de nuevo.",
-    "error.api.close": "Cerrar",
-
-    // Usage
+    /** @Logic.I18n.Section.Usage */
     "usage.title": "Tu Uso",
-    "usage.used": "Has usado",
-    "usage.of": "de",
     "usage.messages": "mensajes",
     "usage.remaining": "Te quedan",
     "usage.limit_reached": "Límite alcanzado",
-    "usage.upgrade": "Actualizar plan",
     "usage.warning": "Casi llegas a tu límite",
     "usage.daily_reset": "Se renueva diariamente",
     "usage.description": "Gestiona tu uso de mensajes",
@@ -315,10 +269,71 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "usage.reached_limit_messages": "Has alcanzado tu límite de mensajes",
     "usage.almost_limit": "Casi llegas a tu límite",
     "usage.almost_limit_messages": "Casi llegas a tu límite de mensajes",
-    "usage.daily_reset_notice": "Tu cuota se reinicia diariamente."
+    "usage.daily_reset_notice": "Tu cuota se reinicia diariamente.",
+
+    /** @Logic.I18n.Section.Personalization */
+    "personalization.title": "Personalización",
+    "personalization.sidebar.general": "General",
+    "personalization.sidebar.notifications": "Notificaciones",
+    "personalization.sidebar.personalization": "Personalización",
+    "personalization.sidebar.apps": "Aplicaciones",
+    "personalization.sidebar.data": "Control de datos",
+    "personalization.sidebar.security": "Seguridad",
+    "personalization.sidebar.account": "Cuenta",
+    "personalization.content.style_title": "Estilo y tono base",
+    "personalization.content.style_desc": "Establece el estilo y tono de cómo PR\\AI te responde. Esto no afecta las capacidades de PR\\AI.",
+    "personalization.content.chars_title": "Características",
+    "personalization.content.chars_desc": "Elige personalizaciones adicionales sobre tu estilo y tono base.",
+    "personalization.content.warm": "Cálido",
+    "personalization.content.enthusiastic": "Entusiasta",
+    "personalization.content.headers": "Encabezados y Listas",
+    "personalization.content.emoji": "Emoji",
+    "personalization.content.instructions_title": "Instrucciones personalizadas",
+    "personalization.content.instructions_desc": "Preferencias adicionales de comportamiento, estilo y tono",
+    "personalization.content.about_title": "Sobre ti",
+    "personalization.content.about_me": "Información sobre ti",
+    "personalization.content.about_me_desc": "Describe quién eres para que la IA sepa cómo interactuar contigo.",
+    "personalization.content.nickname": "Apodo",
+    "personalization.options.default": "Predeterminado",
+    "personalization.options.default_desc": "Estilo y tono predeterminado",
+    "personalization.options.professional": "Profesional",
+    "personalization.options.professional_desc": "Pulido y preciso",
+    "personalization.options.friendly": "Amistoso",
+    "personalization.options.friendly_desc": "Cálido y conversador",
+    "personalization.options.candid": "Sincero",
+    "personalization.options.candid_desc": "Directo y alentador",
+    "personalization.options.quirky": "Peculiar",
+    "personalization.options.quirky_desc": "Juguetón e imaginativo",
+    "personalization.options.efficient": "Eficiente",
+    "personalization.options.efficient_desc": "Conciso y sencillo",
+    "personalization.options.cynical": "Cínico",
+    "personalization.options.cynical_desc": "Crítico y sarcástico",
+    "personalization.options.more": "Más",
+    "personalization.options.less": "Menos",
+
+    /** @Logic.I18n.Section.PersonalizationPrompt */
+    "personalization.prompt.section_header": "### PREFERENCIAS DE PERSONALIZACIÓN Y TONO",
+    "personalization.prompt.instructions": "Adhiérete estrictamente a estas preferencias del usuario para tu estilo de respuesta:",
+    "personalization.prompt.nickname": "Dirígete al usuario como: {nickname}",
+    "personalization.prompt.about_me": "Sobre el usuario: {aboutMe}",
+    "personalization.prompt.persona_header": "Persona Core",
+    "personalization.prompt.modifiers_header": "Modificadores de Estilo",
+    "personalization.prompt.custom_header": "El usuario solicitó explícitamente estos comportamientos",
+    "personalization.prompt.tone.professional": "Profesional, pulido y preciso.",
+    "personalization.prompt.tone.friendly": "Amistoso, cálido y conversador.",
+    "personalization.prompt.tone.candid": "Sincero, directo y alentador.",
+    "personalization.prompt.tone.quirky": "Peculiar, juguetón e imaginativo.",
+    "personalization.prompt.tone.efficient": "Eficiente, conciso y sencillo.",
+    "personalization.prompt.tone.cynical": "Cínico, crítico y sarcástico.",
+    "personalization.prompt.level.more": "Aumenta significativamente",
+    "personalization.prompt.level.less": "Disminuye significativamente/Evita",
+    "personalization.prompt.term.warm": "la calidez y amabilidad",
+    "personalization.prompt.term.enthusiastic": "la energía y emoción",
+    "personalization.prompt.term.headers": "el uso de encabezados y listas estructuradas",
+    "personalization.prompt.term.emoji": "el uso de emojis"
   },
   en: {
-    // Brand & General
+    /** @Logic.I18n.Section.Brand */
     "brand.name": "PR\\AI",
     "brand.slogan": "AI for PR.",
     "brand.tagline": "We help you discover everything about Puerto Rico with artificial intelligence — beaches, road trips, gastronomy, events and much more.",
@@ -331,40 +346,32 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "common.delete": "Delete",
 
 
-    // Header & Nav
+    /** @Logic.I18n.Section.Nav */
     "nav.about": "About PR\\AI",
-    "nav.contact": "Contact",
     "nav.open_chat": "Open Chat",
     "nav.initial_chat": "Initial Chat",
-    "nav.export": "Export",
-    "nav.share": "Share",
     "nav.menu": "Menu",
     "nav.actions": "Explore",
-    "nav.releases": "Updates",
-    "nav.issues": "Issues",
+    "nav.releases": "Release Notes",
+    "nav.issues": "Reports",
     "nav.usage": "Usage",
 
 
-    // Hero
+    /** @Logic.I18n.Section.Hero */
     "hero.cta_chat": "Start chatting",
     "hero.alt_mountains": "Puerto Rico mountains at sunset",
     "hero.alt_condado": "Condado Ocean Water",
     "hero.alt_logo": "PR\\AI Logo",
 
-    // Chat
+    /** @Logic.I18n.Section.Chat */
     "chat.placeholder": "Ask about tourism, gastronomy or local culture...",
     "chat.loading": "AI analyzing",
     "chat.discovering": "Discovering treasures for you...",
     "chat.copy": "Copy",
     "chat.copied": "Copied",
-    "chat.videos_found": "analyzed videos",
-    "chat.web_pages": "Analyzed Web Pages",
     "chat.sources": "Sources",
-    "chat.search_context": "Search Context",
+    "chat.search_context": "Search context",
     "chat.no_sources": "No additional sources found",
-    "chat.visit_source": "Visit Source",
-    "chat.close_sidebar": "Close Sources",
-    "chat.view_all_sources": "View all sources",
     "chat.view_more_results": "View more results",
     "chat.google_search_hint": "Try searching Google with these terms:",
     "chat.menu_highlights": "Menu Highlights",
@@ -399,7 +406,7 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "chat.archived_title": "Archived",
     "chat.back_to_menu": "Back",
 
-    // Issues
+    /** @Logic.I18n.Section.Issues */
     "issues.title": "Report a Bug",
     "issues.subtitle": "Help us improve PR\\AI. Report bugs, suggest improvements, or ask questions.",
     "issues.new": "New report",
@@ -408,16 +415,6 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "issues.open": "Open",
     "issues.in_progress": "In progress",
     "issues.closed": "Closed",
-    "issues.label.bug": "Bug",
-    "issues.label.feature": "Feature",
-    "issues.label.question": "Question",
-    "issues.label.docs": "Docs",
-    "issues.no_issues": "No reports here yet.",
-    "issues.be_first": "Be the first to report something!",
-    "issues.upvotes": "votes",
-    "issues.comments": "comments",
-    "issues.comment": "comment",
-    "issues.add_comment": "Add comment",
     "issues.comment_placeholder": "Write your comment here... (Markdown supported)",
     "issues.submit_comment": "Submit comment",
     "issues.new_title": "Title",
@@ -447,13 +444,11 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "issues.login_to_upvote": "Sign in to vote",
     "issues.confirm_delete": "Are you sure you want to delete this issue?",
 
-    // Auth
+    /** @Logic.I18n.Section.Auth */
     "auth.sign_in": "Sign in",
-    "auth.sign_in_title": "Sign in to continue",
     "auth.sign_in_with_google": "Continue with Google",
     "auth.sign_out": "Sign out",
     "auth.explorer": "Explorer",
-    "auth.welcome": "Welcome",
     "auth.terms_notice": "By signing in, you agree to our terms of service and privacy policy.",
     "auth.profile": "Profile",
     "auth.loading": "Loading...",
@@ -463,7 +458,7 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "auth.role_admin": "Admin",
     "auth.role_user": "User",
 
-    // Profile
+    /** @Logic.I18n.Section.Profile */
     "profile.title": "My Profile",
     "profile.edit_title": "Edit Profile",
     "profile.display_name": "Name",
@@ -493,7 +488,7 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "profile.delete_account_error": "Failed to delete account",
 
 
-    // Thinking Statuses (Internal)
+    /** @Logic.I18n.Section.Thinking */
     "chat.thinking.analyzing": "Analyzing query...",
     "chat.thinking.searching": "Searching for the best answer...",
     "chat.thinking.structuring": "Structuring information...",
@@ -502,7 +497,7 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "chat.thinking.prefix": "Thinking...",
     "chat.thinking.completed": "Thought for",
 
-    // Footer
+    /** @Logic.I18n.Section.Footer */
     "footer.rights": "All rights reserved.",
     "footer.legal": "Legal Documentation",
     "footer.terms": "Terms",
@@ -513,14 +508,14 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "footer.chat": "Chat",
     "footer.explore": "Explore",
 
-    // Cookies
+    /** @Logic.I18n.Section.Cookies */
     "cookies.title": "Cookie Settings",
     "cookies.desc": "We use cookies to enhance your browsing experience and analyze our traffic. You decide what to allow.",
     "cookies.accept": "Accept",
     "cookies.decline": "Decline",
     "cookies.view": "View Cookies Policy",
 
-    // Legal - Privacy
+    /** @Logic.I18n.Section.Privacy */
     "privacy.title": "Privacy PR\\AI.",
     "privacy.subtitle": "How we protect your data and ensure a safe exploration of our Island.",
     "privacy.s1.title": "Data Collection",
@@ -532,7 +527,7 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "privacy.cookies.title": "Cookies",
     "privacy.cookies.desc": "We use cookies to remember your preferences and browsing sessions. You can configure your browser to reject all cookies, but this could affect some features of the service.",
 
-    // Legal - Terms
+    /** @Logic.I18n.Section.Terms */
     "terms.title": "Terms of Service.",
     "terms.subtitle": "Our rules to ensure a transparent and safe experience when exploring Puerto Rico with PR\\AI.",
     "terms.s1.title": "Acceptance of Terms",
@@ -544,7 +539,7 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "terms.note.title": "Important Note",
     "terms.note.desc": "PR\\AI uses advanced language models. While we strive for accuracy, the information provided may contain errors. Always verify critical information with official sources directly.",
 
-    // Legal - Cookies
+    /** @Logic.I18n.Section.LegalCookies */
     "legal.cookies.title": "Cookie Policy.",
     "legal.cookies.subtitle": "Total transparency on how we use technology to improve your exploration of Puerto Rico.",
     "legal.cookies.s1.title": "What are Cookies?",
@@ -554,7 +549,7 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "legal.cookies.note.title": "Total Control",
     "legal.cookies.note.desc": "You are in control. You can delete or block cookies at any time from your browser settings. Please note that this may limit your interactive experience.",
 
-    // 404
+    /** @Logic.I18n.Section.NotFound */
     "404.title": "You got lost in El Morro.",
     "404.desc": "It seems this route doesn't exist. Don't worry, even the best explorers need a guide every now and then.",
     "404.back": "Back Home",
@@ -564,23 +559,14 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "locale.es": "es",
     "locale.en": "en",
 
-    // Model Info Toast
+    /** @Logic.I18n.Section.ModelInfo */
     "info.title": "AI Model Transparency",
     "info.description": "At PR\\AI, we believe in open access. We utilize OpenRouter's free model router, an intelligent system that dynamically selects from the industry's most advanced models (such as Arcee's Trinity, Stepfun's Step 3.5, or NVIDIA's Nemotron) to provide you with vision, analysis, and complex reasoning capabilities free of charge.",
     "info.limitation": "Note: Subject to availability and variable latency based on OpenRouter's global demand.",
 
-    // About Page
+    /** @Logic.I18n.Section.About */
     "releases.title": "PR\\AI Release Notes",
     "releases.subtitle": "Last updated: Mar 23, 2026",
-    "releases.breadcrumb": "Releasebot | All Release Notes",
-    "releases.products": "PR\\AI Products",
-    "releases.all_notes": "All PR\\AI Release Notes",
-    "releases.product.claude": "PR\\AI Core",
-    "releases.product.apps": "PR\\AI Apps",
-    "releases.product.code": "PR\\AI Code",
-    "releases.product.platform": "PR\\AI Developer Platform",
-    "releases.note_count": "release notes",
-    "releases.get_feed": "Get this feed:",
     "releases.rss_feed": "RSS",
     "releases.api_feed": "API",
 
@@ -591,28 +577,11 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "about.description.p2": "We believe in transparency and the power of the community, which is why PR\\AI is an open-source project. We invite developers, tech enthusiasts, and the entire Boricua community to collaborate on its development. As a constantly evolving experiment, we test the capabilities of multimodal models in local contexts, always with the goal of improving the accuracy and usefulness of every response.",
     "about.description.p3": "It is important to remember that PR\\AI is a tool in its experimental stage. While we strive for technical excellence, responses are generated by artificial intelligence and may contain inaccuracies. We invite you to explore with curiosity and be part of this technological journey made 'from the island, for the world'.",
 
-    // API Errors
-    "error.api.title": "API Error",
-    "error.api.400": "Invalid request. Check parameters and try again.",
-    "error.api.401": "Invalid credentials. Check your API key.",
-    "error.api.402": "Insufficient credits.",
-    "error.api.403": "Your content was flagged by moderation.",
-    "error.api.408": "Request timed out. Try again.",
-    "error.api.429": "Too many requests. Wait a moment and try again.",
-    "error.api.500": "Internal server error. Try again in a few minutes.",
-    "error.api.502": "Selected model is unavailable. Try another.",
-    "error.api.503": "No providers available. Try again later.",
-    "error.api.unknown": "An unexpected error occurred. Please try again.",
-    "error.api.close": "Close",
-
-    // Usage
+    /** @Logic.I18n.Section.Usage */
     "usage.title": "Your Usage",
-    "usage.used": "You have used",
-    "usage.of": "of",
     "usage.messages": "messages",
     "usage.remaining": "You have",
     "usage.limit_reached": "Limit reached",
-    "usage.upgrade": "Upgrade plan",
     "usage.warning": "Almost at your limit",
     "usage.daily_reset": "Resets daily",
     "usage.description": "Manage your message usage",
@@ -628,7 +597,67 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "usage.reached_limit_messages": "You have reached your message limit",
     "usage.almost_limit": "Almost at your limit",
     "usage.almost_limit_messages": "Almost at your message limit",
-    "usage.daily_reset_notice": "Your quota resets daily."
+    "usage.daily_reset_notice": "Your quota resets daily.",
+
+    /** @Logic.I18n.Section.Personalization */
+    "personalization.title": "Personalization",
+    "personalization.sidebar.notifications": "Notifications",
+    "personalization.sidebar.personalization": "Personalization",
+    "personalization.sidebar.apps": "Apps",
+    "personalization.sidebar.data": "Data controls",
+    "personalization.sidebar.security": "Security",
+    "personalization.sidebar.account": "Account",
+    "personalization.content.style_title": "Base style and tone",
+    "personalization.content.style_desc": "Set the style and tone of how PR\\AI responds to you. This doesn't impact PR\\AI's capabilities.",
+    "personalization.content.chars_title": "Characteristics",
+    "personalization.content.chars_desc": "Choose additional customizations on top of your base style and tone.",
+    "personalization.content.warm": "Warm",
+    "personalization.content.enthusiastic": "Enthusiastic",
+    "personalization.content.headers": "Headers & Lists",
+    "personalization.content.emoji": "Emoji",
+    "personalization.content.instructions_title": "Custom instructions",
+    "personalization.content.instructions_desc": "Additional behavior, style, and tone preferences",
+    "personalization.content.about_title": "About you",
+    "personalization.content.about_me": "About you",
+    "personalization.content.about_me_desc": "Describe who you are so the AI knows how to interact with you.",
+    "personalization.content.nickname": "Nickname",
+    "personalization.options.default": "Default",
+    "personalization.options.default_desc": "Preset style and tone",
+    "personalization.options.professional": "Professional",
+    "personalization.options.professional_desc": "Polished and precise",
+    "personalization.options.friendly": "Friendly",
+    "personalization.options.friendly_desc": "Warm and chatty",
+    "personalization.options.candid": "Candid",
+    "personalization.options.candid_desc": "Direct and encouraging",
+    "personalization.options.quirky": "Quirky",
+    "personalization.options.quirky_desc": "Playful and imaginative",
+    "personalization.options.efficient": "Efficient",
+    "personalization.options.efficient_desc": "Concise and plain",
+    "personalization.options.cynical": "Cynical",
+    "personalization.options.cynical_desc": "Critical and sarcastic",
+    "personalization.options.more": "More",
+    "personalization.options.less": "Less",
+
+    /** @Logic.I18n.Section.PersonalizationPrompt */
+    "personalization.prompt.section_header": "### PERSONALIZATION & TONE PREFERENCES",
+    "personalization.prompt.instructions": "Adhere strictly to these user preferences for your output style:",
+    "personalization.prompt.nickname": "Address the user as: {nickname}",
+    "personalization.prompt.about_me": "About the user: {aboutMe}",
+    "personalization.prompt.persona_header": "Core Persona",
+    "personalization.prompt.modifiers_header": "Stylistic Modifiers",
+    "personalization.prompt.custom_header": "User explicitly requested these behaviors",
+    "personalization.prompt.tone.professional": "Professional, polished, and precise.",
+    "personalization.prompt.tone.friendly": "Friendly, warm, and chatty.",
+    "personalization.prompt.tone.candid": "Candid, direct, and encouraging.",
+    "personalization.prompt.tone.quirky": "Quirky, playful, and imaginative.",
+    "personalization.prompt.tone.efficient": "Efficient, concise, and plain.",
+    "personalization.prompt.tone.cynical": "Cynical, critical, and sarcastic.",
+    "personalization.prompt.level.more": "Increase significantly",
+    "personalization.prompt.level.less": "Decrease significantly/Avoid",
+    "personalization.prompt.term.warm": "warmth and friendliness",
+    "personalization.prompt.term.enthusiastic": "energy and excitement",
+    "personalization.prompt.term.headers": "the use of structured headers and lists",
+    "personalization.prompt.term.emoji": "the use of emojis"
   }
 }
 
@@ -645,13 +674,23 @@ export const I18nLive = Layer.effect(
     }
 
     const initialLocale = getLocaleFromCookie()
+    let latestLocale = initialLocale
     const currentLocale = yield* Ref.make<Locale>(initialLocale)
 
     return {
-      t: (_key: string) => "", // Placeholder, used by Provider.translate
+      t: (key: string, params?: Record<string, string>) => {
+        let text = translate(latestLocale, key)
+        if (params) {
+          Object.entries(params).forEach(([k, v]) => {
+            text = text.replaceAll(`{${k}}`, v)
+          })
+        }
+        return text
+      },
       locale: Ref.get(currentLocale),
       setLocale: (locale: Locale) =>
         Effect.gen(function* () {
+          latestLocale = locale
           yield* Ref.set(currentLocale, locale)
           if (typeof document !== "undefined") {
             // Set cookie for Next.js i18n compatibility

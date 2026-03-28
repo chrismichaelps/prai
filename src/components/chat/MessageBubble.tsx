@@ -125,6 +125,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = memo(({ message, inde
     >
       <div className={cn('max-w-[92%] md:max-w-[85%] relative w-full')}>
         {!isUser && (
+          /** @UI.Chat.Bubble.CopyButton */
           <div className="absolute -top-1 w-full flex justify-end pointer-events-none z-10">
             <button
               onClick={copyToClipboard}
