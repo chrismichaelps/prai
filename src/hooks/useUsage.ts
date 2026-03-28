@@ -2,7 +2,7 @@
 
 /** @Hook.UseUsage */
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import type { Database } from '@/types/database.types'
 import type { SubscriptionTierType, ResetIntervalType } from '@/lib/effect/constants/SubscriptionConstants'
@@ -18,6 +18,7 @@ export function useUsage() {
   const [usage, setUsage] = useState<UserUsage | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const fetchedRef = useRef(false)
 
   const fetchUsage = useCallback(async () => {
     if (!isAuthenticated) return
@@ -63,7 +64,8 @@ export function useUsage() {
   }, [isAuthenticated])
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && !fetchedRef.current) {
+      fetchedRef.current = true
       fetchUsage()
     }
   }, [isAuthenticated, fetchUsage])
