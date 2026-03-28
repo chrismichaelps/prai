@@ -9,8 +9,14 @@ Grammar_Lock: "@root/hashes/grammar/effect.hash.md"
 ### [Signatures]
 ```ts
 export const initChat: Effect<void, never, ConfigService | Redux>
-export const sendChatMessage: (content: string) => Effect<void, never, OpenRouter | Redux | ConfigService | ChatApi>
-export const regenerateResponse: Effect.Effect<void, never, OpenRouter | Redux | ConfigService>
+export const sendChatMessage: (content: string, personalization?: Personalization) => Effect<void, never, OpenRouter | Redux | ConfigService | ChatApi>
+export const regenerateResponse: (personalization?: Personalization) => Effect.Effect<void, never, OpenRouter | Redux | ConfigService>
+```
+
+**Internal:**
+```ts
+const generateResponse: (sessionId?: string, personalization?: Personalization) => Effect<void, OpenRouterError | void, OpenRouter | Redux>
+// Accepts optional sessionId for OpenRouter session tracking and personalization for system prompt injection
 ```
 
 **Internal:**

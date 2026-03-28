@@ -13,7 +13,9 @@ export const useChatActions: () => ChatContextType
 export const useChatStore: () => ChatContextType  // Deprecated alias
 
 interface ChatContextType {
-  sendMessage: (content: string) => Promise<void>
+  sendMessage: (content: string, personalization?: Personalization) => Promise<void>
+  regenerateMessage: (personalization?: Personalization) => Promise<void>
+  editMessage: (index: number, content: string, personalization?: Personalization) => Promise<void>
   clearHistory: () => void
   startVoice: (onResult: (text: string, isFinal: boolean) => void) => void
   stopVoice: () => void
@@ -23,6 +25,7 @@ interface ChatContextType {
 ### [Governance]
 - **Bridge_Law:** Correct pattern — React bridge calls `runtime.runPromise(effect)` wrapped in `.catch()` boundary.
 - **Render_Law:** Callbacks (`sendMessage`, etc.) memoized with `useCallback` to prevent re-renders.
+- **Personalization_Law:** sendMessage, regenerateMessage, and editMessage accept optional personalization parameter.
 
 ### [Implementation Notes]
 - **Error Boundaries:** The React bridge ensures `runtime.runPromise` is wrapped in `.catch()` to handle Promise rejections safely.

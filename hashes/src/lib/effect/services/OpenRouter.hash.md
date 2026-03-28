@@ -19,7 +19,7 @@ export class OpenRouter extends Effect.Service<OpenRouter>()("OpenRouter", {
 **Interface:**
 ```ts
 interface OpenRouterShape {
-  readonly chat: (messages: readonly ChatMessage[], searchOptions?: PuertoRicoSearchOptions, sessionId?: string) => Stream.Stream<ChatResponse, OpenRouterError, never>
+  readonly chat: (messages: readonly ChatMessage[], searchOptions?: PuertoRicoSearchOptions, sessionId?: string, personalization?: Personalization) => Stream.Stream<ChatResponse, OpenRouterError, never>
 }
 ```
 

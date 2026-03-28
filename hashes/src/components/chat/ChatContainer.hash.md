@@ -16,7 +16,6 @@ export const Chat: {
   Messages: ({ children, scrollAreaRef, innerRef, onScroll, className }) => JSX.Element
   Input: ({ value, onChange, onSend, isLoading, showScrollButton, onScrollToBottom, suggestions, textareaRef, isRecording, onMicClick, stopResponse, t, isAtLimit, isAuthenticated, usage, isUsageVisible, onToggleUsage }) => JSX.Element
 }
-```
 
 ### [Governance]
 - **Performance_Law:** `MemoizedMessageBubble` used for the message list to prevent heavy stream re-renders.
@@ -24,6 +23,7 @@ export const Chat: {
 - **Auto_Chat_Law:** Creates new chat automatically when visiting `/chat` with no `currentChatId`.
 - **URL_Sync_Law:** Updates URL to `/chat/:id` when returning with existing chat via `usePathname`.
 - **Usage_Law:** Displays inline usage bar with progress, remaining messages count, and limit warnings. Usage pill can be toggled visible/hidden.
+- **Personalization_Law:** Uses usePersonalization hook to pass preferences to chat messages.
 
 ### [Implementation Notes]
 - **Component Code Splitting:** Heavy components like `AdaptiveCard` are lazily loaded via Next.js `dynamic()`.
