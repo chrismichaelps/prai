@@ -4,6 +4,7 @@ import { NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import type { ValidationError } from "@/app/api/_lib/errors"
 import { UnauthorizedError } from "@/app/api/_lib/errors"
+import { HttpStatus } from "@/app/api/_lib/constants/status-codes"
 import { decodeSearchParams, S } from "@/app/api/_lib/validation"
 import { decodeBody } from "@/app/api/_lib/validation"
 import { exitResponse } from "@/app/api/_lib/response"
@@ -80,7 +81,7 @@ export async function POST(request: NextRequest) {
     )
   )
 
-  return exitResponse((data) => NextResponse.json(data, { status: 201 }), {
+  return exitResponse((data) => NextResponse.json(data, { status: HttpStatus.CREATED }), {
     spanName: "issues.create",
     method: "POST",
     path: request.url,

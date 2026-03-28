@@ -87,7 +87,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const rss = generateRSS(releases)
 
     return new NextResponse(rss, {
-      status: 200,
+      status: HttpStatus.OK,
       headers: {
         'Content-Type': 'application/rss+xml; charset=utf-8',
         'Cache-Control': 'public, max-age=3600, s-maxage=3600',
@@ -97,7 +97,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   } catch (error) {
     console.error('[RSSFeed] Error generating RSS feed:', error)
     return new NextResponse('<?xml version="1.0" encoding="UTF-8"?><error>Failed to generate RSS feed</error>', {
-      status: 500,
+      status: HttpStatus.INTERNAL_SERVER_ERROR,
       headers: {
         'Content-Type': 'application/rss+xml; charset=utf-8',
       },
