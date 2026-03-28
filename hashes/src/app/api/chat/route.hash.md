@@ -1,5 +1,5 @@
 ---
-State_ID: BigInt(0x0)
+State_ID: BigInt(0x1)
 Git_SHA: LATEST
 Grammar_Lock: "@root/hashes/grammar/typescript.hash.md"
 ---
@@ -19,6 +19,7 @@ export async function POST(req: Request): Promise<Response | NextResponse>
 - **Reasoning_Law:** Injects `reasoning: { effort: "low"|"medium" }` based on tier.
 - **Plugin_Law:** Only injects web search plugins for Pro tier users.
 - **Usage_Law:** Checks user usage before processing; returns 403 if limit reached.
+- **HttpStatus_Convention:** Uses `HttpStatus` constants instead of magic numbers for response status codes.
 
 ### [Implementation Notes]
 - **Model Selection:** Reads from `NEXT_PUBLIC_MODEL_NAME` (free) and `NEXT_PUBLIC_MODEL_NAME_PREMIUM` (pro) env vars.

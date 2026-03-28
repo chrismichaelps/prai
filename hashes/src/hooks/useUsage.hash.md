@@ -1,5 +1,5 @@
 ---
-State_ID: BigInt(0x0)
+State_ID: BigInt(0x1)
 Git_SHA: LATEST
 Grammar_Lock: "@root/hashes/grammar/effect.hash.md"
 ---
@@ -33,6 +33,7 @@ export function useUsage(): {
 - **Fetch_Law:** Fetches usage on mount if authenticated.
 - **Increment_Law:** Calls `/api/user/usage/increment` and updates local state.
 - **Thresholds:** isAtWarning when messages_remaining <= 5; isAtCritical when messages_remaining <= 0.
+- **StrictMode_Law:** Uses `fetchedRef` to prevent duplicate API calls in development (React Strict Mode).
 
 ### [Semantic Hash]
 React hook for managing user usage state, fetching from API, and computing usage thresholds.
