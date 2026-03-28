@@ -20,8 +20,8 @@ import { setApiError } from "@/store/slices/uiSlice"
 import { OpenRouterError } from "./errors"
 import type { AdaptiveData } from "@/types/chat"
 import { toSource } from "@/lib/url"
-
-
+import type { Personalization } from "./schemas/PersonalizationSchema"
+import { I18n } from "./services/I18n"
 
 /** @Logic.Effect.GenerateTitle */
 const generateChatTitle = (
@@ -31,6 +31,7 @@ const generateChatTitle = (
   Effect.gen(function* () {
     const config = yield* ConfigService
 
+    /** @Logic.Chat.PrepareTitleContext */
     const contextSnippet = conversationHistory.length > 0
       ? `\n\nRecent conversation:\n${conversationHistory.slice(-3).join('\n')}`
       : ''
@@ -60,6 +61,7 @@ const generateChatTitle = (
 
     const data = yield* Effect.promise(() => response.json() as Promise<{ choices?: Array<{ message?: { content?: string } }> }>)
     let title = data.choices?.[0]?.message?.content?.trim() || currentMessage.slice(0, 25)
+    /** @Logic.Chat.SanitizeTitle */
     title = title.replace(/[^\w\sáéíóúñüÁÉÍÓÚÑÜ]/g, '').trim()
     return title.slice(0, 30)
   }).pipe(
@@ -78,13 +80,16 @@ export const initChat = Effect.gen(function* () {
 
 /** @Logic.Chat.GenerateResponse.Internal */
 /** @Logic.Chat.GenerateResponse */
-const generateResponse = (sessionId?: string): Effect.Effect<void, OpenRouterError | void, OpenRouter | Redux> => Effect.gen(function* () {
+const generateResponse = (
+  sessionId?: string,
+  personalization?: Personalization
+): Effect.Effect<void, OpenRouterError | void, OpenRouter | Redux | I18n> => Effect.gen(function* () {
   /** @Logic.OpenRouter.Client */
   const openRouter = yield* OpenRouter
   /** @Store.Selector.Chat.Messages */
   const messages = yield* Redux.getState().pipe(Effect.map((s) => s.chat.messages))
   /** @Logic.OpenRouter.ChatStream */
-  const stream = openRouter.chat(messages, undefined, sessionId)
+  const stream = openRouter.chat(messages, undefined, sessionId, personalization)
 
   /** @Store.Action.Chat.AddAssistantMessage */
   yield* Redux.dispatch(addMessage({ role: ChatRole.ASSISTANT, content: "" }))
@@ -115,8 +120,8 @@ const generateResponse = (sessionId?: string): Effect.Effect<void, OpenRouterErr
       if (reasoning) {
         yield* Ref.update(reasoningRef, (prev) => prev + reasoning)
         const currentReasoning = yield* Ref.get(reasoningRef)
-        yield* Redux.dispatch(updateLastMessage({ 
-          metadata: { thought: currentReasoning, isThinking: true } 
+        yield* Redux.dispatch(updateLastMessage({
+          metadata: { thought: currentReasoning, isThinking: true }
         }))
       }
 
@@ -158,8 +163,8 @@ const generateResponse = (sessionId?: string): Effect.Effect<void, OpenRouterErr
   const assistantContent = yield* Ref.get(contentRef)
 
   /** @Logic.Chat.ClearThinking */
-  yield* Redux.dispatch(updateLastMessage({ 
-    metadata: { isThinking: false } 
+  yield* Redux.dispatch(updateLastMessage({
+    metadata: { isThinking: false }
   }))
 
   /** @Logic.Chat.FlushSources */
@@ -179,7 +184,8 @@ const generateResponse = (sessionId?: string): Effect.Effect<void, OpenRouterErr
     }
   }))
 
-  const matches = [...assistantContent.matchAll(/```json\n([\s\S]*?)\n```\n/g)]
+  const assistantContentStr = assistantContent as string
+  const matches = [...assistantContentStr.matchAll(/```json\n([\s\S]*?)\n```\n/g)]
 
   const results = yield* Effect.forEach(matches, (match) =>
     Effect.gen(function* () {
@@ -196,7 +202,7 @@ const generateResponse = (sessionId?: string): Effect.Effect<void, OpenRouterErr
   )
 
   if (jsonBlocks.length > 0) {
-    let processedContent = assistantContent
+    let processedContent = assistantContentStr
     for (const { raw } of jsonBlocks) processedContent = processedContent.replace(raw, "").trim()
 
     /** @Logic.Chat.AdaptiveExtraction */
@@ -217,7 +223,7 @@ const generateResponse = (sessionId?: string): Effect.Effect<void, OpenRouterErr
       updateLastMessage({
         content: processedContent,
         metadata: {
-          searchQuery: assistantContent.match(/Buscando\s+"([^"]+)"/i)?.[1] || undefined
+          searchQuery: assistantContentStr.match(/Buscando\s+"([^"]+)"/i)?.[1] || undefined
         }
       })
     )
@@ -226,8 +232,9 @@ const generateResponse = (sessionId?: string): Effect.Effect<void, OpenRouterErr
 
 /** @Logic.Chat.Send */
 export const sendChatMessage = (
-  content: string
-): Effect.Effect<void, never, OpenRouter | Redux | ConfigService | ChatApi> =>
+  content: string,
+  personalization?: Personalization
+): Effect.Effect<void, never, OpenRouter | Redux | ConfigService | ChatApi | I18n> =>
   Effect.gen(function* () {
     if (!content.trim()) return
 
@@ -275,7 +282,7 @@ export const sendChatMessage = (
       }
     }
 
-    yield* generateResponse(currentChatId ?? undefined)
+    yield* generateResponse(currentChatId ?? undefined, personalization)
 
     if (currentChatId) {
       const state = yield* Redux.getState()
@@ -328,7 +335,9 @@ export const sendChatMessage = (
   )
 
 /** @Logic.Chat.Regenerate */
-export const regenerateResponse: Effect.Effect<void, never, OpenRouter | Redux | ConfigService> =
+export const regenerateResponse = (
+  personalization?: Personalization
+): Effect.Effect<void, never, OpenRouter | Redux | ConfigService | I18n> =>
   Effect.gen(function* () {
     yield* Redux.dispatch(setLoading(true))
     yield* Redux.dispatch(setError(null))
@@ -336,7 +345,7 @@ export const regenerateResponse: Effect.Effect<void, never, OpenRouter | Redux |
 
     const state = yield* Redux.getState()
     const currentChatId = state.chat.currentChatId
-    yield* generateResponse(currentChatId ?? undefined)
+    yield* generateResponse(currentChatId ?? undefined, personalization)
   }).pipe(
     Effect.ensuring(Redux.dispatch(setLoading(false))),
     Effect.catchAll((err) =>
