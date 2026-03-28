@@ -11,11 +11,13 @@ import {
   Bug,
   PenLine,
   BarChart3,
+  Palette,
 } from 'lucide-react'
 import Image from 'next/image'
 import { useAuth } from '@/contexts/AuthContext'
 import { useI18n } from '@/lib/effect/I18nProvider'
 import { useUsage } from '@/hooks/useUsage'
+import { PersonalizationNestedView } from './PersonalizationNestedView'
 import { TierBadge } from '@/components/usage/TierBadge'
 import { cn } from '@/lib/utils'
 
@@ -28,7 +30,8 @@ export function SidebarProfile({ onSignOut }: SidebarProfileProps) {
   const { user, profile, signOut } = useAuth()
   const { usage, fetchUsage } = useUsage()
   const [isPopoverOpen, setIsPopoverOpen] = useState(false)
-  const [activeTab, setActiveTab] = useState<'main' | 'help'>('main')
+  const [activeTab, setActiveTab] = useState<'main' | 'help' | 'personalization'>('main')
+  const [direction, setDirection] = useState(0)
   const popoverRef = useRef<HTMLDivElement>(null)
 
   const isAdmin = profile?.is_admin === true
@@ -73,6 +76,12 @@ export function SidebarProfile({ onSignOut }: SidebarProfileProps) {
     setIsPopoverOpen(false)
     if (onSignOut) onSignOut()
     signOut()
+  }
+
+  const navigateToTab = (newTab: 'main' | 'help' | 'personalization') => {
+    const order = { main: 0, help: 1, personalization: 2 }
+    setDirection(order[newTab] > order[activeTab] ? 1 : -1)
+    setActiveTab(newTab)
   }
 
   const menuVariants = {
@@ -140,17 +149,17 @@ export function SidebarProfile({ onSignOut }: SidebarProfileProps) {
               stiffness: 300,
               layout: { duration: 0.3 }
             }}
-            className="absolute bottom-full left-4 bg-[#1a1a1a] border border-white/20 rounded-2xl shadow-2xl w-[280px] mb-2 overflow-hidden z-[60] backdrop-blur-2xl"
+            className="absolute bottom-full left-4 bg-[#0d0d0d] border border-white/20 rounded-2xl shadow-2xl w-[280px] mb-2 overflow-hidden z-[60] backdrop-blur-3xl"
           >
             <div className="relative overflow-hidden">
               <AnimatePresence
                 initial={false}
-                custom={activeTab === 'main' ? -1 : 1}
+                custom={direction}
               >
-                {activeTab === 'main' ? (
+                {activeTab === 'main' && (
                   <motion.div
                     key="main"
-                    custom={-1}
+                    custom={direction}
                     variants={tabVariants}
                     initial="enter"
                     animate="center"
@@ -224,7 +233,7 @@ export function SidebarProfile({ onSignOut }: SidebarProfileProps) {
                     <div className="h-px bg-white/5 my-1" />
 
                     <button
-                      onClick={() => setActiveTab('help')}
+                      onClick={() => navigateToTab('help')}
                       className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-white/5 text-white/80 hover:text-white transition-all text-sm group"
                     >
                       <div className="flex items-center gap-3">
@@ -242,10 +251,12 @@ export function SidebarProfile({ onSignOut }: SidebarProfileProps) {
                       <span>{t('auth.sign_out')}</span>
                     </button>
                   </motion.div>
-                ) : (
+                )}
+
+                {activeTab === 'help' && (
                   <motion.div
                     key="help"
-                    custom={1}
+                    custom={direction}
                     variants={tabVariants}
                     initial="enter"
                     animate="center"
@@ -254,13 +265,20 @@ export function SidebarProfile({ onSignOut }: SidebarProfileProps) {
                     className="p-2 space-y-1"
                   >
                     <button
-                      onClick={() => setActiveTab('main')}
+                      onClick={() => navigateToTab('main')}
                       className="w-full flex items-center gap-2 p-2.5 rounded-xl hover:bg-white/5 text-white/60 hover:text-white transition-all text-xs font-bold uppercase tracking-wider mb-2"
                     >
                       <ChevronLeft className="w-3 h-3" />
                       <span>{t('chat.back_to_menu') || 'Back'}</span>
                     </button>
 
+                    <button
+                      onClick={() => navigateToTab('personalization')}
+                      className="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/5 text-white/80 hover:text-white transition-all text-sm"
+                    >
+                      <Palette className="w-4 h-4" />
+                      <span>{t('personalization.title')}</span>
+                    </button>
                     <button
                       onClick={() => {
                         setIsPopoverOpen(false)
@@ -291,6 +309,21 @@ export function SidebarProfile({ onSignOut }: SidebarProfileProps) {
                       <Bug className="w-4 h-4" />
                       <span>{t('auth.report_bug')}</span>
                     </button>
+                  </motion.div>
+                )}
+
+                {activeTab === 'personalization' && (
+                  <motion.div
+                    key="personalization"
+                    custom={direction}
+                    variants={tabVariants}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                    transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                    className="p-2"
+                  >
+                    <PersonalizationNestedView onBack={() => navigateToTab('help')} />
                   </motion.div>
                 )}
               </AnimatePresence>

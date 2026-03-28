@@ -1,5 +1,6 @@
 import { Schema, Effect, Config as EffectConfig } from "effect"
 import { PromptBuilderService } from "./PromptBuilder"
+import { translate } from "../i18n"
 
 export const ErrorMessagesSchema = Schema.Struct({
   connectionError: Schema.String.pipe(Schema.minLength(1)),
@@ -56,12 +57,20 @@ export class ConfigService extends Effect.Service<ConfigService>()("Config", {
       Effect.mapError(() => new Error("Missing NEXT_PUBLIC_SITE_URL"))
     )
 
-    const systemPrompt = promptBuilder.compose(`
+    const systemPrompt = promptBuilder.compose((key, params) => {
+      let text = translate("es", key)
+      if (params) {
+        Object.entries(params).forEach(([k, v]) => {
+          text = text.replace(`{${k}}`, v)
+        })
+      }
+      return text
+    }, `
 <dynamic_capabilities>
   - Puedes inventar nuevos tipos de JSON en el futuro siempre que respetes la estructura {"type": "...", "data": {...}}.
   - El sistema está diseñado para escalar sin tocar el código fuente.
 </dynamic_capabilities>
-`)
+`, undefined)
 
     return {
       openRouterBaseUrl,

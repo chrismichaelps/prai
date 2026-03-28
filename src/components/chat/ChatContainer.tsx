@@ -22,6 +22,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useRouter, usePathname } from 'next/navigation'
 /** @Module.Hook.Usage */
 import { useUsage } from '@/hooks/useUsage'
+import { usePersonalization } from '@/hooks/usePersonalization'
 import type { UserUsage } from '@/hooks/useUsage'
 
 /** @UI.Chat.AdaptiveCard.Lazy */
@@ -268,6 +269,7 @@ export const ChatContainer: React.FC = () => {
   const { sendMessage, stopResponse, editMessage, startVoice, stopVoice } = useChatActions()
   const { t } = useI18n()
   const { usage, isAtLimit, setUsage } = useUsage()
+  const { personalization } = usePersonalization()
   const [isUsageVisible, setIsUsageVisible] = useState(true)
   const [userInput, setUserInput] = useState('')
   const [isRecording, setIsRecording] = useState(false)
@@ -423,10 +425,10 @@ export const ChatContainer: React.FC = () => {
       setIsLockedToBottom(true)
       
       await ensureChatExists()
-      await sendMessage(content)
+      await sendMessage(content, personalization)
       scrollToBottom('smooth')
     },
-    [isRecording, userInput, isAtLimit, usage, setUsage, ensureChatExists, sendMessage, scrollToBottom, handleMicClick]
+    [isRecording, userInput, isAtLimit, usage, setUsage, ensureChatExists, sendMessage, scrollToBottom, handleMicClick, personalization]
   )
 
   return (
@@ -445,7 +447,7 @@ export const ChatContainer: React.FC = () => {
             key={index} 
             message={msg} 
             index={index}
-            onEdit={editMessage}
+            onEdit={(idx, content) => editMessage(idx, content, personalization)}
             onStop={stopResponse}
           />
         ))}

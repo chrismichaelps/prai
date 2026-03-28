@@ -8,11 +8,12 @@ import { RuntimeError } from './errors'
 import { startSpeechToText, stopSpeechToText } from './services/Voice'
 import { clearHistory as clearChatAction, editMessage as editChatMessageAction } from '@/store/slices/chatSlice'
 import { useAppDispatch } from '@/store/hooks'
+import type { Personalization } from './schemas/PersonalizationSchema'
 
 interface ChatContextType {
-  sendMessage: (content: string) => Promise<void>
-  regenerateMessage: () => Promise<void>
-  editMessage: (index: number, content: string) => Promise<void>
+  sendMessage: (content: string, personalization?: Personalization) => Promise<void>
+  regenerateMessage: (personalization?: Personalization) => Promise<void>
+  editMessage: (index: number, content: string, personalization?: Personalization) => Promise<void>
   stopResponse: () => void
   clearHistory: () => void
   startVoice: (onResult: (text: string, isFinal: boolean) => void) => void
@@ -36,8 +37,8 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     init()
   }, [init])
 
-  const sendMessage = useCallback(async (content: string) => {
-    const fiber = runtime.runFork(sendChatMessage(content))
+  const sendMessage = useCallback(async (content: string, personalization?: Personalization) => {
+    const fiber = runtime.runFork(sendChatMessage(content, personalization))
     activeFiber.current = fiber
     
     runtime.runPromise(Fiber.await(fiber)).then(() => {
@@ -47,8 +48,8 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     })
   }, [])
 
-  const regenerateMessage = useCallback(async () => {
-    const fiber = runtime.runFork(regenerateResponse)
+  const regenerateMessage = useCallback(async (personalization?: Personalization) => {
+    const fiber = runtime.runFork(regenerateResponse(personalization))
     activeFiber.current = fiber
     
     runtime.runPromise(Fiber.await(fiber)).then(() => {
@@ -58,13 +59,13 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     })
   }, [])
 
-  const editMessage = useCallback(async (index: number, content: string) => {
+  const editMessage = useCallback(async (index: number, content: string, personalization?: Personalization) => {
     if (activeFiber.current) {
       await runtime.runPromise(Fiber.interrupt(activeFiber.current))
       activeFiber.current = null
     }
     dispatch(editChatMessageAction({ index, content }))
-    await regenerateMessage()
+    await regenerateMessage(personalization)
   }, [dispatch, regenerateMessage])
 
   const stopResponse = useCallback(async () => {
