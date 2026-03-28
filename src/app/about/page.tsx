@@ -16,7 +16,7 @@ export default function AboutPage() {
   const { t } = useI18n()
 
   return (
-    <main className="relative min-h-screen overflow-hidden">
+    <main id="main-content" className="relative min-h-screen overflow-hidden" role="main" aria-label="About page">
       {/* Background image + overlay */}
       <div className="absolute inset-0">
         <Image
@@ -25,6 +25,7 @@ export default function AboutPage() {
           fill
           className="object-cover"
           priority
+          fetchPriority="high"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-primary/80 via-primary/60 to-accent/70" />
       </div>
