@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { getChangelogReleasesSync } from '@/lib/effect/services/Changelog'
 
+export const dynamic = 'force-static'
+
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || ''
 const SITE_TITLE = 'PR\\AI Release Notes'
 const SITE_DESCRIPTION = 'The latest updates, features, and fixes for the PR\\AI platform.'

@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import { getChangelogReleasesSync } from '@/lib/effect/services/Changelog'
 import { HttpStatus } from '@/app/api/_lib/constants/status-codes'
 
+export const dynamic = 'force-static'
+
 /** @Route.Api.Releases */
 /** @Route.Api.Releases.GET */
 export async function GET(): Promise<NextResponse> {
