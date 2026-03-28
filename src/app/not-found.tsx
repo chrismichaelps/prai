@@ -50,22 +50,22 @@ export default function NotFound() {
                </p>
              </div>
 
-             <div className="flex flex-col sm:flex-row items-start gap-4 pt-8">
-               <Link 
-                 href="/"
-                 className="group flex items-center gap-3 bg-white text-slate-900 px-8 py-4 rounded-2xl font-bold hover:bg-brand-blue hover:text-white transition-all duration-300 shadow-2xl"
-               >
-                 <Home className="w-5 h-5 group-hover:-translate-y-1 transition-transform" />
-                 {t('404.back')}
-               </Link>
-               <Link 
-                 href="/chat"
-                 className="group flex items-center gap-3 bg-white/10 backdrop-blur-xl text-white px-8 py-4 rounded-2xl font-bold border border-white/20 hover:bg-white/20 transition-all duration-300"
-               >
-                 {t('404.ask')}
-                 <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform rotate-180" />
-               </Link>
-             </div>
+              <div className="flex flex-col sm:flex-row items-start gap-4 pt-8">
+                <Link 
+                  href="/"
+                  className="group flex items-center gap-3 bg-white text-slate-900 px-8 py-4 rounded-2xl font-bold hover:bg-white/90 hover:scale-105 active:scale-95 transition-all duration-300 shadow-2xl"
+                >
+                  <Home className="w-5 h-5 group-hover:-translate-y-1 transition-transform" />
+                  {t('404.back')}
+                </Link>
+                <Link 
+                  href="/chat"
+                  className="group flex items-center gap-3 bg-white/10 backdrop-blur-xl text-white px-8 py-4 rounded-2xl font-bold border border-white/20 hover:bg-white/20 hover:scale-105 active:scale-95 transition-all duration-300"
+                >
+                  {t('404.ask')}
+                  <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform rotate-180" />
+                </Link>
+              </div>
            </motion.div>
         </main>
 
