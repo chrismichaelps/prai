@@ -1,5 +1,24 @@
 # Changelog
 
+## 2026-03-28
+
+- Added per-user message usage tracking system with daily/monthly resets and tier-based limits (#67)
+- Added subscription tier support (Free/Pro) with tier-based model selection in chat API
+- Added reasoning effort injection based on tier (low for free, medium for pro)
+- Added web search plugins only for Pro tier users
+- Added usage page with progress bars, last/next reset dates with user locale times
+- Added tier badges in usage view, profile, and avatar dropdown
+- Added personalization feature allowing users to customize AI response style and tone (#69)
+- Added base style options: Default, Professional, Friendly, Candid, Quirky, Efficient, Cynical
+- Added characteristic adjustments: warmth, enthusiasm, headers/lists, emoji usage
+- Added custom instructions and nickname fields for personalized AI interactions
+- Added PersonalizationModal UI with sidebar navigation for settings
+- Added /personalization page route with full settings interface
+- Added API endpoints for personalization (GET/POST /api/user/personalization)
+- Added Effect Schema validation to personalization API endpoints
+- Added shimmer animation for usage progress bar loading states
+- Added session_id support to OpenRouter for conversation tracking and debug chains
+
 ## 2026-03-27
 
 - Added full 1:1 FMCF Hash Registry conformity ensuring all `src/` modules strictly mirror corresponding `.hash.md` architectural contracts
