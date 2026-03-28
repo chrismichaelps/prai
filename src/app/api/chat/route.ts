@@ -188,7 +188,7 @@ export async function POST(req: Request) {
           const responseBody = response.body
           
           if (!responseBody) {
-            return new Response(null, { status: 500 })
+            return new Response(null, { status: HttpStatus.INTERNAL_SERVER_ERROR })
           }
 
           const encoder = new TextEncoder()
