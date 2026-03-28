@@ -1,5 +1,5 @@
 ---
-State_ID: BigInt(0x0)
+State_ID: BigInt(0x2)
 Git_SHA: LATEST
 Grammar_Lock: "@root/hashes/grammar/typescript.hash.md"
 ---
@@ -14,6 +14,7 @@ Grammar_Lock: "@root/hashes/grammar/typescript.hash.md"
 ### [Governance]
 - **Network_Law**: Synchronizes internal React state with remote Supabase signals.
 - **Auth_Law**: Subscriptions strictly scoped to `recipient_id=eq.${user.id}`.
+- **StrictMode_Law**: Uses `fetchedRef` to prevent duplicate API calls in development (React Strict Mode).
 
 ### [Linkage]
 - **Upstream**: Supabase SDK, React Context (Auth).
