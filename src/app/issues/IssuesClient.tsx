@@ -384,25 +384,31 @@ function IssueListNewForm({ onClose }: { onClose: () => void }) {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-3">
+      <form onSubmit={handleSubmit} className="space-y-3" aria-label="Create new issue">
         <div>
-          <label className="text-[11px] font-semibold text-white/40 uppercase tracking-wider mb-1.5 block">
+          <label htmlFor="issue-title" className="text-[11px] font-semibold text-white/40 uppercase tracking-wider mb-1.5 block">
             {t('issues.new_title')}
           </label>
           <input
+            id="issue-title"
             type="text"
             maxLength={120}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder={t('issues.new_title_placeholder')}
+            aria-describedby="issue-title-hint"
             className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/20 transition"
           />
+          <span id="issue-title-hint" className="text-[10px] text-white/30">
+            {t('a11y.issue_title_hint')}
+          </span>
         </div>
         <div>
-          <label className="text-[11px] font-semibold text-white/40 uppercase tracking-wider mb-1.5 block">
+          <label htmlFor="issue-body" className="text-[11px] font-semibold text-white/40 uppercase tracking-wider mb-1.5 block">
             {t('issues.new_body')}
           </label>
           <MentionInput
+            id="issue-body"
             rows={4}
             value={body}
             onChange={setBody}
@@ -411,10 +417,11 @@ function IssueListNewForm({ onClose }: { onClose: () => void }) {
         </div>
         <div className="flex items-end gap-3 flex-wrap">
           <div className="flex-1 min-w-[140px]">
-            <label className="text-[11px] font-semibold text-white/40 uppercase tracking-wider mb-1.5 block">
+            <label htmlFor="issue-label" className="text-[11px] font-semibold text-white/40 uppercase tracking-wider mb-1.5 block">
               {t('issues.new_label')}
             </label>
             <select
+              id="issue-label"
               value={label}
               onChange={(e) => setLabel(e.target.value as IssueLabel)}
               className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-white/20 transition"

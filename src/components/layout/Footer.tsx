@@ -94,9 +94,11 @@ export function Footer({ className = "" }: FooterProps) {
 
           <div className="flex items-center gap-6">
             {/* Locale Switcher */}
-            <div className="flex p-1 bg-white/5 rounded-full border border-white/10">
+            <div className="flex p-1 bg-white/5 rounded-full border border-white/10" role="group" aria-label={t('a11y.language_selector')}>
               <button
                 onClick={() => setLocale('es')}
+                aria-label={t('a11y.switch_spanish')}
+                aria-pressed={locale === 'es'}
                 className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
                   locale === 'es' ? 'bg-primary text-primary-foreground shadow-lg' : 'text-white/40 hover:text-white'
                 }`}
@@ -105,6 +107,8 @@ export function Footer({ className = "" }: FooterProps) {
               </button>
               <button
                 onClick={() => setLocale('en')}
+                aria-label={t('a11y.switch_english')}
+                aria-pressed={locale === 'en'}
                 className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
                   locale === 'en' ? 'bg-primary text-primary-foreground shadow-lg' : 'text-white/40 hover:text-white'
                 }`}
@@ -114,21 +118,13 @@ export function Footer({ className = "" }: FooterProps) {
             </div>
             
             <div className="flex gap-6">
-              <a href="#" className="text-white/30 hover:text-white transition-colors">
-                <span className="sr-only">Twitter</span>
-                {/* Twitter Icon placeholder */}
-              </a>
-              <a href="#" className="text-white/30 hover:text-white transition-colors">
-                <span className="sr-only">Instagram</span>
-                {/* Instagram Icon placeholder */}
-              </a>
               <a 
                 href={GITHUB_REPO_URL}
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label={t('a11y.github')}
                 className="text-white/30 hover:text-white transition-colors"
               >
-                <span className="sr-only">Github</span>
                 <Github className="w-5 h-5" />
               </a>
             </div>

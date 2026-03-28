@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
 
 @layer base {
   :root {
@@ -94,15 +94,16 @@
   }
 
   body {
-    @apply bg-background text-foreground font-body antialiased min-h-screen w-full;
+    @apply bg-background text-foreground antialiased min-h-screen w-full;
+    font-family: var(--font-inter), system-ui, sans-serif;
     color-scheme: dark;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-display;
+    font-family: var(--font-space-grotesk), system-ui, sans-serif;
   }
 
-  /* Premium Custom Scrollbar */
+  /* Custom Scrollbar */
   ::-webkit-scrollbar {
     width: 5px;
     height: 5px;
@@ -160,4 +161,24 @@
   .focus-ring-inset {
     @apply outline-none ring-2 ring-primary ring-inset;
   }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
 }

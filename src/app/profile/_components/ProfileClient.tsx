@@ -260,10 +260,11 @@ export function ProfileClient() {
 
                   <div className="space-y-5 mb-8">
                     <div>
-                      <label className="block text-white/50 text-sm mb-2 font-medium">
+                      <label htmlFor="profile-display-name" className="block text-white/50 text-sm mb-2 font-medium">
                         {t('profile.display_name')}
                       </label>
                       <input
+                        id="profile-display-name"
                         type="text"
                         value={displayName}
                         onChange={(e) => setDisplayName(e.target.value)}
@@ -273,10 +274,11 @@ export function ProfileClient() {
                     </div>
 
                     <div>
-                      <label className="block text-white/50 text-sm mb-2 font-medium">
+                      <label htmlFor="profile-bio" className="block text-white/50 text-sm mb-2 font-medium">
                         {t('profile.bio')}
                       </label>
                       <textarea
+                        id="profile-bio"
                         value={bio}
                         onChange={(e) => setBio(e.target.value)}
                         className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:border-white/50 focus:bg-white/10 transition-all resize-none h-28"
@@ -473,10 +475,11 @@ export function ProfileClient() {
                   {t('profile.delete_account_confirm') || 'This action cannot be undone. All your data will be permanently deleted.'}
                 </p>
                 <div className="mb-4">
-                  <label className="text-white/40 text-xs uppercase tracking-wider">
+                  <label htmlFor="confirm-handle" className="text-white/40 text-xs uppercase tracking-wider">
                     {t('profile.type_handle')} (@{profile?.handle})
                   </label>
                   <input
+                    id="confirm-handle"
                     type="text"
                     value={confirmHandle}
                     onChange={(e) => setConfirmHandle(e.target.value)}

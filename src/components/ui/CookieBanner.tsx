@@ -65,7 +65,7 @@ export function CookieBanner() {
                 <button
                   onClick={() => setIsVisible(false)}
                   className="text-white/20 hover:text-white transition-colors p-1"
-                  aria-label="Cerrar"
+                  aria-label={t('a11y.close')}
                 >
                   <X className="w-4 h-4" />
                 </button>

@@ -1,6 +1,20 @@
 import type { Metadata } from 'next'
+import { Inter, Space_Grotesk } from 'next/font/google'
 import { Providers } from '@/components/Providers'
 import { I18nProvider } from '@/lib/effect/I18nProvider'
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+  display: 'swap',
+})
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ['latin'],
+  variable: '--font-space-grotesk',
+  display: 'swap',
+})
+
 import { BuildInfoProvider } from '@/lib/effect/hooks/useBuildInfo'
 import { CookieBanner } from '@/components/ui/CookieBanner'
 import { ModelInfoBanner } from '@/components/ui/ModelInfoBanner'
@@ -48,7 +62,7 @@ export const metadata: Metadata = {
     follow: true,
   },
   verification: {
-    google: "tSl-5AerWZ_QVANu60Zx3xj6q7RABQ0gVef8WCaK2ok",
+    google: 'tSl-5AerWZ_QVANu60Zx3xj6q7RABQ0gVef8WCaK2ok',
   },
 }
 
@@ -64,7 +78,10 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="es" className="antialiased">
+    <html
+      lang="es"
+      className={`${inter.variable} ${spaceGrotesk.variable} antialiased`}
+    >
       <body className="font-body min-h-screen">
         <SkipLink />
         <Providers>

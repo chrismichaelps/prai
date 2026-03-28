@@ -105,17 +105,21 @@ export function PersonalizationModal({ isOpen = true, onClose }: Personalization
         initial={{ scale: 0.95, opacity: 0 }} 
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.95, opacity: 0 }}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="personalization-title"
         className="relative w-[90vw] max-w-4xl h-[80vh] bg-[#1a1a1a] rounded-3xl border border-white/[0.08] shadow-2xl overflow-hidden flex"
       >
         <button
           onClick={onClose}
+          aria-label={t('a11y.close_personalization')}
           className="absolute top-4 right-4 text-white/20 hover:text-white/40 transition-colors z-10"
         >
           <X className="w-5 h-5" />
         </button>
 
         <div className="w-64 border-r border-white/5 bg-white/[0.02] p-4 overflow-y-auto">
-          <h2 className="text-lg font-semibold text-white mb-6 px-2">{t('personalization.title')}</h2>
+          <h2 id="personalization-title" className="text-lg font-semibold text-white mb-6 px-2">{t('personalization.title')}</h2>
           <nav className="space-y-1">
             {tabs.map((tab) => (
               <button

@@ -16,6 +16,7 @@ export interface MentionUser {
 }
 
 interface MentionInputProps {
+  id?: string
   value: string
   onChange: (value: string) => void
   placeholder?: string
@@ -35,6 +36,7 @@ function useDebounce<T>(value: T, delay: number): T {
 }
 
 export function MentionInput({
+  id,
   value,
   onChange,
   placeholder,
@@ -172,6 +174,7 @@ export function MentionInput({
   return (
     <div className="relative w-full" ref={popoverRef}>
       <textarea
+        id={id}
         ref={textareaRef}
         rows={rows}
         value={value}

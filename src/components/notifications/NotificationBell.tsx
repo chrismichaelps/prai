@@ -9,6 +9,7 @@ import { Bell, MessageSquare, AtSign, CheckCheck, ChevronRight } from 'lucide-re
 import { cn, timeAgo } from '@/lib/utils'
 import { useNotifications } from '@/hooks/useNotifications'
 import type { Notification } from '@/hooks/useNotifications'
+import { useI18n } from '@/lib/effect/I18nProvider'
 
 interface NotificationContextValue {
   open: boolean
@@ -67,10 +68,11 @@ export function NotificationBell({ children }: { children?: React.ReactNode }) {
 /** @UI.Notifications.Toggle */
 export function NotificationToggle({ open: _open }: { open?: boolean }) {
   const { unreadCount, toggle } = useContext(NotificationContext)!
+  const { t } = useI18n()
   return (
     <button
       onClick={toggle}
-      aria-label="Notifications"
+      aria-label={t('a11y.notifications')}
       className="relative flex items-center justify-center w-9 h-9 rounded-full border border-white/10 bg-white/[0.03] hover:bg-white/[0.07] transition-colors focus:outline-none"
     >
       <Bell className="w-4 h-4 text-white/60" />

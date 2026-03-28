@@ -266,10 +266,8 @@ export function ChatSidebar({ isOpen, onClose }: ChatSidebarProps) {
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => setShowArchived(!showArchived)}
+                  aria-label={showArchived ? t('a11y.show_active') : t('a11y.show_archived')}
                   className="p-2 text-white/50 hover:text-white transition-colors"
-                  title={
-                    showArchived ? 'Show active chats' : 'Show archived chats'
-                  }
                 >
                   {showArchived ? (
                     <MessageSquare className="w-5 h-5" />
@@ -279,6 +277,7 @@ export function ChatSidebar({ isOpen, onClose }: ChatSidebarProps) {
                 </button>
                 <button
                   onClick={onClose}
+                  aria-label={t('a11y.close_sidebar')}
                   className="p-2 text-white/50 hover:text-white transition-colors"
                 >
                   <X className="w-5 h-5" />
@@ -341,6 +340,7 @@ export function ChatSidebar({ isOpen, onClose }: ChatSidebarProps) {
                           e.stopPropagation()
                           setActiveMenu(activeMenu === chat.id ? null : chat.id)
                         }}
+                        aria-label={t('a11y.more_options')}
                         className="p-1 text-white/30 hover:text-white transition-colors opacity-0 group-hover:opacity-100"
                       >
                         <MoreVertical className="w-4 h-4" />

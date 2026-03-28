@@ -92,6 +92,7 @@ export default function AboutPage() {
           >
             <button
               onClick={() => router.push('/chat')}
+              aria-label={t('a11y.open_chat')}
               className="group flex items-center gap-2 text-primary-foreground font-bold hover:opacity-80 transition-opacity relative"
             >
               {t('hero.cta_chat')}

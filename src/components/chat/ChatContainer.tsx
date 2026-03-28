@@ -59,12 +59,14 @@ export const Chat = {
     innerRef,
     onScroll,
     className,
+    t,
   }: {
     children: React.ReactNode
     scrollAreaRef: React.RefObject<HTMLDivElement | null>
     innerRef?: React.RefObject<HTMLDivElement | null>
     onScroll?: (e: React.UIEvent<HTMLDivElement>) => void
     className?: string
+    t: (key: string) => string
   }) => (
     <div
       ref={scrollAreaRef as React.RefObject<HTMLDivElement>}
@@ -74,6 +76,10 @@ export const Chat = {
         className,
       )}
       style={{ scrollbarGutter: 'stable', overscrollBehaviorY: 'contain' }}
+      role="log"
+      aria-live="polite"
+      aria-atomic="false"
+      aria-label={t('a11y.chat_messages')}
     >
       <div
         ref={innerRef as React.RefObject<HTMLDivElement>}
@@ -125,6 +131,7 @@ export const Chat = {
       {showScrollButton && (
         <button
           onClick={onScrollToBottom}
+          aria-label={t('a11y.scroll_bottom')}
           className="pointer-events-auto mb-10 bg-white/5 border border-white/10 w-10 h-10 rounded-full flex items-center justify-center shadow-2xl hover:bg-white/10 transition-all group active:scale-95"
         >
           <ArrowDown className="w-4 h-4 text-white/40 group-hover:text-white transition-colors" />
@@ -166,9 +173,10 @@ export const Chat = {
                 </span>
               </div>
               
-              <div className="flex items-center gap-4 shrink-0">
+                <div className="flex items-center gap-4 shrink-0">
                 <button 
                   onClick={onToggleUsage}
+                  aria-label={t('a11y.close_usage')}
                   className="text-white/20 hover:text-white/60 transition-colors p-1"
                 >
                   <X className="w-4 h-4" />
@@ -214,6 +222,7 @@ export const Chat = {
               {/** @UI.Chat.Action.Mic */}
               <button
                 onClick={onMicClick}
+                aria-label={isRecording ? t('a11y.stop_recording') : t('a11y.start_recording')}
                 className={cn(
                   'w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90 relative',
                   isRecording
@@ -232,6 +241,7 @@ export const Chat = {
               <button
                 onClick={isLoading ? stopResponse : () => onSend()}
                 disabled={(!isLoading && !value.trim()) || isAtLimit}
+                aria-label={isLoading ? t('a11y.stop_response') : t('a11y.send_message')}
                 className={cn(
                   'w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 shadow-xl relative overflow-hidden group shrink-0',
                   (!isLoading && !value.trim()) || isAtLimit
@@ -437,6 +447,7 @@ export const ChatContainer: React.FC = () => {
         scrollAreaRef={scrollAreaRef}
         innerRef={innerContainerRef}
         onScroll={handleScroll}
+        t={t}
       >
         {messages.length === 0 && (
           <div className="h-full flex flex-col items-center justify-center py-32 animate-in fade-in duration-1000" />
