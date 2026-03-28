@@ -334,7 +334,37 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "personalization.prompt.term.warm": "la calidez y amabilidad",
     "personalization.prompt.term.enthusiastic": "la energía y emoción",
     "personalization.prompt.term.headers": "el uso de encabezados y listas estructuradas",
-    "personalization.prompt.term.emoji": "el uso de emojis"
+    "personalization.prompt.term.emoji": "el uso de emojis",
+    
+    /** @Logic.I18n.Section.Pricing */
+    "pricing.title": "Planes y Precios",
+    "pricing.subtitle": "Elige el plan que mejor se adapte a tus necesidades. PR\\AI es gratuito hoy, con potencia Pro para el mañana.",
+    "pricing.explanation.title": "Nuestra aplicación utiliza modelos gratuitos de OpenRouter",
+    "pricing.explanation.subtitle": "Nuestro Asistente de Turismo de Puerto Rico utiliza el **Free Models Router** de OpenRouter (`openrouter/free`).",
+    "pricing.how_it_works.title": "¿Cómo funciona? (Explicación sencilla)",
+    "pricing.how_it_works.p1": "Cada vez que envías un mensaje sobre Puerto Rico — ya sea preguntando por las mejores playas, recomendaciones de comida, rutas de senderismo o planificación de viajes — nuestra aplicación dirige automáticamente tu solicitud a través de `openrouter/free`.",
+    "pricing.how_it_works.list_intro": "Este enrutador inteligente:",
+    "pricing.how_it_works.item1": "Verifica qué modelos de IA gratuitos están disponibles en el momento.",
+    "pricing.how_it_works.item2": "Filtra los modelos que pueden manejar correctamente tu solicitud (texto, imágenes, herramientas, etc.).",
+    "pricing.how_it_works.item3": "Selecciona uno al azar de los modelos gratuitos adecuados.",
+    "pricing.how_it_works.item4": "Utiliza ese modelo para generar tu respuesta.",
+    "pricing.details.title": "Detalles clave",
+    "pricing.details.item1": "Completamente gratis ($0 por millón de tokens de entrada y salida).",
+    "pricing.details.item2": "Soporta hasta 200,000 tokens de contexto (ideal para conversaciones detalladas).",
+    "pricing.details.item3": "Lanzado el 1 de febrero de 2026.",
+    "pricing.limits.title": "Límites actuales",
+    "pricing.limits.intro": "Para mantener el servicio gratuito y justo para todos:",
+    "pricing.limits.item1": "Máximo 20 mensajes por minuto.",
+    "pricing.limits.item2": "Aproximadamente 50 mensajes por día.",
+    "pricing.limits.footer": "Estos límites ayudan a evitar sobrecargas para que más personas puedan disfrutar del asistente.",
+    "pricing.future.title": "Próximamente: Plan Pro ✨",
+    "pricing.future.intro": "Estamos planeando añadir un **Plan Pro** en el futuro cercano.",
+    "pricing.future.list_intro": "Con Pro, obtendrás:",
+    "pricing.future.item1": "Acceso a modelos de IA premium más potentes para respuestas mejores y más rápidas.",
+    "pricing.future.item2": "Límites diarios mucho más altos o ilimitados.",
+    "pricing.future.item3": "**Búsqueda web en tiempo real** — la IA podrá traerte información en vivo como el clima actual en San Juan, eventos de hoy, ofertas de vuelos, horarios de restaurantes y las últimas actualizaciones turísticas en todo Puerto Rico.",
+    "pricing.future.footer": "El plan Pro seguirá siendo impulsado por OpenRouter, pero utilizando modelos más avanzados con capacidades en línea.",
+    "pricing.closing": "¡Mantendremos la versión gratuita disponible para que todos puedan seguir explorando Puerto Rico con nuestro asistente de IA! 🌴"
   },
   en: {
     /** @Logic.I18n.Section.Brand */
@@ -665,7 +695,37 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "personalization.prompt.term.warm": "warmth and friendliness",
     "personalization.prompt.term.enthusiastic": "energy and excitement",
     "personalization.prompt.term.headers": "the use of structured headers and lists",
-    "personalization.prompt.term.emoji": "the use of emojis"
+    "personalization.prompt.term.emoji": "the use of emojis",
+
+    /** @Logic.I18n.Section.Pricing */
+    "pricing.title": "Plans & Pricing",
+    "pricing.subtitle": "Choose the plan that best fits your needs. PR\\AI is free today, with Pro power for tomorrow.",
+    "pricing.explanation.title": "Our app uses free OpenRouter models",
+    "pricing.explanation.subtitle": "Our Puerto Rico Tourism Assistant uses **OpenRouter’s Free Models Router** (`openrouter/free`).",
+    "pricing.how_it_works.title": "How it works (simple explanation)",
+    "pricing.how_it_works.p1": "Every time you send a message about Puerto Rico — whether it’s asking for the best beaches, food recommendations, hiking trails, or trip planning — our app automatically routes your request through `openrouter/free`.",
+    "pricing.how_it_works.list_intro": "This smart router:",
+    "pricing.how_it_works.item1": "Checks which free AI models are currently available.",
+    "pricing.how_it_works.item2": "Filters for models that can properly handle your request (text, images, tools, etc.).",
+    "pricing.how_it_works.item3": "Picks one at random from the suitable free models.",
+    "pricing.how_it_works.item4": "Uses that model to generate your reply.",
+    "pricing.details.title": "Key details",
+    "pricing.details.item1": "Completely free ($0 per million input and output tokens).",
+    "pricing.details.item2": "Supports up to 200,000 tokens of context (great for detailed conversations).",
+    "pricing.details.item3": "Released February 1, 2026.",
+    "pricing.limits.title": "Current Limits",
+    "pricing.limits.intro": "To keep the service free and fair for everyone:",
+    "pricing.limits.item1": "Maximum 20 messages per minute.",
+    "pricing.limits.item2": "About 50 messages per day.",
+    "pricing.limits.footer": "These limits help prevent overload so more people can enjoy the assistant.",
+    "pricing.future.title": "Coming Soon: Pro Plan ✨",
+    "pricing.future.intro": "We’re planning to add a **Pro Plan** in the near future.",
+    "pricing.future.list_intro": "With Pro, you’ll get:",
+    "pricing.future.item1": "Access to stronger premium AI models for better and faster responses.",
+    "pricing.future.item2": "Much higher or unlimited daily limits.",
+    "pricing.future.item3": "**Real-time web search** — the AI will be able to bring you live information like current weather in San Juan, today’s events, flight deals, restaurant hours, and the latest tourism updates across Puerto Rico.",
+    "pricing.future.footer": "The Pro plan will still be powered by OpenRouter, but using more advanced models with online capabilities.",
+    "pricing.closing": "We’ll keep the free version available so everyone can continue exploring Puerto Rico with our AI assistant! 🌴"
   }
 }
 

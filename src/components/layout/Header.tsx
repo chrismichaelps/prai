@@ -63,6 +63,7 @@ export function Header({
   const navLinks = [
     { label: t('nav.about'), key: 'about', href: '/about' },
     { label: t('nav.releases'), key: 'releases', href: '/releases' },
+    { label: t('pricing.title'), key: 'pricing', href: '/pricing' },
   ]
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen)
@@ -205,10 +206,7 @@ export function Header({
                       <NotificationBell />
 
                       {/* Avatar Dropdown */}
-                      <div
-                        className="relative"
-                        ref={dropdownRef}
-                      >
+                      <div className="relative" ref={dropdownRef}>
                         <button
                           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                           className={cn(
@@ -249,8 +247,8 @@ export function Header({
                               exit={{ opacity: 0, y: -10, scale: 0.95 }}
                               transition={{ duration: 0.15 }}
                               className={cn(
-                                "fixed md:absolute left-4 right-4 md:left-auto md:right-0 top-[76px] md:top-full md:mt-2 w-auto md:w-56",
-                                "bg-[#1a1a1a] border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-[110] origin-top md:origin-top-right transform-gpu"
+                                'fixed md:absolute left-4 right-4 md:left-auto md:right-0 top-[76px] md:top-full md:mt-2 w-auto md:w-56',
+                                'bg-[#1a1a1a] border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-[110] origin-top md:origin-top-right transform-gpu',
                               )}
                             >
                               <div className="px-4 py-3 border-b border-white/10">
@@ -258,13 +256,17 @@ export function Header({
                                   <p className="text-sm font-bold text-white truncate">
                                     {userName}
                                   </p>
-                                  <span className={cn(
-                                    "text-[10px] px-1.5 py-0.5 rounded-full font-semibold",
-                                    isAdmin 
-                                      ? "bg-yellow-400/20 text-yellow-400" 
-                                      : "bg-white/10 text-white/40"
-                                  )}>
-                                    {isAdmin ? t('auth.role_admin') : t('auth.role_user')}
+                                  <span
+                                    className={cn(
+                                      'text-[10px] px-1.5 py-0.5 rounded-full font-semibold',
+                                      isAdmin
+                                        ? 'bg-yellow-400/20 text-yellow-400'
+                                        : 'bg-white/10 text-white/40',
+                                    )}
+                                  >
+                                    {isAdmin
+                                      ? t('auth.role_admin')
+                                      : t('auth.role_user')}
                                   </span>
                                 </div>
                                 <p className="text-xs text-white/40 truncate">
