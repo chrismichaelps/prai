@@ -7,6 +7,7 @@ import { ModelInfoBanner } from '@/components/ui/ModelInfoBanner'
 import { ErrorToast } from '@/components/ui/ErrorToast'
 import { ToastProvider } from '@/components/ui/ToastProvider'
 import { AuthProvider } from '@/contexts/AuthContext'
+import { SkipLink } from '@/components/ui/SkipLink'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -65,6 +66,7 @@ export default function RootLayout({
   return (
     <html lang="es" className="antialiased">
       <body className="font-body min-h-screen">
+        <SkipLink />
         <Providers>
           <I18nProvider>
             <BuildInfoProvider>

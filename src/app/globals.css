@@ -151,4 +151,13 @@
   .shadow-glow {
     box-shadow: var(--shadow-glow);
   }
+  
+  /* A11y: Focus ring - WCAG 2.2 AA compliant */
+  .focus-ring {
+    @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-background;
+  }
+  
+  .focus-ring-inset {
+    @apply outline-none ring-2 ring-primary ring-inset;
+  }
 }
