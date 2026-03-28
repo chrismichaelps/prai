@@ -26,15 +26,7 @@ export function useNotifications() {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
   const channelRef = useRef<ReturnType<ReturnType<typeof createSupabaseBrowserClient>['channel']> | null>(null)
-
-  /** @Logic.Notifications.FetchCount */
-  const fetchUnreadCount = useCallback(async () => {
-    if (!isAuthenticated) return
-    const res = await fetch('/api/notifications/count')
-    if (!res.ok) return
-    const data: { count: number } = await res.json()
-    setUnreadCount(data.count)
-  }, [isAuthenticated])
+  const fetchedRef = useRef(false)
 
   /** @Logic.Notifications.Fetch */
   const fetchNotifications = useCallback(async () => {
@@ -45,15 +37,21 @@ export function useNotifications() {
     setNotifications(data.notifications)
     if (data.notifications.length < 20) {
       setUnreadCount(data.notifications.filter((n) => !n.is_read).length)
+    } else {
+      const countRes = await fetch('/api/notifications/count')
+      if (countRes.ok) {
+        const countData: { count: number } = await countRes.json()
+        setUnreadCount(countData.count)
+      }
     }
   }, [isAuthenticated])
 
   /** @Logic.Notifications.Realtime */
   useEffect(() => {
-    if (!isAuthenticated || !user) return
+    if (!isAuthenticated || !user || fetchedRef.current) return
 
+    fetchedRef.current = true
     fetchNotifications()
-    fetchUnreadCount()
 
     const supabase = createSupabaseBrowserClient()
     const channel = supabase
@@ -68,7 +66,6 @@ export function useNotifications() {
         },
         () => {
           void fetchNotifications()
-          void fetchUnreadCount()
         }
       )
       .subscribe()
@@ -78,7 +75,7 @@ export function useNotifications() {
     return () => {
       void supabase.removeChannel(channel)
     }
-  }, [isAuthenticated, user, fetchNotifications, fetchUnreadCount])
+  }, [isAuthenticated, user, fetchNotifications])
 
   /** @Logic.Notifications.MarkRead */
   const markRead = useCallback(async (id: string) => {

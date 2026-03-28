@@ -1,7 +1,7 @@
 'use client'
 
 /** @Component.ProfileClient */
-import React, { useState, useCallback, useEffect } from 'react'
+import React, { useState, useCallback, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { User as UserIcon, Pencil, Check, X, Loader2, Trash2, Archive, AlertTriangle } from 'lucide-react'
@@ -46,6 +46,8 @@ export function ProfileClient() {
   const currentDisplayName = profile?.display_name || user?.user_metadata?.name || user?.user_metadata?.full_name || t('auth.explorer')
   const currentBio = profile?.bio || ''
   const email = user?.email
+  
+  const chatsCountFetched = useRef(false)
 
   useEffect(() => {
     if (profile) {
@@ -60,7 +62,8 @@ export function ProfileClient() {
   }, [fetchUsage])
 
   useEffect(() => {
-    if (user) {
+    if (user && !chatsCountFetched.current) {
+      chatsCountFetched.current = true
       fetch(`${process.env.NEXT_PUBLIC_SITE_URL || ''}/api/chat/chats/count?userId=${user.id}`)
         .then(res => res.json())
         .then(data => setChatsCount(data.count || 0))
