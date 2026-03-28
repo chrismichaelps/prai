@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-03-28 (Continued)
+
+- Fixed duplicate API calls caused by React Strict Mode in development using refs (`fetchedRef`, `chatsCountFetched`)
+- Replaced hardcoded HTTP status codes (200, 500, 201) with HttpStatus constants in API routes
+- Added rate limiting to releases API and RSS feed
+- Added health status page with service monitoring for Supabase and OpenRouter
+- Added health check endpoints (`/api/health/supabase`, `/api/health/openrouter`)
+- Added `/pricing` and `/usage` to sitemap
+- Fixed 404 page button hover styles
+- Added missing i18n translations for issues
+- Added WCAG 2.2 AA accessibility improvements
+- Added skip link and LCP optimizations
+
 ## 2026-03-28
 
 - Added per-user message usage tracking system with daily/monthly resets and tier-based limits (#67)
