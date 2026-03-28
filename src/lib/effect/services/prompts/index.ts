@@ -9,6 +9,7 @@ import { action_handling } from "./action_handling";
 import { output_format } from "./output_format";
 import { titleSystemPrompt } from "./chat_prompts";
 import { search_config } from "./search";
+import { buildPersonalizationPrompt } from "./personalization";
 
 export {
   role,
@@ -20,5 +21,6 @@ export {
   action_handling,
   output_format,
   titleSystemPrompt,
-  search_config
+  search_config,
+  buildPersonalizationPrompt
 };
