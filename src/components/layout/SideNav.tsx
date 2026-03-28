@@ -14,7 +14,6 @@ import {
   Newspaper,
   Compass,
   Radio,
-  CreditCard,
 } from 'lucide-react'
 import { useAppSelector, useAppDispatch } from '@/store/hooks'
 import { setActiveTab } from '@/store/slices/uiSlice'
@@ -25,7 +24,6 @@ const navItems = [
   { id: 'news', icon: Newspaper, label: 'Noticias' },
   { id: 'tourism', icon: Compass, label: 'Turismo' },
   { id: 'radio', icon: Radio, label: 'Radio' },
-  { id: 'passport', icon: CreditCard, label: 'Pasaporte' },
 ]
 
 export const SideNav = () => {

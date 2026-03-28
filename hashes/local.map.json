@@ -801,15 +801,6 @@
       "dependencies": [],
       "fidelity_level": "Active"
     },
-    "store_slices_passportSlice": {
-      "file_path": "@root/src/store/slices/passportSlice.ts",
-      "hash_reference": "@root/hashes/src/store/slices/passportSlice.hash.md",
-      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
-      "dependencies": [
-        "@root/src/store/index.ts"
-      ],
-      "fidelity_level": "Active"
-    },
     "store_slices_uiSlice": {
       "file_path": "@root/src/store/slices/uiSlice.ts",
       "hash_reference": "@root/hashes/src/store/slices/uiSlice.hash.md",

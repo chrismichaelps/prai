@@ -808,13 +808,6 @@
       "reason": "Requires strict architectural DTO validation schemas."
     },
     {
-      "from": "@root/src/store/slices/passportSlice.ts",
-      "to": "@root/src/store/index.ts",
-      "type": "LAYER_DEPENDENCY",
-      "impact": "HIGH",
-      "reason": "Dispatches deterministic global Redux state mutations."
-    },
-    {
       "from": "@root/src/types/chat.ts",
       "to": "Chat components",
       "type": "LAYER_DEPENDENCY",

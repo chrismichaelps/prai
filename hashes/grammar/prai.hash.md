@@ -54,7 +54,7 @@ Grammar_Lock: "@root/hashes/grammar/prai.hash.md"
 
 ## [Namespace.State] (Redux)
 - **Store**: Standard Toolkit `configureStore` wrapped by the Effect Execution Graph.
-- **Slices**: `chatSlice` (message history, streaming chunks, and research sources), `uiSlice` (menus, theme, tooltips), `passportSlice` (user auth state).
+- **Slices**: `chatSlice` (message history, streaming chunks, and research sources), `uiSlice` (menus, theme, tooltips), `authSlice` (user auth state), `issuesSlice` (issue tracking).
 
 ## [Namespace.Build]
 
