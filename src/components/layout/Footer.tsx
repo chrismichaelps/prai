@@ -20,7 +20,7 @@ export function Footer({ className = "" }: FooterProps) {
   return (
     <footer className={cn("w-full bg-slate-900 text-white/70 py-16 px-6 md:px-10 lg:px-16 border-t border-white/5", className)}>
       <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-12 mb-16">
           {/* @UI.Layout.Footer.Brand */}
           <div className="md:col-span-2 space-y-6">
             <PraiLogo white className="scale-110 origin-left" />
@@ -51,6 +51,18 @@ export function Footer({ className = "" }: FooterProps) {
               <li>
                 <Link href="/chat" className="text-sm hover:text-white transition-colors">
                   {t('footer.chat')}
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* @UI.Layout.Footer.Status */}
+          <div>
+            <h4 className="text-white font-bold mb-6 text-sm uppercase tracking-widest">{t('status.title')}</h4>
+            <ul className="space-y-4">
+              <li>
+                <Link href="/status" className="text-sm hover:text-white transition-colors">
+                  {t('status.subtitle')}
                 </Link>
               </li>
             </ul>

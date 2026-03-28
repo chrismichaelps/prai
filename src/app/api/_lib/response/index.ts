@@ -10,7 +10,7 @@ import type {
   ForeignKeyError,
   InternalError
 } from "../errors"
-import { IssueDbError, NotificationDbError, UsersDbError, ChatDbError, AccountDbError } from "../errors/services"
+import { IssueDbError, NotificationDbError, UsersDbError, ChatDbError, AccountDbError, HealthCheckError } from "../errors/services"
 
 type ApiError =
   | ValidationError
@@ -25,6 +25,7 @@ type ApiError =
   | UsersDbError
   | ChatDbError
   | AccountDbError
+  | HealthCheckError
 
 const errorStatusMap: Record<string, number> = {
   ValidationError: HttpStatus.BAD_REQUEST,
@@ -38,7 +39,8 @@ const errorStatusMap: Record<string, number> = {
   NotificationDbError: HttpStatus.INTERNAL_SERVER_ERROR,
   UsersDbError: HttpStatus.INTERNAL_SERVER_ERROR,
   ChatDbError: HttpStatus.INTERNAL_SERVER_ERROR,
-  AccountDbError: HttpStatus.INTERNAL_SERVER_ERROR
+  AccountDbError: HttpStatus.INTERNAL_SERVER_ERROR,
+  HealthCheckError: HttpStatus.SERVICE_UNAVAILABLE
 }
 
 const errorMessageMap: Record<string, (error: ApiError) => string> = {
@@ -53,7 +55,8 @@ const errorMessageMap: Record<string, (error: ApiError) => string> = {
   NotificationDbError: () => "Database error",
   UsersDbError: () => "Database error",
   ChatDbError: () => "Database error",
-  AccountDbError: () => "Account operation failed"
+  AccountDbError: () => "Account operation failed",
+  HealthCheckError: (e) => `Health check failed for ${(e as HealthCheckError).service}`
 }
 
 /** @Logic.Api.HandleError */

@@ -20,3 +20,8 @@ export class ChatDbError extends Data.TaggedError("ChatDbError")<{
 export class AccountDbError extends Data.TaggedError("AccountDbError")<{
   readonly error: unknown
 }> {}
+
+export class HealthCheckError extends Data.TaggedError("HealthCheckError")<{
+  readonly error: unknown
+  readonly service: string
+}> {}

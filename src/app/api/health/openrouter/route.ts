@@ -1,17 +1,12 @@
 /** @Route.Health.OpenRouter */
 import type { NextRequest } from "next/server"
-import { NextResponse } from "next/server"
 import { HttpStatus } from "../../_lib/constants/status-codes"
-import { Data, Effect, pipe } from "effect"
+import { Effect, pipe } from "effect"
+import { HealthCheckError } from "../../_lib/errors/services"
 import { exitResponse } from "../../_lib/response"
+import { checkRateLimit, getClientIp } from "../../_lib/utils/rate-limit"
 
 export const dynamic = 'force-dynamic'
-
-class OpenRouterHealthError extends Data.TaggedError("OpenRouterHealthError")<{
-  readonly error: unknown
-}> {}
-
-type ApiError = OpenRouterHealthError
 
 /** @Logic.Health.CheckOpenRouter */
 const checkOpenRouter = pipe(
@@ -39,14 +34,37 @@ const checkOpenRouter = pipe(
 
       return { status: "ok", service: "openrouter" as const }
     },
-    catch: (error) => new OpenRouterHealthError({ error })
+    catch: (error) => new HealthCheckError({ error, service: "openrouter" })
   })
 )
 
 /** @Route.Health.OpenRouter.GET */
-export async function GET(_request: NextRequest) {
+export async function GET(request: NextRequest) {
+  const clientIp = getClientIp(request)
+  const rateLimit = checkRateLimit(clientIp)
+  
+  if (!rateLimit.allowed) {
+    return new Response(JSON.stringify({ 
+      error: "Too many requests",
+      retryAfter: Math.ceil((rateLimit.resetTime - Date.now()) / 1000)
+    }), { 
+      status: HttpStatus.TOO_MANY_REQUESTS,
+      headers: { 
+        "Content-Type": "application/json",
+        "Retry-After": String(Math.ceil((rateLimit.resetTime - Date.now()) / 1000))
+      }
+    })
+  }
+
   return exitResponse(
-    (value) => NextResponse.json(value, { status: HttpStatus.OK }),
+    (value) => new Response(JSON.stringify(value), { 
+      status: HttpStatus.OK,
+      headers: { 
+        "Content-Type": "application/json",
+        "X-RateLimit-Remaining": String(rateLimit.remaining),
+        "X-RateLimit-Reset": String(rateLimit.resetTime)
+      }
+    }),
     {
       spanName: "health.openrouter",
       method: "GET",
