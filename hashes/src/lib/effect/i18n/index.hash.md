@@ -23,7 +23,7 @@ export function I18nProvider(props: { children: React.ReactNode; initialLocale?:
 - **Locale_Sync:** Automatically synchronizes with cookie storage `NEXT_LOCALE`.
 
 ### [Semantic Hash]
-Global localization context managing translations for Auth, Profile, Nav, Chat, Legal, and Usage domains.
+Global localization context managing translations for Auth, Profile, Nav, Chat, Legal, Usage, and Personalization domains.
 
 ### [Linkage]
 - **Dependencies:** `react`, `js-cookie`
