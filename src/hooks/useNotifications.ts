@@ -22,7 +22,7 @@ export interface Notification {
 }
 
 export function useNotifications() {
-  const { user, isAuthenticated } = useAuth()
+  const { user, isAuthenticated, initialized } = useAuth()
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
   const channelRef = useRef<ReturnType<ReturnType<typeof createSupabaseBrowserClient>['channel']> | null>(null)
@@ -48,7 +48,7 @@ export function useNotifications() {
 
   /** @Logic.Notifications.Realtime */
   useEffect(() => {
-    if (!isAuthenticated || !user || fetchedRef.current) return
+    if (!isAuthenticated || !user || !initialized || fetchedRef.current) return
 
     fetchedRef.current = true
     fetchNotifications()
@@ -75,7 +75,7 @@ export function useNotifications() {
     return () => {
       void supabase.removeChannel(channel)
     }
-  }, [isAuthenticated, user, fetchNotifications])
+  }, [isAuthenticated, user, initialized, fetchNotifications])
 
   /** @Logic.Notifications.MarkRead */
   const markRead = useCallback(async (id: string) => {
