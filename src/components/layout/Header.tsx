@@ -291,7 +291,7 @@ export function Header({
                                     setIsDropdownOpen(false)
                                     router.push('/issues')
                                   }}
-                                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-yellow-400/70 hover:text-yellow-400 hover:bg-yellow-400/5 transition-colors border-b border-white/5"
+                                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-white/70 hover:text-white hover:bg-white/5 transition-colors border-b border-white/5"
                                 >
                                   <Bug className="w-4 h-4" />
                                   {t('nav.issues')}
