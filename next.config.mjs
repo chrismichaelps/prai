@@ -1,5 +1,7 @@
+import createMDX from '@next/mdx'
+
 /** @Config.Next */
-export default {
+const nextConfig = {
   productionBrowserSourceMaps: false,
   images: {
     remotePatterns: [
@@ -15,11 +17,15 @@ export default {
       },
     ],
   },
-  webpack: (config, { dev }) => {
-    if (!dev) {
-      config.devtool = false
-    }
-    return config
-  },
+  pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
 }
 
+const withMDX = createMDX({
+  extension: /\.mdx?$/,
+  options: {
+    remarkPlugins: [],
+    rehypePlugins: [],
+  },
+})
+
+export default withMDX(nextConfig)

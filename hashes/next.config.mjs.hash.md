@@ -8,16 +8,20 @@ Grammar_Lock: "@root/hashes/grammar/next.hash.md"
 
 ### [Signatures]
 ```js
-// next.config.mjs (ESM)
-export default {
+import createMDX from '@next/mdx'
+
+const nextConfig = {
   productionBrowserSourceMaps: false,
-  webpack: (config, { dev }) => {
-    if (!dev) {
-      config.devtool = false; // Hardened against source map leakage
-    }
-    return config;
-  }
+  images: {
+    remotePatterns: [
+      { hostname: 'lh3.googleusercontent.com' },
+      { hostname: 'uvrjhxpsbhffmtmbuahv.supabase.co' }
+    ]
+  },
+  pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx']
 }
+
+export default createMDX(...)(nextConfig)
 ```
 
 ### [Governance]

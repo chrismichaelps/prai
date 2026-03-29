@@ -1,6 +1,7 @@
 'use client'
 
 import { useI18n } from '@/lib/effect/I18nProvider'
+import { Locales } from '@/lib/effect/services/I18n'
 import { cn } from '@/lib/utils'
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
@@ -24,7 +25,7 @@ function Background() {
 /** @UI.Pricing.Main */
 export function PricingContent({ esContent, enContent }: PricingContentProps) {
   const { locale, t } = useI18n()
-  const content = locale === 'en' ? enContent : esContent
+  const content = locale === Locales.EN ? enContent : esContent
 
   return (
     <main className="relative min-h-screen bg-[#090909] overflow-x-hidden selection:bg-white/10 selection:text-white">

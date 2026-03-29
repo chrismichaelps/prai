@@ -87,6 +87,48 @@
       "reason": "Enforces Next.js server-side execution handlers and NextResponse formatting."
     },
     {
+      "from": "@root/src/app/blog/page.tsx",
+      "to": "@root/src/app/blog/BlogList.tsx",
+      "type": "UI_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Delegates listing and hero rendering to the BlogList component."
+    },
+    {
+      "from": "@root/src/app/blog/page.tsx",
+      "to": "@root/src/lib/effect/services/Blog.ts",
+      "type": "SERVICE_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Consumes BlogService for dual-locale post pre-fetching."
+    },
+    {
+      "from": "@root/src/app/blog/BlogList.tsx",
+      "to": "@/lib/effect/I18nProvider",
+      "type": "UI_DEPENDENCY",
+      "impact": "MEDIUM",
+      "reason": "Uses I18n context for client-side language switching."
+    },
+    {
+      "from": "@root/src/app/blog/[slug]/page.tsx",
+      "to": "@root/src/app/blog/[slug]/BlogPostView.tsx",
+      "type": "UI_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Delegates post content rendering to the BlogPostView component."
+    },
+    {
+      "from": "@root/src/app/blog/[slug]/page.tsx",
+      "to": "@root/src/lib/effect/services/Blog.ts",
+      "type": "SERVICE_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Consumes BlogService to fetch post content for both locales."
+    },
+    {
+      "from": "@root/src/app/blog/[slug]/BlogPostView.tsx",
+      "to": "@/lib/effect/I18nProvider",
+      "type": "UI_DEPENDENCY",
+      "impact": "MEDIUM",
+      "reason": "Uses I18n context for client-side content switching and date formatting."
+    },
+    {
       "from": "@root/src/app/chat/page.tsx",
       "to": "react",
       "type": "LAYER_DEPENDENCY",
@@ -729,6 +771,20 @@
       "type": "LAYER_DEPENDENCY",
       "impact": "HIGH",
       "reason": "Consumes isolated Effect Service layer for pure functional side-effects."
+    },
+    {
+      "from": "@root/src/lib/effect/services/Blog.ts",
+      "to": "effect",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Governed by pure functional Effect TS execution runtimes."
+    },
+    {
+      "from": "@root/src/lib/effect/services/Blog.ts",
+      "to": "@root/src/lib/effect/services/I18n.ts",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "MEDIUM",
+      "reason": "Depends on the global Locale type and Locales constant for resolution."
     },
     {
       "from": "@root/src/lib/effect/services/Seo.ts",

@@ -7,6 +7,7 @@ import { useI18n } from '@/lib/effect/I18nProvider'
 import { useBuildInfo } from '@/lib/effect/hooks/useBuildInfo'
 import { cn } from '@/lib/utils'
 import { GITHUB_REPO_URL } from '@/lib/constants'
+import { Locales } from '@/lib/effect/services/I18n'
 
 interface FooterProps {
   className?: string;
@@ -46,6 +47,11 @@ export function Footer({ className = "" }: FooterProps) {
               <li>
                 <Link href="/releases" className="text-sm hover:text-white transition-colors">
                   {t('nav.releases')}
+                </Link>
+              </li>
+              <li>
+                <Link href="/blog" className="text-sm hover:text-white transition-colors">
+                  {t('nav.blog')}
                 </Link>
               </li>
               <li>
@@ -108,21 +114,21 @@ export function Footer({ className = "" }: FooterProps) {
             {/* Locale Switcher */}
             <div className="flex p-1 bg-white/5 rounded-full border border-white/10" role="group" aria-label={t('a11y.language_selector')}>
               <button
-                onClick={() => setLocale('es')}
+                onClick={() => setLocale(Locales.ES)}
                 aria-label={t('a11y.switch_spanish')}
-                aria-pressed={locale === 'es'}
+                aria-pressed={locale === Locales.ES}
                 className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
-                  locale === 'es' ? 'bg-primary text-primary-foreground shadow-lg' : 'text-white/40 hover:text-white'
+                  locale === Locales.ES ? 'bg-primary text-primary-foreground shadow-lg' : 'text-white/40 hover:text-white'
                 }`}
               >
                 es
               </button>
               <button
-                onClick={() => setLocale('en')}
+                onClick={() => setLocale(Locales.EN)}
                 aria-label={t('a11y.switch_english')}
-                aria-pressed={locale === 'en'}
+                aria-pressed={locale === Locales.EN}
                 className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
-                  locale === 'en' ? 'bg-primary text-primary-foreground shadow-lg' : 'text-white/40 hover:text-white'
+                  locale === Locales.EN ? 'bg-primary text-primary-foreground shadow-lg' : 'text-white/40 hover:text-white'
                 }`}
               >
                 en

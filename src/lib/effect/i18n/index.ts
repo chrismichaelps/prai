@@ -50,6 +50,7 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "nav.releases": "Novedades",
     "nav.issues": "Reportes",
     "nav.usage": "Uso",
+    "nav.blog": "Blog",
 
     /** @Logic.I18n.Section.Hero */
     "hero.cta_chat": "Empezar a chatear",
@@ -404,6 +405,16 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "status.last_checked": "Última verificación",
     "status.refresh": "Actualizar",
     "status.back_home": "Volver al inicio",
+
+    /** @Logic.I18n.Section.Blog */
+    "blog.title": "Blog",
+    "blog.subtitle": "Descubre las últimas novedades y artículos sobre PR\\AI y el turismo en Puerto Rico.",
+    "blog.back": "Posts",
+    "blog.read_more": "Leer más",
+    "blog.no_posts": "Aún no hay artículos publicados.",
+    "blog.author": "Autor",
+    "blog.author_by": "por",
+    "blog.published": "Publicado el",
   },
 
   en: {
@@ -453,6 +464,7 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "nav.releases": "Release Notes",
     "nav.issues": "Reports",
     "nav.usage": "Usage",
+    "nav.blog": "Blog",
 
     /** @Logic.I18n.Section.Hero */
     "hero.cta_chat": "Start chatting",
@@ -807,6 +819,16 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "status.last_checked": "Last checked",
     "status.refresh": "Refresh",
     "status.back_home": "Back to home",
+
+    /** @Logic.I18n.Section.Blog */
+    "blog.title": "Blog",
+    "blog.subtitle": "Discover the latest news and articles about PR\\AI and tourism in Puerto Rico.",
+    "blog.back": "Posts",
+    "blog.read_more": "Read more",
+    "blog.no_posts": "No articles published yet.",
+    "blog.author": "Author",
+    "blog.author_by": "by",
+    "blog.published": "Published on",
   }
 }
 /** @Logic.I18n.Live */

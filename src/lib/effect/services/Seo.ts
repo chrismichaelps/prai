@@ -27,6 +27,7 @@ export class SeoService extends Effect.Service<SeoService>()("Seo", {
         const routes: Array<{ path: string, priority: number, changeFrequency: 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'never' }> = [
           { path: "", priority: 1.0, changeFrequency: "daily" },
           { path: "/chat", priority: 0.9, changeFrequency: "daily" },
+          { path: "/blog", priority: 0.8, changeFrequency: "daily" },
           { path: "/status", priority: 0.8, changeFrequency: "daily" },
           { path: "/pricing", priority: 0.8, changeFrequency: "weekly" },
           { path: "/releases", priority: 0.8, changeFrequency: "weekly" },
