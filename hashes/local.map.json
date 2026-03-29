@@ -71,6 +71,45 @@
       ],
       "fidelity_level": "Active"
     },
+    "app_blog_BlogList": {
+      "file_path": "@root/src/app/blog/BlogList.tsx",
+      "hash_reference": "@root/hashes/src/app/blog/BlogList.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "@/lib/effect/I18nProvider",
+        "@/components/brand/PraiLogo"
+      ],
+      "fidelity_level": "Active"
+    },
+    "app_blog_page": {
+      "file_path": "@root/src/app/blog/page.tsx",
+      "hash_reference": "@root/hashes/src/app/blog/page.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "@root/src/app/blog/BlogList.tsx",
+        "@root/src/lib/effect/services/Blog.ts"
+      ],
+      "fidelity_level": "Active"
+    },
+    "app_blog_slug_BlogPostView": {
+      "file_path": "@root/src/app/blog/[slug]/BlogPostView.tsx",
+      "hash_reference": "@root/hashes/src/app/blog/[slug]/BlogPostView.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "@/lib/effect/I18nProvider"
+      ],
+      "fidelity_level": "Active"
+    },
+    "app_blog_slug_page": {
+      "file_path": "@root/src/app/blog/[slug]/page.tsx",
+      "hash_reference": "@root/hashes/src/app/blog/[slug]/page.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "@root/src/app/blog/[slug]/BlogPostView.tsx",
+        "@root/src/lib/effect/services/Blog.ts"
+      ],
+      "fidelity_level": "Active"
+    },
     "app_chat_layout": {
       "file_path": "@root/src/app/chat/layout.tsx",
       "hash_reference": "@root/hashes/src/app/chat/layout.hash.md",
@@ -577,6 +616,15 @@
       "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
       "dependencies": [
         "@root/src/lib/effect/services/Auth.ts"
+      ],
+      "fidelity_level": "Active"
+    },
+    "lib_effect_services_Blog": {
+      "file_path": "@root/src/lib/effect/services/Blog.ts",
+      "hash_reference": "@root/hashes/src/lib/effect/services/Blog.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "effect"
       ],
       "fidelity_level": "Active"
     },

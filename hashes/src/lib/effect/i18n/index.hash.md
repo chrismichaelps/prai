@@ -8,13 +8,12 @@ Grammar_Lock: "@root/hashes/grammar/typescript.hash.md"
 
 ### [Signatures]
 ```ts
-export const dictionaries = { en: { ... }, es: { ... } } as const
-export type Locale = keyof typeof dictionaries
-export type TranslationKey = keyof typeof dictionaries.es
-export const I18nContext: React.Context<I18nContextType | undefined>
+const dictionary: Record<Locale, Record<string, string>> = {
+  es: { ... },
+  en: { ... }
+}
 
-export function useI18n(): I18nContextType
-export function I18nProvider(props: { children: React.ReactNode; initialLocale?: Locale }): JSX.Element
+export const I18nLive = Layer.effect(I18n, ...)
 ```
 
 ### [Governance]
