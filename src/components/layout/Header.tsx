@@ -522,7 +522,7 @@ export function Header({
                   © {new Date().getFullYear()} {t('brand.name')}
                 </span>
                 {buildHash && (
-                  <span className="text-white/10 text-[10px] font-medium">
+                  <span className="font-mono text-[9px] uppercase tracking-widest bg-gradient-to-r from-slate-500 via-slate-200 to-slate-500 bg-clip-text text-transparent opacity-60">
                     Build: {buildHash}
                   </span>
                 )}

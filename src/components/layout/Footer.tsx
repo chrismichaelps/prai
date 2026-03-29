@@ -104,7 +104,7 @@ export function Footer({ className = "" }: FooterProps) {
               © {new Date().getFullYear()} PR\AI. {t('footer.rights')}
             </p>
             {buildHash && (
-              <p className="text-white/20 text-xs">
+              <p className="inline-flex font-mono text-[10px] uppercase tracking-widest bg-gradient-to-r from-slate-500 via-slate-200 to-slate-500 bg-clip-text text-transparent opacity-80 border-l border-white/10 pl-3">
                 Build: {buildHash}
               </p>
             )}
