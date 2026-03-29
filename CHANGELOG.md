@@ -1,5 +1,65 @@
 # Changelog
 
+## 2026-03-28 (Continued)
+
+- Fixed duplicate API calls caused by React Strict Mode in development using refs (`fetchedRef`, `chatsCountFetched`)
+- Replaced hardcoded HTTP status codes (200, 500, 201) with HttpStatus constants in API routes
+- Added rate limiting to releases API and RSS feed
+- Added health status page with service monitoring for Supabase and OpenRouter
+- Added health check endpoints (`/api/health/supabase`, `/api/health/openrouter`)
+- Added `/pricing` and `/usage` to sitemap
+- Fixed 404 page button hover styles
+- Added missing i18n translations for issues
+- Added WCAG 2.2 AA accessibility improvements
+- Added skip link and LCP optimizations
+
+## 2026-03-28
+
+- Added per-user message usage tracking system with daily/monthly resets and tier-based limits (#67)
+- Added subscription tier support (Free/Pro) with tier-based model selection in chat API
+- Added reasoning effort injection based on tier (low for free, medium for pro)
+- Added web search plugins only for Pro tier users
+- Added usage page with progress bars, last/next reset dates with user locale times
+- Added tier badges in usage view, profile, and avatar dropdown
+- Added personalization feature allowing users to customize AI response style and tone (#69)
+- Added base style options: Default, Professional, Friendly, Candid, Quirky, Efficient, Cynical
+- Added characteristic adjustments: warmth, enthusiasm, headers/lists, emoji usage
+- Added custom instructions and nickname fields for personalized AI interactions
+- Added PersonalizationModal UI with sidebar navigation for settings
+- Added /personalization page route with full settings interface
+- Added API endpoints for personalization (GET/POST /api/user/personalization)
+- Added Effect Schema validation to personalization API endpoints
+- Added shimmer animation for usage progress bar loading states
+- Added session_id support to OpenRouter for conversation tracking and debug chains
+
+## 2026-03-27
+
+- Added full 1:1 FMCF Hash Registry conformity ensuring all `src/` modules strictly mirror corresponding `.hash.md` architectural contracts
+- Improved `atlas.graph.json` registry map by manually refining dependency node reasons with context-specific rationale
+- Configured OpenRouter native web search with structured contexts for richer tourism domain accuracy
+- Fixed chat UI usability bugs during active streaming (improved markdown link visibility and removed aggressive auto-scroll hijacking)
+
+## 2026-03-26
+
+- Fixed chat memory loss bugs to preserve messages when archiving and restoring chat sessions (#60)
+- Added Effect-native telemetry logging and tracing via `@vercel/otel` and `Effect.withSpan` (#59)
+
+## 2026-03-25
+
+- Added core issue tracker frontend and database migrations (#47)
+- Added complete notification system v2 and v3 featuring optimistic read status and accurately synchronized unread badges (#43, #51)
+- Added user search functionality and synchronized database types (#44)
+- Added admin badges and restricted issue status updates to administrative roles only (#42)
+- Added optimistic UI updates for appending and editing issue comments to avoid full-screen reloads (#50)
+- Removed monolithic tracking of `supabase/` definitions to clean up repository state (#54, #48)
+- Added `google-site-verification` meta tag for SEO indexing
+
+## 2026-03-24
+
+- Added dedicated Release Notes UI implementation, Metadata blocks, and API endpoints (#38)
+- Fixed Google OAuth authentication flows using popup mode, One Tap, and server-side sign-in fallbacks to improve production stability
+- Fixed Supabase client import resolution paths for robust build environments (#40)
+
 ## 2026-03-23
 
 - Added comprehensive validation layer integrated into `src/app/api/_lib/validation/` (`common.ts` and `params.ts`)

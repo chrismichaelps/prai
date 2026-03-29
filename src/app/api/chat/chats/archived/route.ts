@@ -23,12 +23,14 @@ export async function GET(request: NextRequest) {
       })
     )(searchParams),
     Effect.flatMap((params) => 
-      pipe(
-        chatService.getArchivedChats(params.userId),
-        Effect.mapError((e) => new ChatDbError({ error: e }))
-      )
+      chatService.getArchivedChats(params.userId)
     )
   )
 
-  return exitResponse(NextResponse.json)(program)
+  return exitResponse(NextResponse.json, {
+    spanName: "chat.chats.archived.get",
+    method: "GET",
+    path: request.url,
+    searchParams
+  })(program)
 }

@@ -1,4 +1,4 @@
-import { Layer, ManagedRuntime, ConfigProvider } from "effect";
+import { Layer, ManagedRuntime, ConfigProvider, Effect } from "effect";
 import { BrowserHttpClient } from "@effect/platform-browser";
 import { ConfigService } from "./services/Config";
 import { OpenRouter } from "./services/OpenRouter";
@@ -32,10 +32,14 @@ export const nextJsConfigProvider = ConfigProvider.fromMap(
   ])
 );
 
+/** @Logic.Effect.TelemetryLayer */
+const TelemetryLayer = Layer.empty
+
 /** @Logic.Effect.MainLayer.Init */
 const MainLayer = Layer.mergeAll(
   BaseLayer,
   ConfigLayer,
+  TelemetryLayer,
   VoiceServiceLive,
   I18nLive,
   BuildInfoService.Default,
@@ -66,3 +70,13 @@ export type AppEnvironment = Layer.Layer.Success<typeof MainLayer>;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const runtime = ManagedRuntime.make(MainLayer as any);
+
+/** @Logic.Effect.Trace */
+export function withTrace<T>(name: string, effect: Effect.Effect<T>) {
+  return effect.pipe(Effect.withSpan(name))
+}
+
+/** @Logic.Effect.Annotate */
+export function annotate(attributes: Record<string, string>) {
+  return Effect.annotateCurrentSpan(attributes)
+}

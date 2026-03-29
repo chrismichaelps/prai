@@ -7,6 +7,7 @@ import { useI18n } from '@/lib/effect/I18nProvider'
 import { useBuildInfo } from '@/lib/effect/hooks/useBuildInfo'
 import { cn } from '@/lib/utils'
 import { GITHUB_REPO_URL } from '@/lib/constants'
+import { Locales } from '@/lib/effect/services/I18n'
 
 interface FooterProps {
   className?: string;
@@ -20,7 +21,7 @@ export function Footer({ className = "" }: FooterProps) {
   return (
     <footer className={cn("w-full bg-slate-900 text-white/70 py-16 px-6 md:px-10 lg:px-16 border-t border-white/5", className)}>
       <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-12 mb-16">
           {/* @UI.Layout.Footer.Brand */}
           <div className="md:col-span-2 space-y-6">
             <PraiLogo white className="scale-110 origin-left" />
@@ -49,8 +50,25 @@ export function Footer({ className = "" }: FooterProps) {
                 </Link>
               </li>
               <li>
+                <Link href="/blog" className="text-sm hover:text-white transition-colors">
+                  {t('nav.blog')}
+                </Link>
+              </li>
+              <li>
                 <Link href="/chat" className="text-sm hover:text-white transition-colors">
                   {t('footer.chat')}
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* @UI.Layout.Footer.Status */}
+          <div>
+            <h4 className="text-white font-bold mb-6 text-sm uppercase tracking-widest">{t('status.title')}</h4>
+            <ul className="space-y-4">
+              <li>
+                <Link href="/status" className="text-sm hover:text-white transition-colors">
+                  {t('status.subtitle')}
                 </Link>
               </li>
             </ul>
@@ -86,7 +104,7 @@ export function Footer({ className = "" }: FooterProps) {
               © {new Date().getFullYear()} PR\AI. {t('footer.rights')}
             </p>
             {buildHash && (
-              <p className="text-white/20 text-xs">
+              <p className="inline-flex font-mono text-[10px] uppercase tracking-widest bg-gradient-to-r from-slate-500 via-slate-200 to-slate-500 bg-clip-text text-transparent opacity-80 border-l border-white/10 pl-3">
                 Build: {buildHash}
               </p>
             )}
@@ -94,19 +112,23 @@ export function Footer({ className = "" }: FooterProps) {
 
           <div className="flex items-center gap-6">
             {/* Locale Switcher */}
-            <div className="flex p-1 bg-white/5 rounded-full border border-white/10">
+            <div className="flex p-1 bg-white/5 rounded-full border border-white/10" role="group" aria-label={t('a11y.language_selector')}>
               <button
-                onClick={() => setLocale('es')}
+                onClick={() => setLocale(Locales.ES)}
+                aria-label={t('a11y.switch_spanish')}
+                aria-pressed={locale === Locales.ES}
                 className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
-                  locale === 'es' ? 'bg-primary text-primary-foreground shadow-lg' : 'text-white/40 hover:text-white'
+                  locale === Locales.ES ? 'bg-primary text-primary-foreground shadow-lg' : 'text-white/40 hover:text-white'
                 }`}
               >
                 es
               </button>
               <button
-                onClick={() => setLocale('en')}
+                onClick={() => setLocale(Locales.EN)}
+                aria-label={t('a11y.switch_english')}
+                aria-pressed={locale === Locales.EN}
                 className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
-                  locale === 'en' ? 'bg-primary text-primary-foreground shadow-lg' : 'text-white/40 hover:text-white'
+                  locale === Locales.EN ? 'bg-primary text-primary-foreground shadow-lg' : 'text-white/40 hover:text-white'
                 }`}
               >
                 en
@@ -114,21 +136,13 @@ export function Footer({ className = "" }: FooterProps) {
             </div>
             
             <div className="flex gap-6">
-              <a href="#" className="text-white/30 hover:text-white transition-colors">
-                <span className="sr-only">Twitter</span>
-                {/* Twitter Icon placeholder */}
-              </a>
-              <a href="#" className="text-white/30 hover:text-white transition-colors">
-                <span className="sr-only">Instagram</span>
-                {/* Instagram Icon placeholder */}
-              </a>
               <a 
                 href={GITHUB_REPO_URL}
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label={t('a11y.github')}
                 className="text-white/30 hover:text-white transition-colors"
               >
-                <span className="sr-only">Github</span>
                 <Github className="w-5 h-5" />
               </a>
             </div>

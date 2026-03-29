@@ -2,6 +2,7 @@
 import type { NextRequest } from "next/server"
 import { NextResponse } from "next/server"
 import { createServerClient } from "@supabase/ssr"
+import { createClient as createServiceClient } from "@supabase/supabase-js"
 import { ValidationError } from "@/app/api/_lib/errors"
 import { decodeSearchParams, S } from "@/app/api/_lib/validation"
 import { Effect, Match } from "effect"
@@ -96,10 +97,50 @@ export async function GET(request: NextRequest) {
   })
   
   /** @Logic.Supabase.ExchangeCode */
-  const { error: sessionError } = await supabase.auth.exchangeCodeForSession(params.code)
+  const { data: sessionData, error: sessionError } = await supabase.auth.exchangeCodeForSession(params.code)
 
   if (sessionError) {
     return handleError(new ValidationError({ message: sessionError.message }))
+  }
+
+  /** @Logic.Supabase.CreateProfile */
+  if (sessionData?.user) {
+    const user = sessionData.user
+    console.log("Creating profile for user:", user.id, user.email, JSON.stringify(user.user_metadata))
+    
+    const meta = user.user_metadata as Record<string, unknown> | null
+    const displayName = (meta?.name as string | undefined) 
+      || (meta?.full_name as string | undefined) 
+      || user.email?.split('@')[0] 
+      || 'user'
+    
+    // Generate unique handle from display name (slugified) + first 4 chars of user id
+    const slugified = displayName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+    const handle = slugified ? `${slugified}-${user.id.substring(0, 4)}` : `user-${user.id.substring(0, 4)}`
+    
+    // Use service role client to bypass RLS for profile creation
+    const supabaseAdmin = createServiceClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+    
+    const { error: profileError } = await supabaseAdmin.from('profiles').upsert({
+      id: user.id,
+      display_name: displayName,
+      avatar_url: (meta?.avatar_url as string | undefined) || null,
+      handle: handle,
+      subscription_tier: 'free',
+      subscription_status: 'active',
+      messages_limit: 100,
+      reset_interval: 'daily',
+      last_reset_date: new Date().toISOString(),
+    }, { onConflict: 'id' })
+    
+    if (profileError) {
+      console.error("Profile upsert error:", profileError)
+    } else {
+      console.log("Profile created successfully with service role")
+    }
   }
   
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL

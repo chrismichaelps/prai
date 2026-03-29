@@ -19,7 +19,7 @@ export class PromptBuilderService extends Effect.Service<PromptBuilderService>()
 **Interface:**
 ```ts
 interface PromptBuilderShape {
-  readonly compose: (extraCapabilities?: string) => string
+  readonly compose: (extraCapabilities?: string, personalization?: Personalization) => string
 }
 ```
 
@@ -27,9 +27,10 @@ interface PromptBuilderShape {
 - **Layer_Law:** Exposed via `PromptBuilderService.Default`. No external dependencies.
 - **Export_Law:** Single Effect.Service class export. Consumed via tag yield*.
 - **Transformation_Law:** Pure string composition — no I/O, no side effects.
+- **Personalization_Law:** Injects personalization section into system prompt when provided.
 
 ### [Semantic Hash]
-Builds the LLM system prompt string by composing domain template sections. Includes role, safety, rules, guardrails, media accuracy, and output format templates.
+Builds the LLM system prompt string by composing domain template sections. Includes role, safety, rules, guardrails, media accuracy, output format, and personalization templates.
 
 ### [Linkage]
 - **Upstream:** None

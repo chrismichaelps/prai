@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { useAppDispatch } from '@/store/hooks'
 import { openSources } from '@/store/slices/chatSlice'
-import type { ChatMessage, SearchResult } from '@/types/chat'
+import { ChatRole, type ChatMessage, type SearchResult } from '@/types/chat'
 import {
   Copy,
   ChevronRight,
@@ -53,8 +53,8 @@ export const MessageBubble: React.FC<MessageBubbleProps> = memo(({ message, inde
   const [isCopied, setIsCopied] = useState(false)
   const [editContent, setEditContent] = useState(message.content)
  
-  const isUser = message.role === 'user'
-  const isSystem = message.role === 'system'
+  const isUser = message.role === ChatRole.USER
+  const isSystem = message.role === ChatRole.SYSTEM
 
   /** @Logic.UI.Chat.ContentStripping */
   const strippedContent = useMemo(() => {
@@ -125,6 +125,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = memo(({ message, inde
     >
       <div className={cn('max-w-[92%] md:max-w-[85%] relative w-full')}>
         {!isUser && (
+          /** @UI.Chat.Bubble.CopyButton */
           <div className="absolute -top-1 w-full flex justify-end pointer-events-none z-10">
             <button
               onClick={copyToClipboard}
@@ -294,6 +295,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = memo(({ message, inde
                 'prose-code:before:content-none prose-code:after:content-none prose-code:text-white/80 prose-code:bg-white/5 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md',
                 'prose-headings:text-[17px] prose-headings:font-black prose-headings:mb-3 prose-headings:mt-6 prose-headings:text-white/90',
                 'prose-strong:text-white/90 prose-strong:font-black',
+                'prose-a:text-orange-400 prose-a:hover:text-orange-300 prose-a:underline prose-a:underline-offset-2 prose-a:transition-colors',
                 'prose-ul:list-disc prose-ul:pl-5 prose-li:marker:text-white/20',
                 'font-sans text-[17px] font-normal max-w-none text-white/90 leading-relaxed selection:bg-white/10',
               )}

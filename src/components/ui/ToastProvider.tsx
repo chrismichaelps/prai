@@ -3,6 +3,7 @@
 import React, { useState, useEffect, createContext, useContext, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Check, X } from 'lucide-react'
+import { useI18n } from '@/lib/effect/I18nProvider'
 
 interface ToastMessage {
   id: string
@@ -25,6 +26,7 @@ export function useToast() {
 }
 
 function ToastItem({ toast, onDismiss }: { toast: ToastMessage; onDismiss: () => void }) {
+  const { t } = useI18n()
   useEffect(() => {
     const timer = setTimeout(onDismiss, 4000)
     return () => clearTimeout(timer)
@@ -59,7 +61,7 @@ function ToastItem({ toast, onDismiss }: { toast: ToastMessage; onDismiss: () =>
         <button
           onClick={onDismiss}
           className="text-white/20 hover:text-white transition-colors p-1 shrink-0"
-          aria-label="Cerrar"
+          aria-label={t('a11y.close')}
         >
           <X className="w-4 h-4" />
         </button>

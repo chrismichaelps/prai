@@ -2,6 +2,8 @@ import { getChangelogReleasesSync } from '@/lib/effect/services/Changelog'
 import { ReleasesPage } from './ReleasesClient'
 import type { Metadata } from 'next'
 
+export const dynamic = 'force-static'
+export const revalidate = false
 
 export const metadata: Metadata = {
   title: 'Release Notes | PR\\AI',

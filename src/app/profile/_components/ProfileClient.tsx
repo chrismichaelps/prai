@@ -1,7 +1,7 @@
 'use client'
 
 /** @Component.ProfileClient */
-import React, { useState, useCallback, useEffect } from 'react'
+import React, { useState, useCallback, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { User as UserIcon, Pencil, Check, X, Loader2, Trash2, Archive, AlertTriangle } from 'lucide-react'
@@ -15,6 +15,8 @@ import heroImage from '@/assets/condado-ocean-dusk.png'
 import { useToast } from '@/components/ui/ToastProvider'
 import { useAppSelector, useAppDispatch } from '@/store/hooks'
 import { setChats } from '@/store/slices/chatSlice'
+import { useUsage } from '@/hooks/useUsage'
+import { TierBadge } from '@/components/usage/TierBadge'
 
 const toLocale = (value: string | undefined | null, fallback: Locale = 'es'): Locale => {
   if (value === 'es' || value === 'en') return value
@@ -23,10 +25,11 @@ const toLocale = (value: string | undefined | null, fallback: Locale = 'es'): Lo
 
 export function ProfileClient() {
   const { t, setLocale } = useI18n()
-  const { user, profile, isLoading, refreshProfile } = useAuth()
+  const { user, profile, isLoading, refreshProfile, signOut } = useAuth()
   const { showToast } = useToast()
   const dispatch = useAppDispatch()
   const chats = useAppSelector(state => state.chat.chats)
+  const { usage, fetchUsage } = useUsage()
   const [chatsCount, setChatsCount] = useState(0)
   
   const [isEditing, setIsEditing] = useState(false)
@@ -36,11 +39,15 @@ export function ProfileClient() {
   const [language, setLanguage] = useState<Locale>(toLocale(profile?.language))
   const [showDataControl, setShowDataControl] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [showDeleteAccount, setShowDeleteAccount] = useState(false)
+  const [confirmHandle, setConfirmHandle] = useState('')
 
   const avatarUrl = profile?.avatar_url || user?.user_metadata?.avatar_url
   const currentDisplayName = profile?.display_name || user?.user_metadata?.name || user?.user_metadata?.full_name || t('auth.explorer')
   const currentBio = profile?.bio || ''
   const email = user?.email
+  
+  const chatsCountFetched = useRef(false)
 
   useEffect(() => {
     if (profile) {
@@ -51,7 +58,12 @@ export function ProfileClient() {
   }, [profile])
 
   useEffect(() => {
-    if (user) {
+    fetchUsage()
+  }, [fetchUsage])
+
+  useEffect(() => {
+    if (user && !chatsCountFetched.current) {
+      chatsCountFetched.current = true
       fetch(`${process.env.NEXT_PUBLIC_SITE_URL || ''}/api/chat/chats/count?userId=${user.id}`)
         .then(res => res.json())
         .then(data => setChatsCount(data.count || 0))
@@ -82,6 +94,39 @@ export function ProfileClient() {
       showToast(t('profile.delete_error') || 'Failed to delete chats', 'error')
     } finally {
       setIsDeleting(false)
+    }
+  }
+
+  const handleDeleteAccount = async () => {
+    if (!user || !profile?.handle) return
+    if (confirmHandle !== profile.handle) {
+      showToast(t('profile.handle_mismatch') || 'Handle does not match', 'error')
+      return
+    }
+
+    setIsDeleting(true)
+    try {
+      const res = await fetch('/api/users/account', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ confirmHandle: profile.handle })
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        throw new Error(data.error || `HTTP ${res.status}`)
+      }
+
+      showToast(t('profile.account_deleted') || 'Account deleted successfully', 'success')
+      signOut()
+      window.location.href = '/'
+    } catch (err) {
+      console.error('Error deleting account:', err)
+      showToast(t('profile.delete_account_error') || 'Failed to delete account', 'error')
+    } finally {
+      setIsDeleting(false)
+      setShowDeleteAccount(false)
     }
   }
 
@@ -218,10 +263,11 @@ export function ProfileClient() {
 
                   <div className="space-y-5 mb-8">
                     <div>
-                      <label className="block text-white/50 text-sm mb-2 font-medium">
+                      <label htmlFor="profile-display-name" className="block text-white/50 text-sm mb-2 font-medium">
                         {t('profile.display_name')}
                       </label>
                       <input
+                        id="profile-display-name"
                         type="text"
                         value={displayName}
                         onChange={(e) => setDisplayName(e.target.value)}
@@ -231,10 +277,11 @@ export function ProfileClient() {
                     </div>
 
                     <div>
-                      <label className="block text-white/50 text-sm mb-2 font-medium">
+                      <label htmlFor="profile-bio" className="block text-white/50 text-sm mb-2 font-medium">
                         {t('profile.bio')}
                       </label>
                       <textarea
+                        id="profile-bio"
                         value={bio}
                         onChange={(e) => setBio(e.target.value)}
                         className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:border-white/50 focus:bg-white/10 transition-all resize-none h-28"
@@ -317,7 +364,10 @@ export function ProfileClient() {
                       <p className="text-white/40 text-xs mb-1 font-medium uppercase tracking-wider">
                         {t('profile.display_name')}
                       </p>
-                      <p className="text-xl font-semibold text-white">{currentDisplayName}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-xl font-semibold text-white">{currentDisplayName}</p>
+                        <TierBadge tier={usage?.subscription_tier} />
+                      </div>
                     </div>
 
                     <div>
@@ -388,6 +438,22 @@ export function ProfileClient() {
                         </motion.div>
                       )}
                     </div>
+
+                    {/* Delete Account Section */}
+                    <div className="pt-6 border-t border-red-500/20 mt-6">
+                      <p className="text-white/30 text-xs mb-3">{t('profile.danger_zone') || 'Danger Zone'}</p>
+                      <button
+                        onClick={() => setShowDeleteAccount(true)}
+                        disabled={isDeleting}
+                        className="w-full flex items-center gap-3 px-4 py-3 bg-red-600/20 hover:bg-red-600/30 rounded-xl text-red-400 hover:text-red-300 transition-all disabled:opacity-50"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                        <span className="font-medium">{t('profile.delete_account') || 'Delete Account'}</span>
+                      </button>
+                      <p className="text-white/30 text-xs mt-2 text-center">
+                        {t('profile.delete_account_warning') || 'This will permanently delete your account and all data'}
+                      </p>
+                    </div>
                   </div>
                 </div>
               )}
@@ -395,6 +461,56 @@ export function ProfileClient() {
           </section>
 
           <Footer className="mt-auto bg-transparent border-t-0 py-10" />
+
+          {/* Delete Account Modal */}
+          {showDeleteAccount && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+              <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowDeleteAccount(false)} />
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="relative bg-[#1a1a1a] border border-red-500/30 rounded-2xl p-6 w-full max-w-md shadow-2xl"
+              >
+                <h3 className="text-xl font-bold text-white mb-2">
+                  {t('profile.delete_account') || 'Delete Account'}
+                </h3>
+                <p className="text-white/60 text-sm mb-4">
+                  {t('profile.delete_account_confirm') || 'This action cannot be undone. All your data will be permanently deleted.'}
+                </p>
+                <div className="mb-4">
+                  <label htmlFor="confirm-handle" className="text-white/40 text-xs uppercase tracking-wider">
+                    {t('profile.type_handle')} (@{profile?.handle})
+                  </label>
+                  <input
+                    id="confirm-handle"
+                    type="text"
+                    value={confirmHandle}
+                    onChange={(e) => setConfirmHandle(e.target.value)}
+                    placeholder={profile?.handle}
+                    className="w-full mt-1 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/20 focus:outline-none focus:border-red-500/50"
+                  />
+                </div>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => {
+                      setShowDeleteAccount(false)
+                      setConfirmHandle('')
+                    }}
+                    className="flex-1 px-4 py-3 bg-white/5 hover:bg-white/10 rounded-xl text-white/70 font-medium transition-colors"
+                  >
+                    {t('common.cancel') || 'Cancel'}
+                  </button>
+                  <button
+                    onClick={handleDeleteAccount}
+                    disabled={isDeleting || confirmHandle !== profile?.handle}
+                    className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 rounded-xl text-white font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isDeleting ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : t('profile.delete_account') || 'Delete'}
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          )}
         </div>
       </main>
     </ProtectedRoute>

@@ -9,14 +9,20 @@ Grammar_Lock: "@root/hashes/grammar/effect.hash.md"
 ### [Signatures]
 ```ts
 export const initChat: Effect<void, never, ConfigService | Redux>
-export const sendChatMessage: (content: string) => Effect<void, never, OpenRouter | Redux | ConfigService>
-export const regenerateResponse: Effect.Effect<void, never, OpenRouter | Redux | ConfigService>
+export const sendChatMessage: (content: string, personalization?: Personalization) => Effect<void, never, OpenRouter | Redux | ConfigService | ChatApi>
+export const regenerateResponse: (personalization?: Personalization) => Effect.Effect<void, never, OpenRouter | Redux | ConfigService>
 ```
 
 **Internal:**
 ```ts
-const generateResponse: Effect<void, OpenRouterError, OpenRouter | Redux>
-// Error channel propagates OpenRouterError; callers handle via catchAll
+const generateResponse: (sessionId?: string, personalization?: Personalization) => Effect<void, OpenRouterError | void, OpenRouter | Redux>
+// Accepts optional sessionId for OpenRouter session tracking and personalization for system prompt injection
+```
+
+**Internal:**
+```ts
+const generateResponse: (sessionId?: string) => Effect<void, OpenRouterError | void, OpenRouter | Redux>
+// Accepts optional sessionId for OpenRouter session tracking
 
 const trackUrls: (urls: string[], verified: boolean) => Effect<void>
 // Adds novel URLs to sourcesRef (dedup via seenUrlsRef), does NOT dispatch to Redux
@@ -29,6 +35,8 @@ const syncSources: () => Effect<void>
 - **Generator_Law:** Uses `Effect.gen` + `yield*` for linear flow — COMPLIANT.
 - **Stream_Law:** `Stream.runForEach` for SSE chunk consumption — errors propagate through error channel to caller.
 - **Error_Law:** `Effect.catchAll` at pipeline end on `sendChatMessage` and `regenerateResponse` uses `instanceof OpenRouterError` check to dispatch to Redux `uiSlice.apiError` via `setApiError` or `chatSlice.setError` for unknown errors.
+- **Session_Law:** Passes `currentChatId` as `session_id` to OpenRouter for grouping generations into sessions.
+- **Usage_Law:** Tracks usage via POST to `/api/user/usage/increment` after stream completes.
 - **UrlExtraction_Law:** `extractUrls` from `@/lib/url` filters media hostnames (youtube, spotify, soundcloud, vimeo) and handles balanced parentheses in URLs (e.g., Wikipedia). Always extracts all URLs including those at chunk boundaries.
 - **Favicon_Law:** Every `SearchResult` created MUST include the `icon` field set to `https://www.google.com/s2/favicons?domain=${domain}&sz=32`. Display layer handles fallback via `onError` hiding broken image, showing Globe icon.
 - **SyncLaw:** `syncSources()` is called after every source mutation to ensure Redux state is updated. This guarantees the SourcesPill renders consistently.
@@ -51,5 +59,5 @@ const syncSources: () => Effect<void>
 Manages the full chat lifecycle: initialize system prompt, stream SSE from OpenRouter, parse reasoning/content deltas, extract AdaptiveCard JSON blocks, extract and deduplicate URLs with O(n) sliding window, dispatch all state mutations via Redux.
 
 ### [Linkage]
-- **Upstream:** `OpenRouter`, `ConfigService`, `Redux`, `chatSlice`, `@/lib/url`
+- **Upstream:** `OpenRouter`, `ConfigService`, `Redux`, `ChatApi`, `chatSlice`, `@/lib/url`
 - **Downstream:** `@root/src/lib/effect/ChatProvider.tsx`

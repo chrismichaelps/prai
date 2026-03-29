@@ -44,6 +44,7 @@ export default function SignInPage() {
           {/** @UI.Auth.Action.GoogleSignin */}
           <button
             onClick={() => signIn()}
+            aria-label={t('a11y.sign_in_google')}
             className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-white text-slate-900 font-bold rounded-xl hover:bg-white/90 transition-all active:scale-[0.98] shadow-xl"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">

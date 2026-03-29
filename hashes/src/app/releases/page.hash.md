@@ -1,32 +1,21 @@
 ---
-State_ID: BigInt(0x0)
+State_ID: BigInt(0x0fc98e9)
 Git_SHA: LATEST
-Grammar_Lock: "@root/hashes/grammar/next.hash.md"
+Grammar_Lock: "@root/hashes/grammar/typescript.hash.md"
 ---
 
-## @Route.Releases
+## @Releases.Page
 
 ### [Signatures]
-```tsx
-export default function ReleasesPageRoute(): JSX.Element
-export const metadata: Metadata
-```
-
-### [Metadata]
 ```ts
-{
-  title: 'Release Notes | PR\\AI',
-  description: 'The latest updates, features, and fixes for the PR\\AI platform.'
-}
+export default function Page(): Promise<JSX.Element>
 ```
 
 ### [Governance]
-- **Static_Law:** Page is statically prerendered
-- **Server_Law:** Data fetched server-side via `getChangelogReleasesSync()`
+- **Changelog_Service_Bridge:** Mandates the retrieval of release data through `getChangelogReleasesSync` to maintain a single source of truth for version history.
 
 ### [Semantic Hash]
-Server component that fetches changelog data and renders the releases page.
+The main entry point for the platform's public changelog. It fetches structured release data and passes it to the `ReleasesClient` for interactive rendering.
 
 ### [Linkage]
-- **Upstream:** `getChangelogReleasesSync` from `@/lib/effect/services/Changelog`
-- **Downstream:** `ReleasesPage` from `./ReleasesClient`
+- **Dependencies:** `./ReleasesClient`, `@/lib/effect/services/Changelog`

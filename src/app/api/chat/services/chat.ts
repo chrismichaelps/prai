@@ -1,16 +1,13 @@
 import { Effect, pipe } from "effect"
-import { Data } from "effect"
 import { createClient } from "@/lib/supabase/server"
 import type { Database } from "@/types/database.types"
+import { ChatDbError } from "@/app/api/_lib/errors/services"
 
 type Chat = Database["public"]["Tables"]["chats"]["Row"]
 type Message = Database["public"]["Tables"]["messages"]["Row"]
 type MessageInsert = Database["public"]["Tables"]["messages"]["Insert"]
 
-export class ChatDbError extends Data.TaggedError("ChatDbError")<{
-  readonly error: unknown
-}> {}
-
+export { ChatDbError }
 export type ChatServiceError = ChatDbError
 
 /** @Service.Api.Chat */
@@ -100,7 +97,7 @@ export const chatService = {
       })
     )
   },
-
+  
   /** @Logic.Api.Chat.DeleteChat */
   deleteChat: (chatId: string): Effect.Effect<void, ChatDbError> => {
     return pipe(

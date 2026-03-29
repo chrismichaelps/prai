@@ -12,7 +12,7 @@ type ApiError = ValidationError | ChatDbError
 
 /** @Route.Chat.ChatById.GET */
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   /** @Logic.Chat.GetMessages */
@@ -27,14 +27,16 @@ export async function GET(
       })
     )(resolvedParams),
     Effect.flatMap((validated) => 
-      pipe(
-        chatService.getMessages(validated.id),
-        Effect.mapError((e) => new ChatDbError({ error: e }))
-      )
+      chatService.getMessages(validated.id)
     )
   )
 
-  return exitResponse(NextResponse.json)(program)
+  return exitResponse(NextResponse.json, {
+    spanName: "chat.chats.messages.get",
+    method: "GET",
+    path: request.url,
+    searchParams: new URL(request.url).searchParams
+  })(program)
 }
 
 /** @Route.Chat.ChatById.PATCH */
@@ -61,26 +63,29 @@ export async function PATCH(
           })
         )(request),
         Effect.flatMap((body) => 
-          pipe(
-            chatService.updateChat(validated.id, { is_archived: body.is_archived }),
-            Effect.mapError((e) => new ChatDbError({ error: e }))
-          )
+          chatService.updateChat(validated.id, { is_archived: body.is_archived })
         )
       )
     )
   )
 
-  return exitResponse(NextResponse.json)(program)
+  return exitResponse(NextResponse.json, {
+    spanName: "chat.chats.patch",
+    method: "PATCH",
+    path: request.url,
+    payload: await request.clone().json().catch(() => undefined)
+  })(program)
 }
 
 /** @Route.Chat.ChatById.DELETE */
 export async function DELETE(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   /** @Logic.Chat.DeleteChat */
   const resolvedParams = await params
-   
+  const { searchParams } = new URL(request.url)
+  
   const program: Effect.Effect<void, ApiError> = pipe(
     decodeParams(
       S.Struct({
@@ -90,12 +95,14 @@ export async function DELETE(
       })
     )(resolvedParams),
     Effect.flatMap((validated) => 
-      pipe(
-        chatService.deleteChat(validated.id),
-        Effect.mapError((e) => new ChatDbError({ error: e }))
-      )
+      chatService.deleteChat(validated.id)
     )
   )
 
-  return exitResponse(() => new NextResponse(null, { status: HttpStatus.NO_CONTENT }))(program)
+  return exitResponse(() => new NextResponse(null, { status: HttpStatus.NO_CONTENT }), {
+    spanName: "chat.chats.delete",
+    method: "DELETE",
+    path: request.url,
+    searchParams
+  })(program)
 }

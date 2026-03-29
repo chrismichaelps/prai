@@ -30,6 +30,8 @@ export function ErrorToast() {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 20, scale: 0.95 }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+          role="alert"
+          aria-live="assertive"
           className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:bottom-6 z-[120] max-w-md w-auto sm:w-full"
         >
           <div className="bg-[#1a1a1a] border border-white/[0.08] shadow-2xl pointer-events-auto flex items-center gap-3 px-5 py-4 rounded-[1.5rem]">

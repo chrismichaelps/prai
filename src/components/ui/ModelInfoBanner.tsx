@@ -55,7 +55,7 @@ export function ModelInfoBanner() {
                 <button 
                   onClick={() => dispatch(setModelInfoVisible(false))}
                   className="text-white/20 hover:text-white transition-colors p-1"
-                  aria-label="Cerrar"
+                  aria-label={t('a11y.close')}
                 >
                   <X className="w-4 h-4" />
                 </button>

@@ -1,24 +1,21 @@
 ---
-State_ID: BigInt(0x3)
+State_ID: BigInt(0x0fc98e7)
 Git_SHA: LATEST
-Grammar_Lock: "@root/hashes/grammar/next.hash.md"
+Grammar_Lock: "@root/hashes/grammar/typescript.hash.md"
 ---
 
-## @Route.BuildInfo
+## @Route.Api.BuildInfo
 
 ### [Signatures]
 ```ts
-export async function GET(request: NextRequest): Promise<NextResponse>
+export async function GET(): Promise<NextResponse>
 ```
 
 ### [Governance]
-- **ForceStatic_Law:** Route is `force-static`. Response is cached by Next.js at the edge.
-- **ServerOnly_Law:** Uses `fs/promises` — server-side only.
-- **Fallback_Law:** Returns `{ buildHash: 'dev' }` if `public/app-version.json` cannot be read (e.g., during `next dev`).
+- **Process_Env_Bridge:** Directly exposes critical build-time environment variables (commit SHA, timestamp) to the client for debugging and version tracking.
 
 ### [Semantic Hash]
-API route that reads the app version hash from `public/app-version.json` (written by `scripts/generate-app-version.mjs` post-build). Returns first 12 chars of the SHA-256 hash.
+The diagnostic boundary for the application's deployment state. It serves as an internal health and version check, providing transparency into the current running build.
 
 ### [Linkage]
-- **Upstream:** `public/app-version.json` (written by post-build script)
-- **Downstream:** `@root/src/lib/effect/hooks/useBuildInfo.ts`, `@root/src/components/layout/Header.tsx`
+- **Dependencies:** `process.env`

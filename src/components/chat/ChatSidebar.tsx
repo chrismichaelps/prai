@@ -25,10 +25,12 @@ import {
   setMessages,
   type Chat,
 } from '@/store/slices/chatSlice'
+import { ChatRole } from '@/types/chat'
 import { useAuth } from '@/contexts/AuthContext'
 import { useI18n } from '@/lib/effect/I18nProvider'
 import { useToast } from '@/components/ui/ToastProvider'
 import { useRouter } from 'next/navigation'
+import { SidebarProfile } from './SidebarProfile'
 
 interface ChatSidebarProps {
   isOpen: boolean
@@ -144,7 +146,7 @@ export function ChatSidebar({ isOpen, onClose }: ChatSidebarProps) {
           content: string
           metadata: Record<string, unknown> | null
         }) => ({
-          role: msg.role as 'user' | 'assistant',
+          role: msg.role as typeof ChatRole.USER | typeof ChatRole.ASSISTANT,
           content: msg.content,
           metadata: msg.metadata as Record<string, unknown> | undefined,
         }),
@@ -171,7 +173,11 @@ export function ChatSidebar({ isOpen, onClose }: ChatSidebarProps) {
         const text = await res.text()
         throw new Error(text || `HTTP ${res.status}`)
       }
+      
       dispatch(removeChat(chatId))
+      if (currentChatId === chatId) {
+        dispatch(clearHistory())
+      }
       showToast(t('chat.archived') || 'Chat archived', 'success')
       setActiveMenu(null)
     } catch (err) {
@@ -260,10 +266,8 @@ export function ChatSidebar({ isOpen, onClose }: ChatSidebarProps) {
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => setShowArchived(!showArchived)}
+                  aria-label={showArchived ? t('a11y.show_active') : t('a11y.show_archived')}
                   className="p-2 text-white/50 hover:text-white transition-colors"
-                  title={
-                    showArchived ? 'Show active chats' : 'Show archived chats'
-                  }
                 >
                   {showArchived ? (
                     <MessageSquare className="w-5 h-5" />
@@ -273,6 +277,7 @@ export function ChatSidebar({ isOpen, onClose }: ChatSidebarProps) {
                 </button>
                 <button
                   onClick={onClose}
+                  aria-label={t('a11y.close_sidebar')}
                   className="p-2 text-white/50 hover:text-white transition-colors"
                 >
                   <X className="w-5 h-5" />
@@ -335,6 +340,7 @@ export function ChatSidebar({ isOpen, onClose }: ChatSidebarProps) {
                           e.stopPropagation()
                           setActiveMenu(activeMenu === chat.id ? null : chat.id)
                         }}
+                        aria-label={t('a11y.more_options')}
                         className="p-1 text-white/30 hover:text-white transition-colors opacity-0 group-hover:opacity-100"
                       >
                         <MoreVertical className="w-4 h-4" />
@@ -397,6 +403,9 @@ export function ChatSidebar({ isOpen, onClose }: ChatSidebarProps) {
                 </div>
               )}
             </div>
+
+            {/* User Profile Section */}
+            <SidebarProfile onSignOut={onClose} />
           </motion.aside>
         </>
       )}

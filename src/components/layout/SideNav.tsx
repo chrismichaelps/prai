@@ -14,17 +14,16 @@ import {
   Newspaper,
   Compass,
   Radio,
-  CreditCard,
 } from 'lucide-react'
 import { useAppSelector, useAppDispatch } from '@/store/hooks'
 import { setActiveTab } from '@/store/slices/uiSlice'
+import type { UIActiveTab } from '@/types/ui'
 import { PraiLogo } from '@/components/brand/PraiLogo'
 
 const navItems = [
   { id: 'news', icon: Newspaper, label: 'Noticias' },
   { id: 'tourism', icon: Compass, label: 'Turismo' },
   { id: 'radio', icon: Radio, label: 'Radio' },
-  { id: 'passport', icon: CreditCard, label: 'Pasaporte' },
 ]
 
 export const SideNav = () => {
@@ -86,7 +85,7 @@ export const SideNav = () => {
                 <button
                   key={item.id}
                   onClick={() => {
-                    dispatch(setActiveTab(item.id))
+                    dispatch(setActiveTab(item.id as UIActiveTab))
                   }}
                   className={cn(
                     'flex items-center space-x-3 px-4 py-3 rounded-2xl transition-all duration-300 text-sm font-medium',

@@ -14,7 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      /** @Type.Database.Chats */
       chats: {
         Row: {
           created_at: string | null
@@ -42,7 +41,124 @@ export type Database = {
         }
         Relationships: []
       }
-      /** @Type.Database.Messages */
+      issue_comments: {
+        Row: {
+          body: string
+          created_at: string
+          deleted_at: string | null
+          id: string
+          is_admin_reply: boolean
+          issue_id: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          is_admin_reply?: boolean
+          issue_id: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          is_admin_reply?: boolean
+          issue_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "issue_comments_issue_id_fkey"
+            columns: ["issue_id"]
+            isOneToOne: false
+            referencedRelation: "issues"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "issue_comments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      issue_upvotes: {
+        Row: {
+          created_at: string
+          issue_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          issue_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          issue_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "issue_upvotes_issue_id_fkey"
+            columns: ["issue_id"]
+            isOneToOne: false
+            referencedRelation: "issues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      issues: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          is_pinned: boolean
+          label: string | null
+          status: string
+          title: string
+          updated_at: string
+          upvotes: number
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          is_pinned?: boolean
+          label?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          upvotes?: number
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          is_pinned?: boolean
+          label?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          upvotes?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "issues_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           chat_id: string
@@ -78,16 +194,96 @@ export type Database = {
           },
         ]
       }
-      /** @Type.Database.Profiles */
+      notifications: {
+        Row: {
+          actor_id: string
+          archived_at: string | null
+          body: string | null
+          comment_id: string | null
+          created_at: string
+          id: string
+          issue_id: string
+          read: boolean
+          read_at: string | null
+          recipient_id: string
+          resource_id: string | null
+          resource_type: string | null
+          seen_at: string | null
+          title: string | null
+          type: Database["public"]["Enums"]["notification_type"]
+        }
+        Insert: {
+          actor_id: string
+          archived_at?: string | null
+          body?: string | null
+          comment_id?: string | null
+          created_at?: string
+          id?: string
+          issue_id: string
+          read?: boolean
+          read_at?: string | null
+          recipient_id: string
+          resource_id?: string | null
+          resource_type?: string | null
+          seen_at?: string | null
+          title?: string | null
+          type: Database["public"]["Enums"]["notification_type"]
+        }
+        Update: {
+          actor_id?: string
+          archived_at?: string | null
+          body?: string | null
+          comment_id?: string | null
+          created_at?: string
+          id?: string
+          issue_id?: string
+          read?: boolean
+          read_at?: string | null
+          recipient_id?: string
+          resource_id?: string | null
+          resource_type?: string | null
+          seen_at?: string | null
+          title?: string | null
+          type?: Database["public"]["Enums"]["notification_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "issue_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_issue_id_fkey"
+            columns: ["issue_id"]
+            isOneToOne: false
+            referencedRelation: "issues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
           bio: string | null
           created_at: string | null
           display_name: string | null
+          handle: string
           id: string
+          is_admin: boolean
           language: string | null
+          last_reset_date: string
+          messages_limit: number
+          messages_used: number
           preferences: Json | null
+          reset_interval: string
+          subscription_end_date: string | null
+          subscription_start_date: string | null
+          subscription_status: string
+          subscription_tier: string
+          total_cost: number
+          total_tokens_used: number
           updated_at: string | null
         }
         Insert: {
@@ -95,9 +291,21 @@ export type Database = {
           bio?: string | null
           created_at?: string | null
           display_name?: string | null
+          handle: string
           id: string
+          is_admin?: boolean
           language?: string | null
+          last_reset_date?: string
+          messages_limit?: number
+          messages_used?: number
           preferences?: Json | null
+          reset_interval?: string
+          subscription_end_date?: string | null
+          subscription_start_date?: string | null
+          subscription_status?: string
+          subscription_tier?: string
+          total_cost?: number
+          total_tokens_used?: number
           updated_at?: string | null
         }
         Update: {
@@ -105,9 +313,21 @@ export type Database = {
           bio?: string | null
           created_at?: string | null
           display_name?: string | null
+          handle?: string
           id?: string
+          is_admin?: boolean
           language?: string | null
+          last_reset_date?: string
+          messages_limit?: number
+          messages_used?: number
           preferences?: Json | null
+          reset_interval?: string
+          subscription_end_date?: string | null
+          subscription_start_date?: string | null
+          subscription_status?: string
+          subscription_tier?: string
+          total_cost?: number
+          total_tokens_used?: number
           updated_at?: string | null
         }
         Relationships: []
@@ -117,10 +337,86 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      archive_old_notifications: { Args: never; Returns: undefined }
+      get_notifications: {
+        Args: { p_limit?: number; p_offset?: number; p_user_id: string }
+        Returns: {
+          actor_avatar_url: string
+          actor_handle: string
+          actor_id: string
+          body: string
+          comment_id: string
+          created_at: string
+          id: string
+          is_read: boolean
+          issue_id: string
+          resource_id: string
+          resource_type: string
+          title: string
+          type: string
+        }[]
+      }
+      get_unread_notification_count: {
+        Args: { p_user_id: string }
+        Returns: number
+      }
+      get_user_usage: {
+        Args: { p_user_id: string }
+        Returns: {
+          can_send: boolean
+          last_reset_date: string
+          messages_limit: number
+          messages_remaining: number
+          messages_used: number
+          reset_interval: string
+          subscription_tier: string
+          usage_percentage: number
+        }[]
+      }
+      increment_token_usage: {
+        Args: { p_cost?: number; p_tokens?: number; p_user_id: string }
+        Returns: undefined
+      }
+      increment_user_usage: {
+        Args: { p_amount?: number; p_user_id: string }
+        Returns: {
+          can_send: boolean
+          messages_limit: number
+          messages_remaining: number
+          messages_used: number
+          usage_percentage: number
+        }[]
+      }
+      mark_notifications_read: {
+        Args: { p_notification_ids?: string[]; p_user_id: string }
+        Returns: undefined
+      }
+      mark_notifications_seen: {
+        Args: { p_user_id: string }
+        Returns: undefined
+      }
+      search_users: {
+        Args: {
+          requesting_user_id: string
+          result_limit?: number
+          result_offset?: number
+          search_term: string
+        }
+        Returns: {
+          avatar_url: string
+          display_name: string
+          handle: string
+          id: string
+          relevance: number
+        }[]
+      }
+      show_limit: { Args: never; Returns: number }
+      show_trgm: { Args: { "": string }; Returns: string[] }
     }
     Enums: {
-      [_ in never]: never
+      issue_label: "bug" | "feature" | "question" | "docs"
+      issue_status: "open" | "in_progress" | "closed"
+      notification_type: "mention" | "comment" | "status_change"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -132,7 +428,6 @@ type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
 
 type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
-/** @Type.Database.Tables */
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
@@ -162,7 +457,6 @@ export type Tables<
       : never
     : never
 
-/** @Type.Database.Insert */
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
@@ -188,7 +482,6 @@ export type TablesInsert<
       : never
     : never
 
-/** @Type.Database.Update */
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
@@ -250,6 +543,10 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      issue_label: ["bug", "feature", "question", "docs"],
+      issue_status: ["open", "in_progress", "closed"],
+      notification_type: ["mention", "comment", "status_change"],
+    },
   },
 } as const

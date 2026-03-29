@@ -1,6 +1,6 @@
 ---
 State_ID: BigInt(0xb06818da)
-Git_SHA: e14bd7ccd7a813335a9fa967470e8061bd2124a0
+Git_SHA: LATEST
 Grammar_Lock: "@root/hashes/grammar/typescript.hash.md"
 ---
 
@@ -22,6 +22,15 @@ export type Database = {
           avatar_url: string | null
           created_at: string | null
           updated_at: string | null
+          // Usage tracking columns
+          messages_used: number
+          messages_limit: number
+          last_reset_date: string
+          total_tokens_used: number
+          total_cost: number
+          subscription_tier: string
+          subscription_status: string
+          reset_interval: string
         }
 ```
 
