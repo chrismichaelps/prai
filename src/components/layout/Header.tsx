@@ -62,6 +62,7 @@ export function Header({
 
   const navLinks = [
     { label: t('nav.about'), key: 'about', href: '/about' },
+    { label: t('nav.blog'), key: 'blog', href: '/blog' },
     { label: t('nav.releases'), key: 'releases', href: '/releases' },
     { label: t('pricing.title'), key: 'pricing', href: '/pricing' },
   ]
