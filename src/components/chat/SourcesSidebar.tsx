@@ -4,6 +4,7 @@
 
 import React from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import DOMPurify from 'isomorphic-dompurify'
 import MarkdownIt from 'markdown-it'
 import { X, Search, Globe, ExternalLink, CheckCircle2 } from 'lucide-react'
 import { useI18n } from '@/lib/effect/I18nProvider'
@@ -26,7 +27,8 @@ export const SourcesSidebar: React.FC = () => {
 
   const htmlQuery = React.useMemo(() => {
     if (!selectedSources?.query) return { __html: '' }
-    return { __html: md.render(selectedSources.query) }
+    const html = md.render(selectedSources.query)
+    return { __html: DOMPurify.sanitize(html) }
   }, [selectedSources?.query])
 
   if (!selectedSources && isSourcesOpen) return null

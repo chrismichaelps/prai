@@ -25,6 +25,7 @@ import { MentionInput } from '@/components/mentions/MentionInput'
 import { useI18n } from '@/lib/effect/I18nProvider'
 import { useAuth } from '@/contexts/AuthContext'
 import { cn, timeAgo } from '@/lib/utils'
+import DOMPurify from 'isomorphic-dompurify'
 import MarkdownIt from 'markdown-it'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import {
@@ -105,7 +106,7 @@ function MarkdownBody({ content }: { content: string }) {
   return (
     <div
       className="prose prose-invert prose-sm max-w-none text-white/70"
-      dangerouslySetInnerHTML={{ __html: withMentions }}
+      dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(withMentions) }}
     />
   )
 }
@@ -616,7 +617,7 @@ function IssueDetailCommentComposer() {
         {showPreview ? (
           <div className="min-h-[100px] p-3 rounded-xl border border-white/10 bg-white/[0.02] prose prose-invert prose-sm max-w-none">
             {body.trim() ? (
-              <div dangerouslySetInnerHTML={{ __html: md.render(body) }} />
+              <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(md.render(body)) }} />
             ) : (
               <p className="text-white/30 italic">
                 {t('issues.nothing_to_preview') || 'Nothing to preview'}
