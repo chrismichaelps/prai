@@ -54,3 +54,4 @@ FMCF-MASTER-SEED.md
 # Supabase
 supabase/
 supabase/.temp/
+!src/app/api/health/supabase/
