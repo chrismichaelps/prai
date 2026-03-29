@@ -54,26 +54,35 @@ export function useNotifications() {
     fetchNotifications()
 
     const supabase = createSupabaseBrowserClient()
-    const channel = supabase
-      .channel(`notifications:${user.id}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'notifications',
-          filter: `recipient_id=eq.${user.id}`,
-        },
-        () => {
-          void fetchNotifications()
-        }
-      )
-      .subscribe()
 
-    channelRef.current = channel
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) return
+
+      const channel = supabase
+        .channel(`notifications:${user.id}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'notifications',
+            filter: `recipient_id=eq.${user.id}`,
+          },
+          () => {
+            void fetchNotifications()
+          }
+        )
+        .subscribe((status) => {
+          if (status === 'SUBSCRIBED') {
+            channelRef.current = channel
+          }
+        })
+    })
 
     return () => {
-      void supabase.removeChannel(channel)
+      if (channelRef.current) {
+        void supabase.removeChannel(channelRef.current)
+      }
     }
   }, [isAuthenticated, user, initialized, fetchNotifications])
 
