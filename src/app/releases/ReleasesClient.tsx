@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { ChevronDown, Rss, Code } from 'lucide-react'
+import DOMPurify from 'isomorphic-dompurify'
 import MarkdownIt from 'markdown-it'
 import { PraiLogo } from '@/components/brand/PraiLogo'
 import { Header } from '@/components/layout/Header'
@@ -126,7 +127,7 @@ function Content({
         'prose prose-invert max-w-none font-sans leading-relaxed selection:bg-white/10',
         className,
       )}
-      dangerouslySetInnerHTML={{ __html: md.render(content) }}
+      dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(md.render(content)) }}
     />
   )
 }
