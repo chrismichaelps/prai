@@ -31,6 +31,7 @@ import { useI18n } from '@/lib/effect/I18nProvider'
 import { useToast } from '@/components/ui/ToastProvider'
 import { useRouter } from 'next/navigation'
 import { SidebarProfile } from './SidebarProfile'
+import { useHaptics } from '@/hooks/useHaptics'
 
 interface ChatSidebarProps {
   isOpen: boolean
@@ -41,6 +42,7 @@ export function ChatSidebar({ isOpen, onClose }: ChatSidebarProps) {
   const { t } = useI18n()
   const { showToast } = useToast()
   const { user } = useAuth()
+  const haptics = useHaptics()
   const dispatch = useAppDispatch()
   const router = useRouter()
   /** @Store.Selector.Chat.State */
@@ -276,9 +278,9 @@ export function ChatSidebar({ isOpen, onClose }: ChatSidebarProps) {
                   )}
                 </button>
                 <button
-                  onClick={onClose}
-                  aria-label={t('a11y.close_sidebar')}
-                  className="p-2 text-white/50 hover:text-white transition-colors"
+                  onClick={() => { haptics.success(); createNewChat() }}
+                  aria-label={t('a11y.new_chat')}
+                  className="p-2 text-white/70 hover:text-white transition-colors"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -327,7 +329,7 @@ export function ChatSidebar({ isOpen, onClose }: ChatSidebarProps) {
                           ? 'bg-white/10 border border-white/20'
                           : 'hover:bg-white/5 border border-transparent'
                       }`}
-                      onClick={() => !showArchived && selectChat(chat.id)}
+                      onClick={() => { if (!showArchived) { haptics.selection(); selectChat(chat.id) } }}
                     >
                       <MessageSquare className="w-5 h-5 text-white/50 flex-shrink-0" />
                       <span className="flex-1 text-white/80 text-sm font-medium truncate">

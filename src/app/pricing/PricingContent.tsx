@@ -1,5 +1,6 @@
 'use client'
 
+import DOMPurify from 'isomorphic-dompurify'
 import { useI18n } from '@/lib/effect/I18nProvider'
 import { Locales } from '@/lib/effect/services/I18n'
 import { cn } from '@/lib/utils'
@@ -56,7 +57,7 @@ export function PricingContent({ esContent, enContent }: PricingContentProps) {
                 'prose-code:text-primary prose-code:bg-primary/10 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md prose-code:before:content-none prose-code:after:content-none',
                 'prose-hr:border-white/5 prose-hr:my-10',
               )}
-              dangerouslySetInnerHTML={{ __html: content }}
+              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(content) }}
             />
           </div>
         </section>

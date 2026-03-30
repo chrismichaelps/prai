@@ -1,5 +1,6 @@
 import { Effect, Context, Layer, Data } from "effect"
 import type { Chat, Message } from "./Chat"
+import { AppConstants } from "@/lib/constants/app-constants"
 
 /** @Type.Effect.ApiError */
 export class ApiError extends Data.TaggedError("ApiError")<{ message: string; status?: number }> {}
@@ -32,7 +33,7 @@ export interface ChatApi {
 export const ChatApiLayer = Layer.effect(
   ChatApi,
   Effect.gen(function* () {
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || AppConstants.DEV_URL
 
     return {
       /** @Logic.Effect.ChatApi.AddMessage */

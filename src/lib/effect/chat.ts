@@ -22,6 +22,7 @@ import type { AdaptiveData } from "@/types/chat"
 import { toSource } from "@/lib/url"
 import type { Personalization } from "./schemas/PersonalizationSchema"
 import { I18n } from "./services/I18n"
+import { LimitConstants } from "@/lib/constants/app-constants"
 
 /** @Logic.Effect.GenerateTitle */
 const generateChatTitle = (
@@ -47,7 +48,7 @@ const generateChatTitle = (
           model: config.models.default,
           messages: [
             { role: ChatRole.SYSTEM, content: titleSystemPrompt },
-            { role: ChatRole.USER, content: `Generate title for: "${currentMessage.slice(0, 80)}"${contextSnippet}` }
+            { role: ChatRole.USER, content: `Generate title for: "${currentMessage.slice(0, LimitConstants.CHAT_TITLE_GENERATION_LENGTH)}"${contextSnippet}` }
           ],
           max_tokens: 15,
           temperature: config.chatRequestConfig.temperature
@@ -56,16 +57,16 @@ const generateChatTitle = (
     )
 
     if (!response.ok) {
-      return currentMessage.slice(0, 25)
+      return currentMessage.slice(0, LimitConstants.CHAT_TITLE_PREVIEW_LENGTH)
     }
 
     const data = yield* Effect.promise(() => response.json() as Promise<{ choices?: Array<{ message?: { content?: string } }> }>)
-    let title = data.choices?.[0]?.message?.content?.trim() || currentMessage.slice(0, 25)
+    let title = data.choices?.[0]?.message?.content?.trim() || currentMessage.slice(0, LimitConstants.CHAT_TITLE_PREVIEW_LENGTH)
     /** @Logic.Chat.SanitizeTitle */
     title = title.replace(/[^\w\sáéíóúñüÁÉÍÓÚÑÜ]/g, '').trim()
-    return title.slice(0, 30)
+    return title.slice(0, LimitConstants.CHAT_TITLE_MAX_LENGTH)
   }).pipe(
-    Effect.catchAll(() => Effect.succeed(currentMessage.slice(0, 25)))
+    Effect.catchAll(() => Effect.succeed(currentMessage.slice(0, LimitConstants.CHAT_TITLE_PREVIEW_LENGTH)))
   )
 
 /** @Logic.Effect.Chat.Init */
@@ -133,7 +134,7 @@ const generateResponse = (
             a.url_citation!.url,
             true,
             a.url_citation!.title,
-            a.url_citation!.content?.slice(0, 200)
+            a.url_citation!.content?.slice(0, LimitConstants.URL_CITATION_MAX_LENGTH)
           ))
 
         /** @Logic.Chat.DeduplicateSources */
@@ -180,7 +181,7 @@ const generateResponse = (
       })
     },
     catch: () => {
-      // Silent failure - usage tracking should not block chat
+      /** @Logic.Chat.SilentFailureUsage */
     }
   }))
 

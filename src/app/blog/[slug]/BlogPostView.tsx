@@ -9,6 +9,7 @@ import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
 import { useI18n } from '@/lib/effect/I18nProvider'
 import { Locales } from '@/lib/effect/services/I18n'
+import DOMPurify from 'isomorphic-dompurify'
 import MarkdownIt from 'markdown-it'
 import type { BlogPost } from '@/lib/effect/services/Blog'
 
@@ -95,7 +96,7 @@ export function BlogPostView({ enPost, esPost }: BlogPostViewProps) {
                   prose-code:bg-white/5 prose-code:px-1.5 prose-code:py-0.5 
                   prose-code:rounded prose-code:before:content-none prose-code:after:content-none
                   prose-pre:bg-white/5 prose-pre:border prose-pre:border-white/10 prose-pre:rounded-2xl"
-                dangerouslySetInnerHTML={{ __html: md.render(post.content) }}
+                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(md.render(post.content)) }}
               />
             </div>
           </div>

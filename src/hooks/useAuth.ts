@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import type { User, Session } from '@/lib/effect/schemas/AuthSchema'
+import { TimeConstants } from '@/lib/constants/app-constants'
 
 interface AuthState {
   user: User | null
@@ -38,7 +39,7 @@ export function useAuth() {
   useEffect(() => {
     fetchSession()
 
-    const checkInterval = setInterval(fetchSession, 5 * 60 * 1000)
+    const checkInterval = setInterval(fetchSession, TimeConstants.SESSION_CHECK_INTERVAL_MS)
     return () => clearInterval(checkInterval)
   }, [fetchSession])
 

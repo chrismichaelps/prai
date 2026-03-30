@@ -7,7 +7,7 @@ import Image from 'next/image'
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
 import { useI18n } from '@/lib/effect/I18nProvider'
-import { GITHUB_REPO_URL } from '@/lib/constants'
+import { ApiConstants } from '@/lib/constants/app-constants'
 import heroImage from '@/assets/condado-ocean-dusk.png'
 
 /** @Route.About */
@@ -101,7 +101,7 @@ export default function AboutPage() {
             </button>
 
             <a 
-              href={GITHUB_REPO_URL}
+              href={ApiConstants.GITHUB_REPO_URL}
               target="_blank" 
               rel="noopener noreferrer"
               className="group flex items-center gap-3 p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all duration-300 backdrop-blur-sm"

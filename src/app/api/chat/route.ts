@@ -10,6 +10,7 @@ import { UsageDefaults } from "@/lib/effect/constants/UsageConstants"
 import { SubscriptionTier, SubscriptionDefaults, TierModelConfig, WebSearchPlugins } from "@/lib/effect/constants/SubscriptionConstants"
 import { getUserUsage } from "../user/usage/services/usage"
 import { ChatDbError } from "../_lib/errors/services"
+import { ApiConstants, CacheControlConstants, TimeConstants, SSEConstants } from "@/lib/constants/app-constants"
 import type { SubscriptionTierType, ReasoningEffortType } from "@/lib/effect/constants/SubscriptionConstants"
 import type { Database } from "@/types/database.types"
 
@@ -142,7 +143,7 @@ export async function POST(req: Request) {
       /** @Logic.Chat.OpenRouterInvocation */
       return Effect.tryPromise({
         try: async () => {
-          const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+          const response = await fetch(ApiConstants.OPENROUTER_CHAT_COMPLETIONS, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -176,7 +177,7 @@ export async function POST(req: Request) {
                   })
                 })
               } catch {
-                // Silent failure
+                /** @Logic.Chat.SilentFailure */
               }
             }
 
@@ -207,9 +208,9 @@ export async function POST(req: Request) {
                     if (buffer.length > 0 && userId) {
                       const lines = buffer.split('\n')
                       for (const line of lines) {
-                        if (line.startsWith('data: ')) {
-                          const data = line.slice(6)
-                          if (data === '[DONE]') continue
+                        if (line.startsWith(SSEConstants.DATA_PREFIX)) {
+                          const data = line.slice(SSEConstants.DATA_PREFIX.length)
+                          if (data === SSEConstants.DONE) continue
                           try {
                             const parsed = JSON.parse(data)
                             if (parsed.usage) {
@@ -223,12 +224,12 @@ export async function POST(req: Request) {
                                 }).catch(() => { })
                               }
                             }
-                          } catch { /* ignore parse errors */ }
+                          } catch { /** @Logic.Chat.IgnoreParseErrors */ }
                         }
                       }
                     }
 
-                    // Fallback: track message after stream completes (for models that don't include usage in stream)
+                    /** @Logic.Chat.UsageTrackingFallback */
                     if (userId) {
                       setTimeout(() => {
                         fetch(`${process.env.NEXT_PUBLIC_SITE_URL || ''}/api/user/usage/increment`, {
@@ -236,7 +237,7 @@ export async function POST(req: Request) {
                           headers: { 'Content-Type': 'application/json' },
                           body: JSON.stringify({ amount: 1, tokens: 0, cost: 0 })
                         }).catch(() => { })
-                      }, 1000)
+                      }, TimeConstants.USAGE_TRACK_DEBOUNCE_MS)
                     }
                     controller.close()
                     break
@@ -259,7 +260,7 @@ export async function POST(req: Request) {
           return new Response(transformStream, {
             headers: {
               'Content-Type': 'text/event-stream',
-              'Cache-Control': 'no-cache',
+              'Cache-Control': CacheControlConstants.NO_CACHE_HEADER,
               'Connection': 'keep-alive',
             },
           })

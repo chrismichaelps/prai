@@ -4,6 +4,7 @@
 
 import React, { useMemo, useState, useCallback, memo } from 'react'
 import { useI18n } from '@/lib/effect/I18nProvider'
+import DOMPurify from 'isomorphic-dompurify'
 import MarkdownIt from 'markdown-it'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
@@ -65,7 +66,8 @@ export const MessageBubble: React.FC<MessageBubbleProps> = memo(({ message, inde
   /** @Logic.UI.Chat.MarkdownRender */
   const htmlContent = useMemo(() => {
     if (isSystem) return { __html: '' }
-    return { __html: md.render(strippedContent) }
+    const html = md.render(strippedContent)
+    return { __html: DOMPurify.sanitize(html) }
   }, [strippedContent, isSystem])
 
   const thoughtUrls = useMemo(() => {

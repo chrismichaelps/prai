@@ -165,7 +165,7 @@ export function withApiSpan<A, E>(
       baseAttrs["request.payload_size"] = String(payloadSize)
       baseAttrs["request.payload_type"] = typeof payload
     } catch {
-      // Ignore serialization errors
+      /** @Lib.Response.IgnoreSerializationErrors */
     }
   }
 

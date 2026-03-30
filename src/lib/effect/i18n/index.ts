@@ -1,5 +1,6 @@
 import { Effect, Layer, Ref } from "effect"
 import { I18n, type Locale } from "../services/I18n"
+import { TimeConstants, AppConstants } from "@/lib/constants/app-constants"
 
 /** @Logic.I18n.Dictionary */
 const dictionary: Record<Locale, Record<string, string>> = {
@@ -835,12 +836,12 @@ const dictionary: Record<Locale, Record<string, string>> = {
 export const I18nLive = Layer.effect(
   I18n,
   Effect.gen(function* () {
-    // Standard Next.js cookie: NEXT_LOCALE
+    /** @Logic.I18n.StandardCookie */
     /** @Logic.I18n.GetLocaleFromCookie */
     const getLocaleFromCookie = () => {
-      if (typeof document === "undefined") return "es"
-      const match = document.cookie.match(/NEXT_LOCALE=([^;]+)/)
-      return (match?.[1] as Locale) || "es"
+      if (typeof document === "undefined") return AppConstants.DEFAULT_LOCALE
+      const match = document.cookie.match(new RegExp(`${AppConstants.LOCALE_COOKIE_NAME}=([^;]+)`))
+      return (match?.[1] as Locale) || AppConstants.DEFAULT_LOCALE
     }
 
     const initialLocale = getLocaleFromCookie()
@@ -863,8 +864,8 @@ export const I18nLive = Layer.effect(
           latestLocale = locale
           yield* Ref.set(currentLocale, locale)
           if (typeof document !== "undefined") {
-            // Set cookie for Next.js i18n compatibility
-            document.cookie = `NEXT_LOCALE=${locale}; path=/; max-age=31536000`
+            /** @Logic.I18n.SetCookie */
+            document.cookie = `${AppConstants.LOCALE_COOKIE_NAME}=${locale}; path=/; max-age=${TimeConstants.LOCALE_COOKIE_MAX_AGE}`
           }
         })
     }
