@@ -2,6 +2,7 @@ import { Effect, pipe } from "effect"
 import { createClient } from "@/lib/supabase/server"
 import { UuidSchema, NonEmptyStringSchema, S } from "@/app/api/_lib/validation/common"
 import { IssueDbError } from "@/app/api/_lib/errors/services"
+import { LimitConstants } from "@/lib/constants/app-constants"
 
 export { IssueDbError }
 export type IssueServiceError = IssueDbError
@@ -395,7 +396,7 @@ export const issueService = {
             .ilike("display_name", `%${q}%`)
             .neq("id", excludeUserId)
             .order("display_name")
-            .limit(10)
+            .limit(LimitConstants.ISSUE_USER_SEARCH_LIMIT)
           if (error) throw new IssueDbError({ error })
           return data ?? []
         },

@@ -2,6 +2,7 @@ import { Effect } from "effect"
 import { SeoError } from "../errors"
 import { ConfigService } from "./Config"
 import type { MetadataRoute } from "next"
+import { AppConstants, SeoConstants, SeoPaths, RobotsConstants } from "@/lib/constants/app-constants"
 
 export interface Seo {
   readonly getSitemapRoutes: Effect.Effect<MetadataRoute.Sitemap, SeoError, ConfigService>
@@ -15,7 +16,7 @@ export class SeoService extends Effect.Service<SeoService>()("Seo", {
 
     const getBaseUrl = Effect.gen(function* () {
       if (process.env.NODE_ENV !== "production") {
-        return "http://localhost:3000"
+        return AppConstants.DEV_URL
       }
       return config.siteUrl
     })
@@ -25,18 +26,18 @@ export class SeoService extends Effect.Service<SeoService>()("Seo", {
         const baseUrl = yield* getBaseUrl
 
         const routes: Array<{ path: string, priority: number, changeFrequency: 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'never' }> = [
-          { path: "", priority: 1.0, changeFrequency: "daily" },
-          { path: "/chat", priority: 0.9, changeFrequency: "daily" },
-          { path: "/blog", priority: 0.8, changeFrequency: "daily" },
-          { path: "/status", priority: 0.8, changeFrequency: "daily" },
-          { path: "/pricing", priority: 0.8, changeFrequency: "weekly" },
-          { path: "/releases", priority: 0.8, changeFrequency: "weekly" },
-          { path: "/about", priority: 0.7, changeFrequency: "weekly" },
-          { path: "/usage", priority: 0.6, changeFrequency: "weekly" },
-          { path: "/issues", priority: 0.6, changeFrequency: "weekly" },
-          { path: "/legal/terms", priority: 0.5, changeFrequency: "monthly" },
-          { path: "/legal/privacy", priority: 0.5, changeFrequency: "monthly" },
-          { path: "/legal/cookies", priority: 0.5, changeFrequency: "monthly" }
+          { path: "", priority: SeoConstants.PRIORITY.HOMEPAGE, changeFrequency: SeoConstants.CHANGE_FREQUENCY.DAILY },
+          { path: "/chat", priority: SeoConstants.PRIORITY.HIGH, changeFrequency: SeoConstants.CHANGE_FREQUENCY.DAILY },
+          { path: "/blog", priority: SeoConstants.PRIORITY.MEDIUM_HIGH, changeFrequency: SeoConstants.CHANGE_FREQUENCY.DAILY },
+          { path: "/status", priority: SeoConstants.PRIORITY.MEDIUM_HIGH, changeFrequency: SeoConstants.CHANGE_FREQUENCY.DAILY },
+          { path: "/pricing", priority: SeoConstants.PRIORITY.MEDIUM_HIGH, changeFrequency: SeoConstants.CHANGE_FREQUENCY.WEEKLY },
+          { path: "/releases", priority: SeoConstants.PRIORITY.MEDIUM_HIGH, changeFrequency: SeoConstants.CHANGE_FREQUENCY.WEEKLY },
+          { path: "/about", priority: SeoConstants.PRIORITY.MEDIUM, changeFrequency: SeoConstants.CHANGE_FREQUENCY.WEEKLY },
+          { path: "/usage", priority: SeoConstants.PRIORITY.MEDIUM_LOW, changeFrequency: SeoConstants.CHANGE_FREQUENCY.WEEKLY },
+          { path: "/issues", priority: SeoConstants.PRIORITY.MEDIUM_LOW, changeFrequency: SeoConstants.CHANGE_FREQUENCY.WEEKLY },
+          { path: "/legal/terms", priority: SeoConstants.PRIORITY.LOW, changeFrequency: SeoConstants.CHANGE_FREQUENCY.MONTHLY },
+          { path: "/legal/privacy", priority: SeoConstants.PRIORITY.LOW, changeFrequency: SeoConstants.CHANGE_FREQUENCY.MONTHLY },
+          { path: "/legal/cookies", priority: SeoConstants.PRIORITY.LOW, changeFrequency: SeoConstants.CHANGE_FREQUENCY.MONTHLY }
         ]
 
         return routes.map((route) => ({
@@ -54,11 +55,11 @@ export class SeoService extends Effect.Service<SeoService>()("Seo", {
 
         return {
           rules: {
-            userAgent: "*",
-            allow: "/",
-            disallow: ["/api/", "/profile/", "/auth/"],
+            userAgent: RobotsConstants.USER_AGENT,
+            allow: RobotsConstants.ALLOW_ROOT,
+            disallow: [RobotsConstants.DISALLOW_API, RobotsConstants.DISALLOW_PROFILE, RobotsConstants.DISALLOW_AUTH],
           },
-          sitemap: `${baseUrl}/sitemap.xml`,
+          sitemap: `${baseUrl}${SeoPaths.SITEMAP}`,
         }
       }).pipe(
         Effect.catchAll((cause) => Effect.fail(new SeoError({ message: "Failed to generate robots config", cause })))

@@ -2,7 +2,8 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getChangelogReleasesSync } from '@/lib/effect/services/Changelog'
 import { HttpStatus } from '@/app/api/_lib/constants/status-codes'
-import { checkRateLimit } from '@/app/api/_lib/utils/rate-limit'
+import { checkRateLimit, getClientIp } from '@/app/api/_lib/utils/rate-limit'
+import { CacheControlConstants, HttpHeaderConstants, ContentTypeConstants, XmlConstants, LocaleConstants } from '@/lib/constants/app-constants'
 
 export const dynamic = 'force-static'
 
@@ -45,13 +46,13 @@ function generateRSSItem(release: { date: string; content: string }): string {
 function generateRSS(releases: Array<{ date: string; content: string }>): string {
   const items = releases.map(generateRSSItem).join('\n')
 
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  return `${XmlConstants.VERSION}
+<rss version="2.0" xmlns:atom="${XmlConstants.RSS_NAMESPACE}" xmlns:content="${XmlConstants.CONTENT_NAMESPACE}">
   <channel>
     <title>${escapeXml(SITE_TITLE)}</title>
     <link>${SITE_URL}/releases</link>
     <description>${escapeXml(SITE_DESCRIPTION)}</description>
-    <language>en-us</language>
+    <language>${LocaleConstants.RSS_LANGUAGE}</language>
     <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
     <atom:link href="${SITE_URL}/releases/feed.xml" rel="self" type="application/rss+xml" />
     <image>
@@ -66,18 +67,16 @@ function generateRSS(releases: Array<{ date: string; content: string }>): string
 
 /** @Route.Feed.RSS */
 export async function GET(request: NextRequest): Promise<NextResponse> {
-  const clientIp = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() 
-    || request.headers.get('x-real-ip') 
-    || 'unknown'
+  const clientIp = getClientIp(request)
   
   const rateLimit = checkRateLimit(clientIp)
   
   if (!rateLimit.allowed) {
-    return new NextResponse('<?xml version="1.0" encoding="UTF-8"?><error>Too many requests</error>', {
+    return new NextResponse(`${XmlConstants.VERSION}<error>Too many requests</error>`, {
       status: HttpStatus.TOO_MANY_REQUESTS,
       headers: {
-        'Content-Type': 'application/rss+xml; charset=utf-8',
-        'Retry-After': String(Math.ceil((rateLimit.resetTime - Date.now()) / 1000))
+        [HttpHeaderConstants.CONTENT_TYPE]: ContentTypeConstants.RSS_XML,
+        [HttpHeaderConstants.RETRY_AFTER]: String(Math.ceil((rateLimit.resetTime - Date.now()) / 1000))
       },
     })
   }
@@ -89,14 +88,14 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     return new NextResponse(rss, {
       status: HttpStatus.OK,
       headers: {
-        'Content-Type': 'application/rss+xml; charset=utf-8',
-        'Cache-Control': 'public, max-age=3600, s-maxage=3600',
-        'X-RateLimit-Remaining': String(rateLimit.remaining),
+        [HttpHeaderConstants.CONTENT_TYPE]: ContentTypeConstants.RSS_XML,
+        [HttpHeaderConstants.CACHE_CONTROL]: CacheControlConstants.STATIC_CACHE,
+        [HttpHeaderConstants.RATE_LIMIT_REMAINING]: String(rateLimit.remaining),
       },
     })
   } catch (error) {
     console.error('[RSSFeed] Error generating RSS feed:', error)
-    return new NextResponse('<?xml version="1.0" encoding="UTF-8"?><error>Failed to generate RSS feed</error>', {
+    return new NextResponse(`${XmlConstants.VERSION}<error>Failed to generate RSS feed</error>`, {
       status: HttpStatus.INTERNAL_SERVER_ERROR,
       headers: {
         'Content-Type': 'application/rss+xml; charset=utf-8',

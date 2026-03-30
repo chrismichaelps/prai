@@ -6,7 +6,7 @@ import { PraiLogo } from '@/components/brand/PraiLogo'
 import { useI18n } from '@/lib/effect/I18nProvider'
 import { useBuildInfo } from '@/lib/effect/hooks/useBuildInfo'
 import { cn } from '@/lib/utils'
-import { GITHUB_REPO_URL } from '@/lib/constants'
+import { ApiConstants } from '@/lib/constants/app-constants'
 import { Locales } from '@/lib/effect/services/I18n'
 
 interface FooterProps {
@@ -137,7 +137,7 @@ export function Footer({ className = "" }: FooterProps) {
             
             <div className="flex gap-6">
               <a 
-                href={GITHUB_REPO_URL}
+                href={ApiConstants.GITHUB_REPO_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={t('a11y.github')}

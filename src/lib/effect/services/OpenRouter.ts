@@ -10,6 +10,8 @@ import type { PuertoRicoSearchOptions, DiscoveryCategory } from "../types/search
 import { Timeframes } from "../types/search"
 import { createSearchContext, createSearchMessage, getDiscoveryQuery } from "./search"
 import type { Personalization } from "../schemas/PersonalizationSchema"
+import { SSEConstants } from "@/lib/constants/app-constants"
+import { HttpStatus } from "@/app/api/_lib/constants/status-codes"
 
 export interface ChatResponse {
   readonly content: string
@@ -82,8 +84,8 @@ export class OpenRouter extends Effect.Service<OpenRouter>()("OpenRouter", {
 
         const res = yield* baseClient.execute(request)
         
-        if (!res.status || res.status >= 400) {
-          const statusCode = res.status || 500
+        if (!res.status || res.status >= HttpStatus.BAD_REQUEST) {
+          const statusCode = res.status || HttpStatus.INTERNAL_SERVER_ERROR
           return yield* Effect.fail(new OpenRouterError({
             message: OpenRouterErrorCodes[statusCode as keyof typeof OpenRouterErrorCodes] || `Error ${statusCode}`,
             code: statusCode
@@ -96,7 +98,7 @@ export class OpenRouter extends Effect.Service<OpenRouter>()("OpenRouter", {
       return Stream.unwrapScoped(responseEffect.pipe(Effect.map(res => res.stream))).pipe(
         Stream.decodeText(),
         Stream.splitLines,
-        Stream.filter((line) => line.startsWith("data: ") && line !== "data: [DONE]"),
+        Stream.filter((line) => line.startsWith(SSEConstants.DATA_PREFIX) && line !== SSEConstants.DATA_DONE),
         Stream.map((line) => line.slice(6)),
         /** @Logic.Chat.ProcessStreamChunk.Simple */
         Stream.filterMap((jsonStr): Option.Option<ChatResponse> => {

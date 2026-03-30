@@ -5,7 +5,7 @@ import { Effect, pipe } from "effect"
 import { HealthCheckError } from "../../_lib/errors/services"
 import { exitResponse } from "../../_lib/response"
 import { checkRateLimit, getClientIp } from "../../_lib/utils/rate-limit"
-import { TimeConstants, ApiConstants } from "@/lib/constants/app-constants"
+import { TimeConstants, ApiConstants, ContentTypeConstants, HttpHeaderConstants } from "@/lib/constants/app-constants"
 
 export const dynamic = 'force-dynamic'
 
@@ -23,8 +23,8 @@ const checkOpenRouter = pipe(
       const response = await fetch(`${baseUrl}/models`, {
         method: "GET",
         headers: {
-          "Authorization": `Bearer ${apiKey}`,
-          "Content-Type": "application/json"
+          [HttpHeaderConstants.AUTHORIZATION]: `Bearer ${apiKey}`,
+          [HttpHeaderConstants.CONTENT_TYPE]: ContentTypeConstants.JSON
         },
         signal: AbortSignal.timeout(TimeConstants.HEALTH_CHECK_TIMEOUT_MS)
       })
@@ -51,8 +51,8 @@ export async function GET(request: NextRequest) {
     }), { 
       status: HttpStatus.TOO_MANY_REQUESTS,
       headers: { 
-        "Content-Type": "application/json",
-        "Retry-After": String(Math.ceil((rateLimit.resetTime - Date.now()) / 1000))
+        [HttpHeaderConstants.CONTENT_TYPE]: ContentTypeConstants.JSON,
+        [HttpHeaderConstants.RETRY_AFTER]: String(Math.ceil((rateLimit.resetTime - Date.now()) / 1000))
       }
     })
   }
@@ -61,9 +61,9 @@ export async function GET(request: NextRequest) {
     (value) => new Response(JSON.stringify(value), { 
       status: HttpStatus.OK,
       headers: { 
-        "Content-Type": "application/json",
-        "X-RateLimit-Remaining": String(rateLimit.remaining),
-        "X-RateLimit-Reset": String(rateLimit.resetTime)
+        [HttpHeaderConstants.CONTENT_TYPE]: ContentTypeConstants.JSON,
+        [HttpHeaderConstants.RATE_LIMIT_REMAINING]: String(rateLimit.remaining),
+        [HttpHeaderConstants.RATE_LIMIT_RESET]: String(rateLimit.resetTime)
       }
     }),
     {

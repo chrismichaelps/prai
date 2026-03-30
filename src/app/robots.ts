@@ -1,6 +1,7 @@
 import { Effect, Layer, ManagedRuntime } from "effect"
 import { ConfigLayer, nextJsConfigProvider } from "@/lib/effect/runtime"
 import { SeoService } from "@/lib/effect/services/Seo"
+import { RobotsConstants, SeoPaths } from "@/lib/constants/app-constants"
 import type { MetadataRoute } from "next"
 
 export default async function robots(): Promise<MetadataRoute.Robots> {
@@ -14,10 +15,10 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
     Effect.flatMap(SeoService, (service) => service.getRobotsConfig)
   ).catch(() => ({
     rules: {
-      userAgent: "*",
-      allow: "/",
-      disallow: ["/api/", "/profile/", "/auth/"],
+      userAgent: RobotsConstants.USER_AGENT,
+      allow: RobotsConstants.ALLOW_ROOT,
+      disallow: [RobotsConstants.DISALLOW_API, RobotsConstants.DISALLOW_PROFILE, RobotsConstants.DISALLOW_AUTH],
     },
-    sitemap: `${process.env.NEXT_PUBLIC_SITE_URL || ""}/sitemap.xml`,
+    sitemap: `${process.env.NEXT_PUBLIC_SITE_URL || ""}${SeoPaths.SITEMAP}`,
   }))
 }

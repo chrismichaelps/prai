@@ -4,12 +4,12 @@ import { updateSession } from '@/lib/supabase/proxy'
 import { AppConstants, TimeConstants } from '@/lib/constants/app-constants'
 
 export async function middleware(request: NextRequest) {
-  // Sync NEXT_LOCALE cookie if missing
-  const hasLocale = request.cookies.has('NEXT_LOCALE')
+  // Sync locale cookie if missing
+  const hasLocale = request.cookies.has(AppConstants.LOCALE_COOKIE_NAME)
   
   if (!hasLocale) {
     const response = NextResponse.next()
-    response.cookies.set('NEXT_LOCALE', AppConstants.DEFAULT_LOCALE, { path: '/', maxAge: TimeConstants.LOCALE_COOKIE_MAX_AGE })
+    response.cookies.set(AppConstants.LOCALE_COOKIE_NAME, AppConstants.DEFAULT_LOCALE, { path: '/', maxAge: TimeConstants.LOCALE_COOKIE_MAX_AGE })
     return response
   }
 

@@ -10,7 +10,7 @@ import { UsageDefaults } from "@/lib/effect/constants/UsageConstants"
 import { SubscriptionTier, SubscriptionDefaults, TierModelConfig, WebSearchPlugins } from "@/lib/effect/constants/SubscriptionConstants"
 import { getUserUsage } from "../user/usage/services/usage"
 import { ChatDbError } from "../_lib/errors/services"
-import { ApiConstants } from "@/lib/constants/app-constants"
+import { ApiConstants, CacheControlConstants, TimeConstants, SSEConstants } from "@/lib/constants/app-constants"
 import type { SubscriptionTierType, ReasoningEffortType } from "@/lib/effect/constants/SubscriptionConstants"
 import type { Database } from "@/types/database.types"
 
@@ -208,9 +208,9 @@ export async function POST(req: Request) {
                     if (buffer.length > 0 && userId) {
                       const lines = buffer.split('\n')
                       for (const line of lines) {
-                        if (line.startsWith('data: ')) {
-                          const data = line.slice(6)
-                          if (data === '[DONE]') continue
+                        if (line.startsWith(SSEConstants.DATA_PREFIX)) {
+                          const data = line.slice(SSEConstants.DATA_PREFIX.length)
+                          if (data === SSEConstants.DONE) continue
                           try {
                             const parsed = JSON.parse(data)
                             if (parsed.usage) {
@@ -237,7 +237,7 @@ export async function POST(req: Request) {
                           headers: { 'Content-Type': 'application/json' },
                           body: JSON.stringify({ amount: 1, tokens: 0, cost: 0 })
                         }).catch(() => { })
-                      }, 1000)
+                      }, TimeConstants.USAGE_TRACK_DEBOUNCE_MS)
                     }
                     controller.close()
                     break
@@ -260,7 +260,7 @@ export async function POST(req: Request) {
           return new Response(transformStream, {
             headers: {
               'Content-Type': 'text/event-stream',
-              'Cache-Control': 'no-cache',
+              'Cache-Control': CacheControlConstants.NO_CACHE_HEADER,
               'Connection': 'keep-alive',
             },
           })

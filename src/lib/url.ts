@@ -1,4 +1,5 @@
 import type { SearchResult } from "@/types/chat"
+import { ApiConstants } from "@/lib/constants/app-constants"
 
 const URL_RE = /(https?:\/\/[^\s<>"]+(?:\([^)\s]*\))*)/g
 const TRAILING_PUNCT_RE = /[.,;:?!'"`]+$/
@@ -43,7 +44,7 @@ export const toSource = (
       source: domain, 
       verified,
       snippet,
-      icon: `https://www.google.com/s2/favicons?domain=${domain}&sz=32`
+      icon: `${ApiConstants.GOOGLE_S2_FAVICONS_URL}?domain=${domain}&sz=${ApiConstants.FAVICON_SIZE}`
     }
   } catch {
     return { title: title || url, url, verified, snippet }
