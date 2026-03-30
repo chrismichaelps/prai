@@ -23,6 +23,7 @@ import { useRouter, usePathname } from 'next/navigation'
 /** @Module.Hook.Usage */
 import { useUsage } from '@/hooks/useUsage'
 import { usePersonalization } from '@/hooks/usePersonalization'
+import { useHaptics } from '@/hooks/useHaptics'
 import type { UserUsage } from '@/hooks/useUsage'
 
 /** @UI.Chat.AdaptiveCard.Lazy */
@@ -71,10 +72,7 @@ export const Chat = {
     <div
       ref={scrollAreaRef as React.RefObject<HTMLDivElement>}
       onScroll={onScroll}
-      className={cn(
-        'flex-1 overflow-y-auto relative z-20',
-        className,
-      )}
+      className={cn('flex-1 overflow-y-auto relative z-20', className)}
       style={{ scrollbarGutter: 'stable', overscrollBehaviorY: 'contain' }}
       role="log"
       aria-live="polite"
@@ -108,6 +106,7 @@ export const Chat = {
     usage,
     isUsageVisible,
     onToggleUsage,
+    haptics,
   }: {
     value: string
     onChange: (val: string) => void
@@ -126,11 +125,15 @@ export const Chat = {
     usage: UserUsage | null
     isUsageVisible: boolean
     onToggleUsage: () => void
+    haptics?: { light: () => void; medium: () => void }
   }) => (
     <footer className="w-full h-fit flex flex-col items-center z-30 pointer-events-none pb-12 px-6">
       {showScrollButton && (
         <button
-          onClick={onScrollToBottom}
+          onClick={() => {
+            haptics?.light()
+            onScrollToBottom()
+          }}
           aria-label={t('a11y.scroll_bottom')}
           className="pointer-events-auto mb-10 bg-white/5 border border-white/10 w-10 h-10 rounded-full flex items-center justify-center shadow-2xl hover:bg-white/10 transition-all group active:scale-95"
         >
@@ -145,7 +148,10 @@ export const Chat = {
             {suggestions.map((suggestion, idx) => (
               <button
                 key={suggestion.label + idx}
-                onClick={() => onSend(suggestion.action || suggestion.label)}
+                onClick={() => {
+                  haptics?.light()
+                  onSend(suggestion.action || suggestion.label)
+                }}
                 className="px-5 py-2.5 rounded-2xl bg-[#1a1a1a] border border-white/[0.08] text-xs font-bold text-white/40 hover:bg-white/5 hover:text-white transition-all shadow-xl flex items-center gap-3 group"
               >
                 <span>{suggestion.label}</span>
@@ -157,7 +163,7 @@ export const Chat = {
 
         {/* @UI.Chat.Usage.Pill */}
         {isAuthenticated && usage && isUsageVisible && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
@@ -166,15 +172,17 @@ export const Chat = {
             <div className="bg-[#1a1a1a] border border-white/[0.08] rounded-t-[1.5rem] border-b-0 px-6 py-3 flex items-center justify-between shadow-2xl">
               <div className="flex items-center gap-2 text-[13px] text-white/40 overflow-hidden">
                 <span className="font-bold text-white shrink-0">
-                  {usage.messages_remaining} {t('usage.remaining_label').toLowerCase()} {t('usage.messages').toLowerCase()}.
+                  {usage.messages_remaining}{' '}
+                  {t('usage.remaining_label').toLowerCase()}{' '}
+                  {t('usage.messages').toLowerCase()}.
                 </span>
                 <span className="truncate opacity-60 hidden sm:inline">
                   {t('usage.daily_reset_notice')}
                 </span>
               </div>
-              
-                <div className="flex items-center gap-4 shrink-0">
-                <button 
+
+              <div className="flex items-center gap-4 shrink-0">
+                <button
                   onClick={onToggleUsage}
                   aria-label={t('a11y.close_usage')}
                   className="text-white/20 hover:text-white/60 transition-colors p-1"
@@ -187,11 +195,15 @@ export const Chat = {
         )}
 
         {/* @UI.Chat.Input.Box */}
-        <div className={cn(
-          "w-full bg-[#1a1a1a] shadow-2xl pointer-events-auto flex flex-col border border-white/[0.08] hover:border-white/[0.12] transition-all duration-300 group overflow-hidden",
-          isAuthenticated && usage && isUsageVisible ? "rounded-b-[1.5rem]" : "rounded-[1.5rem]",
-          isAtLimit && "opacity-50"
-        )}>
+        <div
+          className={cn(
+            'w-full bg-[#1a1a1a] shadow-2xl pointer-events-auto flex flex-col border border-white/[0.08] hover:border-white/[0.12] transition-all duration-300 group overflow-hidden',
+            isAuthenticated && usage && isUsageVisible
+              ? 'rounded-b-[1.5rem]'
+              : 'rounded-[1.5rem]',
+            isAtLimit && 'opacity-50',
+          )}
+        >
           <div className="flex-1 flex flex-col px-1.5 max-h-[400px]">
             {/** @UI.Chat.Input.Textarea */}
             <textarea
@@ -207,22 +219,32 @@ export const Chat = {
               rows={1}
               disabled={isAtLimit}
               className={cn(
-                "flex-1 bg-transparent border-none focus:ring-0 focus:outline-none text-[17px] font-normal py-5 px-5 text-white placeholder:text-white/20 resize-none font-sans leading-relaxed transition-[height] duration-200 overflow-hidden",
-                isAtLimit && "opacity-50 cursor-not-allowed"
+                'flex-1 bg-transparent border-none focus:ring-0 focus:outline-none text-[17px] font-normal py-5 px-5 text-white placeholder:text-white/20 resize-none font-sans leading-relaxed transition-[height] duration-200 overflow-hidden',
+                isAtLimit && 'opacity-50 cursor-not-allowed',
               )}
-              placeholder={isAtLimit ? (t('usage.limit_reached') || 'Límite alcanzado') : t('chat.placeholder')}
+              placeholder={
+                isAtLimit
+                  ? t('usage.limit_reached') || 'Límite alcanzado'
+                  : t('chat.placeholder')
+              }
               style={{ height: 'auto', outline: 'none', boxShadow: 'none' }}
             />
           </div>
 
           {/* @UI.Chat.Actions */}
           <div className="flex items-center justify-end px-3 pb-3">
-
             <div className="flex items-center gap-2">
               {/** @UI.Chat.Action.Mic */}
               <button
-                onClick={onMicClick}
-                aria-label={isRecording ? t('a11y.stop_recording') : t('a11y.start_recording')}
+                onClick={() => {
+                  haptics?.light()
+                  onMicClick()
+                }}
+                aria-label={
+                  isRecording
+                    ? t('a11y.stop_recording')
+                    : t('a11y.start_recording')
+                }
                 className={cn(
                   'w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90 relative',
                   isRecording
@@ -239,9 +261,18 @@ export const Chat = {
               </button>
               {/** @UI.Chat.Action.Send */}
               <button
-                onClick={isLoading ? stopResponse : () => onSend()}
+                onClick={() => {
+                  haptics?.medium()
+                  if (isLoading) {
+                    stopResponse()
+                  } else {
+                    onSend()
+                  }
+                }}
                 disabled={(!isLoading && !value.trim()) || isAtLimit}
-                aria-label={isLoading ? t('a11y.stop_response') : t('a11y.send_message')}
+                aria-label={
+                  isLoading ? t('a11y.stop_response') : t('a11y.send_message')
+                }
                 className={cn(
                   'w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 shadow-xl relative overflow-hidden group shrink-0',
                   (!isLoading && !value.trim()) || isAtLimit
@@ -268,18 +299,19 @@ export const Chat = {
 
 /** @UI.Chat.Container.Main */
 export const ChatContainer: React.FC = () => {
-  const { messages, isLoading, error, activeAdaptiveData, currentChatId } = useAppSelector(
-    (state) => state.chat,
-  )
+  const { messages, isLoading, error, activeAdaptiveData, currentChatId } =
+    useAppSelector((state) => state.chat)
   /** @UI.Hooks.ChatActions */
   const dispatch = useAppDispatch()
   const { user } = useAuth()
   const router = useRouter()
   const pathname = usePathname()
-  const { sendMessage, stopResponse, editMessage, startVoice, stopVoice } = useChatActions()
+  const { sendMessage, stopResponse, editMessage, startVoice, stopVoice } =
+    useChatActions()
   const { t } = useI18n()
   const { usage, isAtLimit, setUsage } = useUsage()
   const { personalization } = usePersonalization()
+  const haptics = useHaptics()
   const [isUsageVisible, setIsUsageVisible] = useState(true)
   const [userInput, setUserInput] = useState('')
   const [isRecording, setIsRecording] = useState(false)
@@ -296,10 +328,13 @@ export const ChatContainer: React.FC = () => {
       const res = await fetch('/api/chat/chats', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user.id, title: t('chat.new_chat') || 'New Chat' })
+        body: JSON.stringify({
+          userId: user.id,
+          title: t('chat.new_chat') || 'New Chat',
+        }),
       })
       const data = await res.json()
-      
+
       if (!res.ok) throw new Error(data.error)
       dispatch(addChat(data))
       dispatch(setCurrentChat(data.id))
@@ -420,25 +455,41 @@ export const ChatContainer: React.FC = () => {
       const content = text || userInput
       if (!content.trim() || isAtLimit) return
 
+      haptics.medium()
       // Optimistic usage update
       if (usage && usage.messages_remaining > 0) {
         setUsage({
           ...usage,
           messages_used: usage.messages_used + 1,
           messages_remaining: usage.messages_remaining - 1,
-          usage_percentage: Math.min(((usage.messages_used + 1) / usage.messages_limit) * 100, 100),
-          can_send: (usage.messages_remaining - 1) > 0
+          usage_percentage: Math.min(
+            ((usage.messages_used + 1) / usage.messages_limit) * 100,
+            100,
+          ),
+          can_send: usage.messages_remaining - 1 > 0,
         })
       }
 
       setUserInput('')
       setIsLockedToBottom(true)
-      
+
       await ensureChatExists()
       await sendMessage(content, personalization)
       scrollToBottom('smooth')
     },
-    [isRecording, userInput, isAtLimit, usage, setUsage, ensureChatExists, sendMessage, scrollToBottom, handleMicClick, personalization]
+    [
+      isRecording,
+      userInput,
+      isAtLimit,
+      usage,
+      setUsage,
+      ensureChatExists,
+      sendMessage,
+      scrollToBottom,
+      handleMicClick,
+      personalization,
+      haptics,
+    ],
   )
 
   return (
@@ -454,11 +505,13 @@ export const ChatContainer: React.FC = () => {
         )}
 
         {messages.map((msg, index) => (
-          <MemoizedMessageBubble 
-            key={index} 
-            message={msg} 
+          <MemoizedMessageBubble
+            key={index}
+            message={msg}
             index={index}
-            onEdit={(idx, content) => editMessage(idx, content, personalization)}
+            onEdit={(idx, content) =>
+              editMessage(idx, content, personalization)
+            }
             onStop={stopResponse}
           />
         ))}
@@ -523,6 +576,7 @@ export const ChatContainer: React.FC = () => {
         usage={usage}
         isUsageVisible={isUsageVisible}
         onToggleUsage={() => setIsUsageVisible(false)}
+        haptics={haptics}
       />
       <SourcesSidebar />
     </Chat.Root>
