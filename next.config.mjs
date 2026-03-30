@@ -4,7 +4,7 @@ import createMDX from '@next/mdx'
 const nextConfig = {
   productionBrowserSourceMaps: false,
   async headers() {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+    const supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL || '').trim()
     const supabaseWsUrl = supabaseUrl.replace('https://', 'wss://')
 
     return [
