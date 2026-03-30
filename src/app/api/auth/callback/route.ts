@@ -114,11 +114,11 @@ export async function GET(request: NextRequest) {
       || user.email?.split('@')[0] 
       || 'user'
     
-    // Generate unique handle from display name (slugified) + first 4 chars of user id
+    /** @Logic.Auth.GenerateUniqueHandle */
     const slugified = displayName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
     const handle = slugified ? `${slugified}-${user.id.substring(0, 4)}` : `user-${user.id.substring(0, 4)}`
     
-    // Use service role client to bypass RLS for profile creation
+    /** @Logic.Auth.BypassRLS */
     const supabaseAdmin = createServiceClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!

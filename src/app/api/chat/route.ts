@@ -177,7 +177,7 @@ export async function POST(req: Request) {
                   })
                 })
               } catch {
-                // Silent failure
+                /** @Logic.Chat.SilentFailure */
               }
             }
 
@@ -224,12 +224,12 @@ export async function POST(req: Request) {
                                 }).catch(() => { })
                               }
                             }
-                          } catch { /* ignore parse errors */ }
+                          } catch { /** @Logic.Chat.IgnoreParseErrors */ }
                         }
                       }
                     }
 
-                    // Fallback: track message after stream completes (for models that don't include usage in stream)
+                    /** @Logic.Chat.UsageTrackingFallback */
                     if (userId) {
                       setTimeout(() => {
                         fetch(`${process.env.NEXT_PUBLIC_SITE_URL || ''}/api/user/usage/increment`, {

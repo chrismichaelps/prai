@@ -7,8 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  /** @Type.Database.SupabaseOptions */
   __InternalSupabase: {
     PostgrestVersion: "14.4"
   }

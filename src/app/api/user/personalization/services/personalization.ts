@@ -20,7 +20,7 @@ export const getPersonalization = (userId: string): Effect.Effect<Personalizatio
           .single()
 
         if (error) {
-          // If no profile yet, return default
+          /** @Logic.Personalization.DefaultProfile */
           return DEFAULT_PERSONALIZATION
         }
 

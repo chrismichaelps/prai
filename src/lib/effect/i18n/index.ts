@@ -836,7 +836,7 @@ const dictionary: Record<Locale, Record<string, string>> = {
 export const I18nLive = Layer.effect(
   I18n,
   Effect.gen(function* () {
-    // Standard Next.js cookie
+    /** @Logic.I18n.StandardCookie */
     /** @Logic.I18n.GetLocaleFromCookie */
     const getLocaleFromCookie = () => {
       if (typeof document === "undefined") return AppConstants.DEFAULT_LOCALE
@@ -864,7 +864,7 @@ export const I18nLive = Layer.effect(
           latestLocale = locale
           yield* Ref.set(currentLocale, locale)
           if (typeof document !== "undefined") {
-            // Set cookie for Next.js i18n compatibility
+            /** @Logic.I18n.SetCookie */
             document.cookie = `${AppConstants.LOCALE_COOKIE_NAME}=${locale}; path=/; max-age=${TimeConstants.LOCALE_COOKIE_MAX_AGE}`
           }
         })

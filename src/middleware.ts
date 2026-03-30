@@ -4,7 +4,7 @@ import { updateSession } from '@/lib/supabase/proxy'
 import { AppConstants, TimeConstants } from '@/lib/constants/app-constants'
 
 export async function middleware(request: NextRequest) {
-  // Sync locale cookie if missing
+  /** @Middleware.SyncLocaleCookie */
   const hasLocale = request.cookies.has(AppConstants.LOCALE_COOKIE_NAME)
   
   if (!hasLocale) {
@@ -13,7 +13,7 @@ export async function middleware(request: NextRequest) {
     return response
   }
 
-  // Update session and refresh cookies
+  /** @Middleware.RefreshSession */
   const supabaseResponse = await updateSession(request)
 
   return supabaseResponse

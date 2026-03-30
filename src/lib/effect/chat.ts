@@ -181,7 +181,7 @@ const generateResponse = (
       })
     },
     catch: () => {
-      // Silent failure - usage tracking should not block chat
+      /** @Logic.Chat.SilentFailureUsage */
     }
   }))
 

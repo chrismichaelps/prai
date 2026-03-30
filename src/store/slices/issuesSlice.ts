@@ -212,7 +212,8 @@ export const issuesSlice = createSlice({
     /** @Logic.Issues.Action.SetFilter */
     setFilter: (state, action: PayloadAction<IssueFilter>) => {
       state.filter = action.payload;
-      state.page = 1; // reset to page 1 on filter change
+      /** @Logic.Issues.ResetPageOnFilter */
+      state.page = 1;
     },
     /** @Logic.Issues.Action.SetPage */
     setPage: (state, action: PayloadAction<number>) => {

@@ -96,7 +96,7 @@ export const issueService = {
 
           if (error) throw new IssueDbError({ error })
 
-          // mention notification dispatch for issue body
+          /** @Logic.Issues.MentionDispatchBody */
           if (data?.id && body) {
             Effect.runFork(
               issueService.dispatchMentionNotifications(
@@ -213,7 +213,7 @@ export const issueService = {
             .single()
           if (error) throw new IssueDbError({ error })
 
-          // mention notification dispatch never blocks the HTTP response
+          /** @Logic.Issues.MentionDispatchNonBlocking */
           if (data?.id) {
             Effect.runFork(
               issueService.dispatchMentionNotifications(

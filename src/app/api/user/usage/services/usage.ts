@@ -54,7 +54,7 @@ export const incrementUserUsage = (
       try: async () => {
         const supabase = await createClient()
         
-        // Increment message count
+        /** @Logic.Usage.IncrementMessageCount */
         const { data, error } = await supabase.rpc("increment_user_usage", {
           p_user_id: userId,
           p_amount: amount
@@ -64,7 +64,7 @@ export const incrementUserUsage = (
           throw new ChatDbError({ error })
         }
 
-        // Track token usage if provided
+        /** @Logic.Usage.TrackTokenUsage */
         if (tokens > 0) {
           await supabase.rpc("increment_token_usage", {
             p_user_id: userId,
