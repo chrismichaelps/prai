@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-03-30
+
+- Added haptic feedback for mobile interactions using web-haptics library (#107)
+- Added useHaptics hook for triggering haptics on user interactions
+- Added haptics to chat: send button, suggestions, mic button, scroll to bottom
+- Added haptics to sidebar: new chat creation and chat selection
+- Refactored all code comments to standardized JSDoc format (`/** @Logic.* */`, `/** @Route.* */`)
+- Extracted magic values into centralized `app-constants.ts` with timeouts, limits, API URLs, routes, SEO config
+- Added SSE constants for stream processing
+- Added XML/RSS constants for feed generation
+- Added SEO constants for sitemap and robots.txt
+- Added pagination constants for API limits
+
 ## 2026-03-28 (Continued)
 
 - Fixed duplicate API calls caused by React Strict Mode in development using refs (`fetchedRef`, `chatsCountFetched`)
@@ -12,6 +25,13 @@
 - Added missing i18n translations for issues
 - Added WCAG 2.2 AA accessibility improvements
 - Added skip link and LCP optimizations
+- Added XSS protection with DOMPurify and CSP headers (#106)
+- Fixed session check before realtime subscription
+- Added supabase health endpoint
+- Fixed wait for auth init before realtime subscription
+- Fixed issues navigation item color to white for consistency
+- Updated build hash typography and styling in header and footer
+- Added blog post imagery to public assets directory
 
 ## 2026-03-28
 
