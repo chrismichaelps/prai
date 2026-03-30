@@ -5,6 +5,7 @@ import { Effect, pipe } from "effect"
 import { HealthCheckError } from "../../_lib/errors/services"
 import { exitResponse } from "../../_lib/response"
 import { checkRateLimit, getClientIp } from "../../_lib/utils/rate-limit"
+import { TimeConstants, ApiConstants } from "@/lib/constants/app-constants"
 
 export const dynamic = 'force-dynamic'
 
@@ -13,7 +14,7 @@ const checkOpenRouter = pipe(
   Effect.tryPromise({
     try: async () => {
       const apiKey = process.env.OPENROUTER_API_KEY
-      const baseUrl = process.env.NEXT_PUBLIC_OPENROUTER_BASE_URL || "https://openrouter.ai/api/v1"
+      const baseUrl = process.env.NEXT_PUBLIC_OPENROUTER_BASE_URL || ApiConstants.OPENROUTER_BASE_URL
 
       if (!apiKey) {
         throw new Error("Missing OpenRouter API key")
@@ -25,7 +26,7 @@ const checkOpenRouter = pipe(
           "Authorization": `Bearer ${apiKey}`,
           "Content-Type": "application/json"
         },
-        signal: AbortSignal.timeout(5000)
+        signal: AbortSignal.timeout(TimeConstants.HEALTH_CHECK_TIMEOUT_MS)
       })
 
       if (!response.ok) {

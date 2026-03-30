@@ -10,6 +10,7 @@ import { UsageDefaults } from "@/lib/effect/constants/UsageConstants"
 import { SubscriptionTier, SubscriptionDefaults, TierModelConfig, WebSearchPlugins } from "@/lib/effect/constants/SubscriptionConstants"
 import { getUserUsage } from "../user/usage/services/usage"
 import { ChatDbError } from "../_lib/errors/services"
+import { ApiConstants } from "@/lib/constants/app-constants"
 import type { SubscriptionTierType, ReasoningEffortType } from "@/lib/effect/constants/SubscriptionConstants"
 import type { Database } from "@/types/database.types"
 
@@ -142,7 +143,7 @@ export async function POST(req: Request) {
       /** @Logic.Chat.OpenRouterInvocation */
       return Effect.tryPromise({
         try: async () => {
-          const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+          const response = await fetch(ApiConstants.OPENROUTER_CHAT_COMPLETIONS, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { updateSession } from '@/lib/supabase/proxy'
+import { AppConstants, TimeConstants } from '@/lib/constants/app-constants'
 
 export async function middleware(request: NextRequest) {
   // Sync NEXT_LOCALE cookie if missing
@@ -8,7 +9,7 @@ export async function middleware(request: NextRequest) {
   
   if (!hasLocale) {
     const response = NextResponse.next()
-    response.cookies.set('NEXT_LOCALE', 'es', { path: '/', maxAge: 31536000 })
+    response.cookies.set('NEXT_LOCALE', AppConstants.DEFAULT_LOCALE, { path: '/', maxAge: TimeConstants.LOCALE_COOKIE_MAX_AGE })
     return response
   }
 

@@ -3,6 +3,7 @@ import { Effect, pipe } from "effect"
 import { createClient } from "@/lib/supabase/server"
 import { ChatDbError } from "@/app/api/_lib/errors/services"
 import { UsageDefaults } from "@/lib/effect/constants/UsageConstants"
+import { TimeConstants } from "@/lib/constants/app-constants"
 import type { Database } from "@/types/database.types"
 
 type UserUsage = Database["public"]["Functions"]["get_user_usage"]["Returns"][number]
@@ -31,7 +32,7 @@ export const getUserUsage = (userId: string): Effect.Effect<UserUsage, UsageServ
         const usage = { ...data[0] } as UserUsage & { next_reset_date?: string }
         if (usage.last_reset_date) {
           const lastReset = new Date(usage.last_reset_date)
-          const nextReset = new Date(lastReset.getTime() + 24 * 60 * 60 * 1000)
+          const nextReset = new Date(lastReset.getTime() + TimeConstants.USAGE_RESET_INTERVAL_MS)
           usage.next_reset_date = nextReset.toISOString()
         }
         return usage

@@ -5,6 +5,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 import { useAuth } from '@/contexts/AuthContext'
+import { LimitConstants } from '@/lib/constants/app-constants'
 
 export interface Notification {
   id: string
@@ -35,7 +36,7 @@ export function useNotifications() {
     if (!res.ok) return
     const data: { notifications: Notification[] } = await res.json()
     setNotifications(data.notifications)
-    if (data.notifications.length < 20) {
+    if (data.notifications.length < LimitConstants.NOTIFICATION_FETCH_LIMIT) {
       setUnreadCount(data.notifications.filter((n) => !n.is_read).length)
     } else {
       const countRes = await fetch('/api/notifications/count')
