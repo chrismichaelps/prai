@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest"
+import { Effect, Exit } from "effect"
 import {
   shouldShowSuggestion,
   shouldFilterSuggestion,
@@ -360,31 +361,38 @@ describe("Suggestion service", () => {
   })
 
   describe("processSuggestionResponse", () => {
+    /** @Helper.Test.Suggestion.RunSync */
+    const runSync = (input: string) =>
+      Exit.match(Effect.runSyncExit(processSuggestionResponse(input)), {
+        onSuccess: (r) => r,
+        onFailure: () => ({ suggestion: "", confidence: 0 }),
+      })
+
     it("should return filtered result for empty input", () => {
-      const result = processSuggestionResponse("")
+      const result = runSync("")
       expect(result.suggestion).toBe("")
       expect(result.confidence).toBe(0)
     })
 
     it("should return filtered result for whitespace only", () => {
-      const result = processSuggestionResponse("   ")
+      const result = runSync("   ")
       expect(result.suggestion).toBe("")
       expect(result.confidence).toBe(0)
     })
 
     it("should return result with confidence for valid suggestion", () => {
-      const result = processSuggestionResponse("Cuáles son las mejores playas?")
+      const result = runSync("Cuáles son las mejores playas?")
       expect(result.suggestion).toBe("Cuáles son las mejores playas?")
       expect(result.confidence).toBe(SUGGESTION_CONFIG.CONFIDENCE_THRESHOLD)
     })
 
     it("should trim suggestion before filtering", () => {
-      const result = processSuggestionResponse(" playitas del mar  ")
+      const result = runSync(" playitas del mar  ")
       expect(result.suggestion).toBe("playitas del mar")
     })
 
     it("should return empty for filtered suggestion", () => {
-      const result = processSuggestionResponse("gracias")
+      const result = runSync("gracias")
       expect(result.suggestion).toBe("")
       expect(result.confidence).toBe(0)
     })
@@ -401,7 +409,9 @@ describe("Suggestion service", () => {
     })
   })
 
+  /** @Test.Suggestion.EdgeCases */
   describe("Edge cases and bug prevention", () => {
+    /** @Test.Suggestion.ShouldShow.EdgeCases */
     describe("shouldShowSuggestion edge cases", () => {
       it("should handle only one assistant message", () => {
         const messages = [
@@ -459,6 +469,7 @@ describe("Suggestion service", () => {
       })
     })
 
+    /** @Test.Suggestion.ShouldFilter.EdgeCases */
     describe("shouldFilterSuggestion edge cases", () => {
       it("should handle whitespace-only string", () => {
         const result = shouldFilterSuggestion("   ")
@@ -585,6 +596,7 @@ describe("Suggestion service", () => {
       })
     })
 
+    /** @Test.Suggestion.BuildPrompt.EdgeCases */
     describe("buildSuggestionPrompt edge cases", () => {
       it("should handle messages with only system role", () => {
         const messages = [
@@ -620,6 +632,7 @@ describe("Suggestion service", () => {
       })
     })
 
+    /** @Test.Suggestion.Config.Constants */
     describe("SUGGESTION_CONFIG constants", () => {
       it("MIN_ASSISTANT_MESSAGES should be 2", () => {
         expect(SUGGESTION_CONFIG.MIN_ASSISTANT_MESSAGES).toBe(2)

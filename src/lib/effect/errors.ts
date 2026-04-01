@@ -59,3 +59,18 @@ export class ChangelogError extends Data.TaggedError("ChangelogError")<{
   readonly message: string
   readonly cause?: unknown
 }> {}
+
+/** @Error.Effect.Tool */
+export class ToolError extends Data.TaggedError("ToolError")<{
+  readonly toolName: string
+  readonly message: string
+  readonly cause?: unknown
+}> {}
+
+/** @Error.Effect.Suggestion */
+export class SuggestionError extends Data.TaggedError("SuggestionError")<{
+  readonly message: string
+  readonly reason: "generation" | "filter" | "rate_limit" | "unmounted" | "aborted"
+  readonly filterReason?: string
+  readonly cause?: unknown
+}> {}

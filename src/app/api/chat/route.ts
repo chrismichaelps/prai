@@ -10,9 +10,10 @@ import { UsageDefaults } from "@/lib/effect/constants/UsageConstants"
 import { SubscriptionTier, SubscriptionDefaults, TierModelConfig, WebSearchPlugins } from "@/lib/effect/constants/SubscriptionConstants"
 import { getUserUsage } from "../user/usage/services/usage"
 import { ChatDbError } from "../_lib/errors/services"
-import { ApiConstants, CacheControlConstants, TimeConstants, SSEConstants } from "@/lib/constants/app-constants"
+import { ApiConstants, CacheControlConstants, SSEConstants } from "@/lib/constants/app-constants"
 import type { SubscriptionTierType, ReasoningEffortType } from "@/lib/effect/constants/SubscriptionConstants"
 import type { Database } from "@/types/database.types"
+import { toolsToOpenRouter, executeTool, validateToolInput, isReadOnlyTool } from "@/lib/effect/services/tools"
 
 type UserUsage = Database["public"]["Functions"]["get_user_usage"]["Returns"][number]
 
@@ -105,6 +106,313 @@ export async function POST(req: Request) {
 
   /** @Logic.Chat.StreamProgram */
   const { searchParams } = new URL(req.url)
+
+  const _buildRequestBody = (messages: { role: string; content: string; name?: string; tool_calls?: unknown[] }[]) => ({
+    model: getModelConfig(auth.tier).default,
+    messages,
+    stream: false,
+    user: auth.userId || undefined,
+    reasoning: {
+      effort: getModelConfig(auth.tier).reasoning.reasoningEffort
+    },
+    tools: toolsToOpenRouter(),
+    ...(auth.tier === SubscriptionTier.Pro ? { plugins: WebSearchPlugins } : {})
+  })
+
+/** @Logic.Chat.ToolCalling.AgenticLoop */
+const AGENTIC_TIMEOUT_MS = 60000
+const MAX_TOOL_ITERATIONS = 5
+const TOOL_EXECUTION_TIMEOUT_MS = 30000
+
+/** @Logic.Chat.RunStreamingAgenticLoop */
+async function runStreamingAgenticLoop(
+  initialMessages: { role: string; content: string; name?: string; tool_calls?: unknown[] }[],
+  userId: string,
+  tier: SubscriptionTierType,
+  onChunk: (chunk: string) => void
+): Promise<{ success: boolean; error?: string }> {
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), AGENTIC_TIMEOUT_MS)
+
+  const buildRequestBody = (msgs: typeof initialMessages) => ({
+    model: getModelConfig(tier).default,
+    messages: msgs,
+    stream: true,
+    user: userId || undefined,
+    reasoning: { effort: getModelConfig(tier).reasoning.reasoningEffort },
+    tools: toolsToOpenRouter(),
+    ...(tier === SubscriptionTier.Pro ? { plugins: WebSearchPlugins } : {})
+  })
+
+  try {
+    let messages = [...initialMessages]
+
+    for (let i = 0; i < MAX_TOOL_ITERATIONS; i++) {
+      console.log(`[StreamToolLoop] Iteration ${i + 1}/${MAX_TOOL_ITERATIONS}`)
+
+      const response = await fetch(ApiConstants.OPENROUTER_CHAT_COMPLETIONS, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+          'HTTP-Referer': process.env.NEXT_PUBLIC_SITE_URL || '',
+          'X-Title': 'PR\\AI Assistant',
+        },
+        body: JSON.stringify(buildRequestBody(messages)),
+        signal: controller.signal
+      })
+
+      if (!response.ok) {
+        return { success: false, error: `OpenRouter error: ${response.status}` }
+      }
+
+      const streamBody = response.body
+      if (!streamBody) {
+        return { success: false, error: "No stream body" }
+      }
+
+      const decoder = new TextDecoder()
+      const reader = streamBody.getReader()
+      let buffer = ''
+      let toolCallsBuffer: unknown[] = []
+      let hasToolCalls = false
+
+      while (true) {
+        const { done, value } = await reader.read()
+
+        if (done) {
+          if (buffer.length > 0) {
+            onChunk(buffer)
+          }
+          break
+        }
+
+        buffer += decoder.decode(value, { stream: true })
+        const lines = buffer.split('\n')
+        buffer = lines.pop() || ''
+
+        for (const line of lines) {
+          if (!line.startsWith(SSEConstants.DATA_PREFIX)) {
+            onChunk(line + '\n')
+            continue
+          }
+
+          const data = line.slice(SSEConstants.DATA_PREFIX.length)
+          if (data === SSEConstants.DONE) continue
+
+          try {
+            const parsed = JSON.parse(data)
+            const delta = parsed.choices?.[0]?.delta
+
+            if (delta?.tool_calls) {
+              hasToolCalls = true
+              toolCallsBuffer.push(...delta.tool_calls)
+            }
+
+            if (delta?.content) {
+              onChunk(line + '\n')
+            }
+          } catch {
+            onChunk(line + '\n')
+          }
+        }
+      }
+
+      if (!hasToolCalls || toolCallsBuffer.length === 0) {
+        clearTimeout(timeoutId)
+        return { success: true }
+      }
+
+      console.log(`[StreamToolLoop] Executing ${toolCallsBuffer.length} tool(s)`)
+
+      const toolMessages: { role: string; tool_call_id: string; name: string; content: string }[] = []
+
+      for (const tc of toolCallsBuffer) {
+        const { id, function: fn } = tc as { id: string; function: { name: string; arguments: string } }
+        const toolName = fn.name
+        const args = JSON.parse(fn.arguments)
+
+        const validation = validateToolInput(toolName, args)
+        let toolResult: string
+
+        if (!validation.success) {
+          toolResult = JSON.stringify({ error: validation.error })
+        } else {
+          try {
+            const execResult = await Effect.runPromise(
+              Effect.timeout(executeTool(toolName, validation.parsed || args), TOOL_EXECUTION_TIMEOUT_MS)
+            )
+            toolResult = execResult
+          } catch (execError) {
+            console.error(`[StreamToolLoop] Tool error: ${toolName}`, execError)
+            toolResult = JSON.stringify({ error: `Tool execution failed: ${String(execError)}` })
+          }
+        }
+
+        toolMessages.push({
+          role: "tool",
+          tool_call_id: id,
+          name: toolName,
+          content: toolResult
+        })
+
+        const toolResultLine = SSEConstants.DATA_PREFIX + JSON.stringify({
+          choices: [{ delta: { role: "tool", content: toolResult }, finish_reason: null }]
+        }) + '\n'
+        onChunk(toolResultLine)
+      }
+
+      messages = [
+        ...messages,
+        { role: "assistant", content: "", tool_calls: toolCallsBuffer },
+        ...toolMessages
+      ]
+
+      const doneLine = SSEConstants.DATA_PREFIX + SSEConstants.DONE + '\n'
+      onChunk(doneLine)
+
+      toolCallsBuffer = []
+    }
+
+    clearTimeout(timeoutId)
+    return { success: true }
+  } catch (error) {
+    clearTimeout(timeoutId)
+    const isAbort = error instanceof DOMException && error.name === 'AbortError'
+    console.error(`[StreamToolLoop] ${isAbort ? 'Timeout' : 'Error'}`, error)
+    return { success: false, error: isAbort ? "Request timeout" : String(error) }
+  }
+}
+
+const runAgenticLoop = async (
+  initialMessages: { role: string; content: string; name?: string; tool_calls?: unknown[] }[],
+  userId: string,
+  tier: SubscriptionTierType
+): Promise<{ success: boolean; data?: unknown; error?: string }> => {
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), AGENTIC_TIMEOUT_MS)
+
+  try {
+    const buildRequestBody = (msgs: typeof initialMessages) => ({
+      model: getModelConfig(tier).default,
+      messages: msgs,
+      stream: false,
+      user: userId || undefined,
+      reasoning: {
+        effort: getModelConfig(tier).reasoning.reasoningEffort
+      },
+      tools: toolsToOpenRouter(),
+      ...(tier === SubscriptionTier.Pro ? { plugins: WebSearchPlugins } : {})
+    })
+
+    let messages = [...initialMessages]
+
+    for (let i = 0; i < MAX_TOOL_ITERATIONS; i++) {
+      console.log(`[ToolLoop] Iteration ${i + 1}/${MAX_TOOL_ITERATIONS}`)
+
+      const response = await fetch(ApiConstants.OPENROUTER_CHAT_COMPLETIONS, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+          'HTTP-Referer': process.env.NEXT_PUBLIC_SITE_URL || '',
+          'X-Title': 'PR\\AI Assistant',
+        },
+        body: JSON.stringify(buildRequestBody(messages)),
+        signal: controller.signal
+      })
+
+      if (!response.ok) {
+        const errorBody = await response.text()
+        console.error(`[ToolLoop] OpenRouter error: ${response.status}`, errorBody)
+        return { success: false, error: `OpenRouter error: ${response.status}` }
+      }
+
+      const data = await response.json()
+      const assistantMessage = data.choices?.[0]?.message
+
+      if (!assistantMessage) {
+        return { success: true, data }
+      }
+
+      const toolCalls = assistantMessage.tool_calls || []
+
+      if (toolCalls.length === 0) {
+        return { success: true, data }
+      }
+
+      console.log(`[ToolLoop] Executing ${toolCalls.length} tool(s)`)
+
+      const toolMessages: { role: string; tool_call_id: string; name: string; content: string }[] = []
+
+      const parsedToolCalls: Array<{ id: string; name: string; args: Record<string, unknown> }> = toolCalls.map((tc: { id: string; function: { name: string; arguments: string } }) => {
+        const { id, function: fn } = tc
+        return { id, name: fn.name, args: JSON.parse(fn.arguments) }
+      })
+
+      const readOnlyCalls = parsedToolCalls.filter((tc: { name: string }) => isReadOnlyTool(tc.name))
+      const writeCalls = parsedToolCalls.filter((tc: { name: string }) => !isReadOnlyTool(tc.name))
+
+      const executeToolCall = async (id: string, toolName: string, args: Record<string, unknown>): Promise<string> => {
+        const validation = validateToolInput(toolName, args)
+        if (!validation.success) {
+          return JSON.stringify({ error: validation.error })
+        }
+        try {
+          const execResult = await Effect.runPromise(
+            Effect.timeout(executeTool(toolName, validation.parsed || args), TOOL_EXECUTION_TIMEOUT_MS)
+          )
+          return execResult
+        } catch (execError) {
+          console.error(`[ToolLoop] Tool execution error: ${toolName}`, execError)
+          return JSON.stringify({ error: `Tool execution failed: ${String(execError)}` })
+        }
+      }
+
+      if (readOnlyCalls.length > 0) {
+        const readOnlyResults = await Promise.all(
+          readOnlyCalls.map(async (tc: { id: string; name: string; args: Record<string, unknown> }) => {
+            const result = await executeToolCall(tc.id, tc.name, tc.args)
+            return { id: tc.id, name: tc.name, content: result }
+          })
+        )
+        toolMessages.push(...readOnlyResults.map(r => ({
+          role: "tool" as const,
+          tool_call_id: r.id,
+          name: r.name,
+          content: r.content
+        })))
+      }
+
+      for (const tc of writeCalls) {
+        const result = await executeToolCall(tc.id, tc.name, tc.args)
+        toolMessages.push({
+          role: "tool",
+          tool_call_id: tc.id,
+          name: tc.name,
+          content: result
+        })
+      }
+
+      messages = [
+        ...messages,
+        { role: "assistant", content: assistantMessage.content || "", tool_calls: toolCalls },
+        ...toolMessages
+      ]
+    }
+
+    console.warn(`[ToolLoop] Max iterations reached (${MAX_TOOL_ITERATIONS})`)
+    return { success: false, error: "Max tool iterations reached" }
+
+  } catch (error) {
+    const isAbort = error instanceof DOMException && error.name === 'AbortError'
+    console.error(`[ToolLoop] ${isAbort ? 'Timeout' : 'Error'}`, error)
+    return { success: false, error: isAbort ? "Request timeout" : String(error) }
+  } finally {
+    clearTimeout(timeoutId)
+  }
+}
+
   const program = pipe(
     decodeBody(
       S.Struct({
@@ -120,48 +428,14 @@ export async function POST(req: Request) {
       })
     )(req),
     Effect.flatMap((params) => {
-      /** @Logic.Chat.ModelResolution */
-      const modelConfig = getModelConfig(auth.tier)
-      const tierModel = modelConfig.default
-      const model = params.model || tierModel
-
-      const requestBody: Record<string, unknown> = {
-        model,
-        messages: params.messages,
-        stream: params.stream ?? true,
-        user: auth.userId || undefined,
-        reasoning: {
-          effort: modelConfig.reasoning.reasoningEffort
-        }
-      }
-
-      /** @Logic.Chat.InjectPlugins */
-      if (auth.tier === SubscriptionTier.Pro) {
-        requestBody.plugins = WebSearchPlugins
-      }
-
       /** @Logic.Chat.OpenRouterInvocation */
       return Effect.tryPromise({
         try: async () => {
-          const response = await fetch(ApiConstants.OPENROUTER_CHAT_COMPLETIONS, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
-              'HTTP-Referer': process.env.NEXT_PUBLIC_SITE_URL || '',
-              'X-Title': 'PR\\AI Assistant',
-            },
-            body: JSON.stringify(requestBody),
-          })
-
-          if (!response.ok) {
-            throw new Error('OpenRouter error')
-          }
-
-          /** @Logic.Chat.SyncUsageTracking */
-          if (!(params.stream ?? true)) {
-            const data = await response.json()
-            const usageData = data.usage || {}
+          const isStreaming = params.stream ?? true
+          
+          if (!isStreaming) {
+            const result = await runAgenticLoop([...params.messages], auth.userId, auth.tier)
+            const usageData = result.data && typeof result.data === 'object' ? (result.data as { usage?: { total_tokens?: number; cost?: number } }).usage || {} : {}
             const totalTokens = usageData.total_tokens || 0
             const cost = usageData.cost || 0
 
@@ -170,87 +444,43 @@ export async function POST(req: Request) {
                 await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || ''}/api/user/usage/increment`, {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    amount: 1,
-                    tokens: totalTokens,
-                    cost: cost
-                  })
+                  body: JSON.stringify({ amount: 1, tokens: totalTokens, cost })
                 })
-              } catch {
-                /** @Logic.Chat.SilentFailure */
-              }
+              } catch { /** @Logic.Chat.SilentFailure */ }
             }
 
-            return NextResponse.json(data)
+            return result.success 
+              ? NextResponse.json(result.data)
+              : NextResponse.json({ error: result.error }, { status: HttpStatus.INTERNAL_SERVER_ERROR })
           }
 
-          /** @Logic.Chat.StreamUsageTracking */
-          const userId = auth.userId
-          const responseBody = response.body
+          const initialMessages = [...params.messages]
           
-          if (!responseBody) {
-            return new Response(null, { status: HttpStatus.INTERNAL_SERVER_ERROR })
-          }
-
           const encoder = new TextEncoder()
-          const decoder = new TextDecoder()
-          let buffer = ''
-          
+
           const transformStream = new ReadableStream({
             async start(controller) {
-              const reader = responseBody.getReader()
-              
               try {
-                while (true) {
-                  const { done, value } = await reader.read()
-                  
-                  if (done) {
-                    if (buffer.length > 0 && userId) {
-                      const lines = buffer.split('\n')
-                      for (const line of lines) {
-                        if (line.startsWith(SSEConstants.DATA_PREFIX)) {
-                          const data = line.slice(SSEConstants.DATA_PREFIX.length)
-                          if (data === SSEConstants.DONE) continue
-                          try {
-                            const parsed = JSON.parse(data)
-                            if (parsed.usage) {
-                              const totalTokens = parsed.usage.total_tokens || 0
-                              const cost = parsed.usage.cost || 0
-                              if (totalTokens > 0) {
-                                fetch(`${process.env.NEXT_PUBLIC_SITE_URL || ''}/api/user/usage/increment`, {
-                                  method: 'POST',
-                                  headers: { 'Content-Type': 'application/json' },
-                                  body: JSON.stringify({ amount: 1, tokens: totalTokens, cost })
-                                }).catch(() => { })
-                              }
-                            }
-                          } catch { /** @Logic.Chat.IgnoreParseErrors */ }
-                        }
-                      }
-                    }
-
-                    /** @Logic.Chat.UsageTrackingFallback */
-                    if (userId) {
-                      setTimeout(() => {
-                        fetch(`${process.env.NEXT_PUBLIC_SITE_URL || ''}/api/user/usage/increment`, {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({ amount: 1, tokens: 0, cost: 0 })
-                        }).catch(() => { })
-                      }, TimeConstants.USAGE_TRACK_DEBOUNCE_MS)
-                    }
-                    controller.close()
-                    break
-                  }
-                  
-                  buffer += decoder.decode(value, { stream: true })
-                  const lines = buffer.split('\n')
-                  buffer = lines.pop() || ''
-                  
-                  for (const line of lines) {
-                    controller.enqueue(encoder.encode(line + '\n'))
-                  }
+                const onChunk = (chunk: string) => {
+                  controller.enqueue(encoder.encode(chunk))
                 }
+
+                const result = await runStreamingAgenticLoop(
+                  initialMessages,
+                  auth.userId,
+                  auth.tier,
+                  onChunk
+                )
+
+                if (!result.success) {
+                  const errorChunk = SSEConstants.DATA_PREFIX + JSON.stringify({
+                    choices: [{ delta: { content: `[Error: ${result.error}]` }, finish_reason: "stop" }]
+                  }) + '\n'
+                  controller.enqueue(encoder.encode(errorChunk))
+                }
+
+                controller.enqueue(encoder.encode(SSEConstants.DATA_PREFIX + SSEConstants.DONE + '\n'))
+                controller.close()
               } catch (error) {
                 controller.error(error)
               }

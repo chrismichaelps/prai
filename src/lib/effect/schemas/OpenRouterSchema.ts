@@ -1,6 +1,6 @@
 import { Schema } from "effect"
 
-/** @Schema.Effect.OpenRouter */
+/** @Schema.Effect.OpenRouter.ChatMessage */
 export const ChatMessageSchema = Schema.Struct({
   role: Schema.Literal("user", "assistant", "system"),
   content: Schema.String
@@ -8,7 +8,7 @@ export const ChatMessageSchema = Schema.Struct({
 
 export type ChatMessage = Schema.Schema.Type<typeof ChatMessageSchema>
 
-
+/** @Schema.Effect.OpenRouter.RateLimit */
 export const OpenRouterRateLimitSchema = Schema.Struct({
   headers: Schema.Struct({
     "X-RateLimit-Limit": Schema.String,
@@ -18,6 +18,7 @@ export const OpenRouterRateLimitSchema = Schema.Struct({
   provider_name: Schema.NullOr(Schema.String)
 })
 
+/** @Schema.Effect.OpenRouter.ErrorBody */
 export const OpenRouterErrorBodySchema = Schema.Struct({
   error: Schema.Struct({
     message: Schema.String,
@@ -29,13 +30,14 @@ export const OpenRouterErrorBodySchema = Schema.Struct({
 
 export interface OpenRouterErrorBody extends Schema.Schema.Type<typeof OpenRouterErrorBodySchema> {}
 
-/** @Schema.Effect.OpenRouter.Response */
+/** @Schema.Effect.OpenRouter.Choice */
 export const ChoiceSchema = Schema.Struct({
   message: Schema.Struct({
     content: Schema.String
   })
 })
 
+/** @Schema.Effect.OpenRouter.Response */
 export const OpenRouterResponseSchema = Schema.Struct({
   choices: Schema.NonEmptyArray(ChoiceSchema)
 })
@@ -54,3 +56,41 @@ export const OpenRouterErrorCodes = {
 } as const
 
 export type OpenRouterErrorCode = keyof typeof OpenRouterErrorCodes
+
+/** @Schema.Effect.OpenRouter.UrlCitation */
+export const UrlCitationSchema = Schema.Struct({
+  url: Schema.String,
+  title: Schema.String,
+  content: Schema.optional(Schema.String),
+  start_index: Schema.Number,
+  end_index: Schema.Number
+})
+
+export type UrlCitation = Schema.Schema.Type<typeof UrlCitationSchema>
+
+/** @Schema.Effect.OpenRouter.Annotation */
+export const AnnotationSchema = Schema.Struct({
+  type: Schema.String,
+  url_citation: Schema.optional(UrlCitationSchema)
+})
+
+export type Annotation = Schema.Schema.Type<typeof AnnotationSchema>
+
+/** @Schema.Effect.OpenRouter.ToolCall */
+export const ToolCallSchema = Schema.Struct({
+  id: Schema.String,
+  name: Schema.String,
+  arguments: Schema.String
+})
+
+export type ToolCall = Schema.Schema.Type<typeof ToolCallSchema>
+
+/** @Schema.Effect.OpenRouter.ChatResponse */
+export const ChatResponseSchema = Schema.Struct({
+  content: Schema.String,
+  reasoning: Schema.optional(Schema.String),
+  annotations: Schema.optional(Schema.Array(AnnotationSchema)),
+  toolCalls: Schema.optional(Schema.Array(ToolCallSchema))
+})
+
+export type ChatResponse = Schema.Schema.Type<typeof ChatResponseSchema>

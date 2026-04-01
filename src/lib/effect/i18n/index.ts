@@ -117,6 +117,7 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "chat.no_archived": "Sin conversaciones archivadas",
     "chat.archived_title": "Archivadas",
     "chat.back_to_menu": "Volver",
+    "chat.tools": "Herramientas",
 
     /** @Logic.I18n.Section.Issues */
     "issues.title": "Reportar un Error",
@@ -553,6 +554,7 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "chat.no_archived": "No archived conversations",
     "chat.archived_title": "Archived",
     "chat.back_to_menu": "Back",
+    "chat.tools": "Tools",
 
     /** @Logic.I18n.Section.Issues */
     "issues.title": "Report a Bug",

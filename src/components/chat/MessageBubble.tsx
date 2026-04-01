@@ -10,7 +10,9 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { useAppDispatch } from '@/store/hooks'
 import { openSources } from '@/store/slices/chatSlice'
-import { ChatRole, type ChatMessage, type SearchResult } from '@/types/chat'
+import { ChatRole } from '@/types/chat'
+import type { ChatMessage } from '@/lib/effect/schemas/ChatSchema'
+import type { SearchResult } from '@/lib/effect/schemas/ChatSchema'
 import {
   Copy,
   ChevronRight,
@@ -23,23 +25,17 @@ import {
   X,
 } from 'lucide-react'
 
+/** @Constant.UI.Chat.MarkdownRenderer */
 const md = new MarkdownIt({
   html: true,
   linkify: true,
   typographer: true,
 })
 
+/** @Type.UI.Chat.Bubble.Props */
 interface MessageBubbleProps {
-  message: ChatMessage & {
-    metadata?: {
-      thought?: string
-      thoughtDuration?: string
-      steps?: { type: 'analyzed' | 'plan' | 'search'; label: string }[]
-      sources?: SearchResult[]
-      searchQuery?: string
-      edited?: boolean
-    }
-  }
+  /** @Type.UI.Chat.Message */
+  message: ChatMessage
   index: number
   onEdit?: (index: number, content: string) => void
   onStop?: () => void
@@ -131,7 +127,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = memo(({ message, inde
           <div className="absolute -top-1 w-full flex justify-end pointer-events-none z-10">
             <button
               onClick={copyToClipboard}
-              className="pointer-events-auto px-2 py-1 flex items-center gap-1.5 text-white/20 hover:text-white/60 transition-all rounded-lg hover:bg-white/5 active:scale-95 text-[11px] font-bold uppercase tracking-widest"
+              className="pointer-events-auto px-2.5 py-1.5 flex items-center gap-1.5 text-white/30 hover:text-white/70 transition-all rounded-lg hover:bg-white/5 active:scale-95 text-[12px] font-medium tracking-tight"
             >
               {isCopied ? (
                 <>
@@ -217,9 +213,12 @@ export const MessageBubble: React.FC<MessageBubbleProps> = memo(({ message, inde
                       {(() => {
                         const val = message.metadata?.thoughtDuration
                         if (!val) return t('chat.thinking')
+                        
                         if (val.startsWith('status:')) {
-                          return `${t('chat.thinking.prefix')} ${t(val.split(':')[1] || 'chat.thinking.analyzing')}`
+                          const statusKey = val.split(':')[1] || 'analyzing'
+                          return `${t('chat.thinking.prefix')} ${t(`chat.thinking.${statusKey}`)}...`
                         }
+                        
                         if (val.startsWith('completed:')) {
                           return `${t('chat.thinking.completed')} ${val.split(':')[1] || ''}`
                         }
@@ -289,6 +288,33 @@ export const MessageBubble: React.FC<MessageBubbleProps> = memo(({ message, inde
                   <span className="text-[14px] tracking-tight">{step.label}</span>
                 </div>
               ))}
+
+              {message.metadata?.tool_calls && message.metadata.tool_calls.length > 0 && (
+                <div className="flex flex-col gap-3 py-3">
+                  <div className="flex items-center gap-2 text-[13px] font-black text-white/30 uppercase tracking-[0.2em] mb-1">
+                    <Search className="w-3.5 h-3.5" />
+                    <span>{t('chat.tools') || 'Herramientas'}</span>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    {message.metadata.tool_calls.map((tc, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-center gap-3 px-4 py-2.5 bg-white/[0.03] border border-white/10 rounded-2xl text-[14px] shadow-sm hover:bg-white/[0.05] transition-all"
+                      >
+                        <div className="flex items-center gap-2 text-orange-400 font-bold shrink-0">
+                          <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse" />
+                          <span>{tc.name}</span>
+                        </div>
+                        {tc.result && (
+                          <div className="text-white/40 text-[13px] truncate border-l border-white/10 pl-3">
+                            {typeof tc.result === 'string' ? tc.result : JSON.stringify(tc.result)}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div

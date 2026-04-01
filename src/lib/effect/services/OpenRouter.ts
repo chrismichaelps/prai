@@ -1,4 +1,6 @@
-import { Effect, Stream, Option } from "effect"
+/** @Service.OpenRouter */
+
+import { Effect, Stream, Option, Context, Layer } from "effect"
 import { HttpClient, HttpClientRequest, HttpClientResponse } from "@effect/platform"
 import { ConfigService } from "./Config"
 import { PromptBuilderService } from "./PromptBuilder"
@@ -12,24 +14,33 @@ import { createSearchContext, createSearchMessage, getDiscoveryQuery } from "./s
 import type { Personalization } from "../schemas/PersonalizationSchema"
 import { SSEConstants } from "@/lib/constants/app-constants"
 import { HttpStatus } from "@/app/api/_lib/constants/status-codes"
+import { toolsToOpenRouter } from "./tools"
 
-export interface ChatResponse {
-  readonly content: string
-  readonly reasoning?: string
-  readonly annotations: readonly {
-    readonly type: string
-    readonly url_citation?: {
-      readonly url: string
-      readonly title: string
-      readonly content?: string
-      readonly start_index: number
-      readonly end_index: number
-    }
-  }[]
+import { ChatResponseSchema, type ChatResponse } from "../schemas/OpenRouterSchema"
+
+export const OpenRouter = Context.GenericTag<OpenRouter>("OpenRouter")
+
+export interface OpenRouter {
+  readonly chat: (
+    messages: ChatMessage[],
+    searchOptions?: PuertoRicoSearchOptions,
+    sessionId?: string,
+    personalization?: Personalization
+  ) => Stream.Stream<ChatResponse, OpenRouterError, I18n>
+  readonly searchPuertoRico: (
+    query: string,
+    options?: Partial<PuertoRicoSearchOptions>
+  ) => Stream.Stream<ChatResponse, OpenRouterError, I18n>
+  readonly discoverLive: (
+    category: DiscoveryCategory,
+    location?: string
+  ) => Stream.Stream<ChatResponse, OpenRouterError, I18n>
 }
 
-export class OpenRouter extends Effect.Service<OpenRouter>()("OpenRouter", {
-  effect: Effect.gen(function* () {
+/** @Layer.Effect.OpenRouter */
+export const OpenRouterLayer = Layer.effect(
+  OpenRouter,
+  Effect.gen(function* () {
     const baseClient = yield* HttpClient.HttpClient
     const config = yield* ConfigService
     const promptBuilder = yield* PromptBuilderService
@@ -42,28 +53,28 @@ export class OpenRouter extends Effect.Service<OpenRouter>()("OpenRouter", {
     }
 
     const chat = (
-      messages: readonly ChatMessage[],
+      messages: ChatMessage[],
       searchOptions?: PuertoRicoSearchOptions,
       sessionId?: string,
       personalization?: Personalization
     ): Stream.Stream<ChatResponse, OpenRouterError, I18n> => {
       const responseEffect = Effect.gen(function* () {
-        const i18n = yield* I18n
-        
-        const systemPrompt = buildSystemPrompt(i18n.t, searchOptions, personalization)
+        const t = (key: string, _params?: Record<string, string>) => key
+        const systemPrompt = buildSystemPrompt(t, searchOptions, personalization)
+
         const chatMessages = messages.filter(m => m.role !== "system")
         const enhancedMessages: ChatMessage[] = [
           { role: "system", content: systemPrompt },
           ...chatMessages
         ]
 
-        /** @Logic.Chat.BuildRequestBody */
         const requestBody: Record<string, unknown> = {
           model: config.models.default,
           messages: enhancedMessages,
           stream: config.chatRequestConfig.stream,
           temperature: config.chatRequestConfig.temperature,
           max_tokens: config.chatRequestConfig.maxTokens,
+          tools: toolsToOpenRouter(),
           provider: {
             allow_fallbacks: true,
             data_collection: "deny"
@@ -100,21 +111,28 @@ export class OpenRouter extends Effect.Service<OpenRouter>()("OpenRouter", {
         Stream.splitLines,
         Stream.filter((line) => line.startsWith(SSEConstants.DATA_PREFIX) && line !== SSEConstants.DATA_DONE),
         Stream.map((line) => line.slice(6)),
-        /** @Logic.Chat.ProcessStreamChunk.Simple */
         Stream.filterMap((jsonStr): Option.Option<ChatResponse> => {
           try {
-            const parsed = JSON.parse(jsonStr)
+            const parsed = JSON.parse(jsonStr as string)
             const content = parsed.choices?.[0]?.delta?.content || ""
-            /** @Logic.Chat.ExtractReasoning */
             const reasoning = parsed.choices?.[0]?.delta?.reasoning || ""
-            /** @Logic.OpenRouter.ExtractAnnotations */
             const annotations =
               parsed.choices?.[0]?.delta?.annotations ||
               parsed.choices?.[0]?.message?.annotations ||
               []
+            const toolCalls = parsed.choices?.[0]?.delta?.tool_calls || parsed.choices?.[0]?.message?.tool_calls || []
 
-            if (content || reasoning || annotations.length > 0) {
-              return Option.some({ content, reasoning: reasoning || undefined, annotations } as ChatResponse)
+            if (content || reasoning || annotations.length > 0 || toolCalls.length > 0) {
+              return Option.some({ 
+                content, 
+                reasoning: reasoning || undefined, 
+                annotations,
+                toolCalls: toolCalls.length > 0 ? toolCalls.map((tc: { id: string; function: { name: string; arguments: string } }) => ({
+                  id: tc.id,
+                  name: tc.function.name,
+                  arguments: tc.function.arguments
+                })) : undefined
+              } as ChatResponse)
             }
             return Option.none()
           } catch {
@@ -158,7 +176,6 @@ export class OpenRouter extends Effect.Service<OpenRouter>()("OpenRouter", {
       })
     }
 
-    return { chat, searchPuertoRico, discoverLive } as const
-  }),
-  accessors: true
-}) { }
+    return { chat, searchPuertoRico, discoverLive }
+  })
+)

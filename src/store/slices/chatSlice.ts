@@ -1,7 +1,9 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
+import { castDraft } from 'immer';
 import type { ChatMessage, AdaptiveData, Suggestion, SearchResult } from '@/types/chat';
 import { ChatRole } from '@/types/chat';
+
 
 /** @Type.Chat */
 export interface Chat {
@@ -81,11 +83,11 @@ export const chatSlice = createSlice({
     },
     /** @Store.Action.Chat.SetMessages */
     setMessages: (state, action: PayloadAction<ChatMessage[]>) => {
-      state.messages = action.payload;
+      state.messages = castDraft(action.payload);
     },
     /** @Store.Action.Chat.AddMessage */
     addMessage: (state, action: PayloadAction<ChatMessage>) => {
-      state.messages.push(action.payload);
+      state.messages.push(castDraft(action.payload));
     },
     /** @Store.Action.Chat.UpdateLastMessage */
     updateLastMessage: (state, action: PayloadAction<string | { content?: string; metadata?: ChatMessage['metadata'] }>) => {
@@ -96,10 +98,10 @@ export const chatSlice = createSlice({
         } else {
           if (action.payload.content !== undefined) last.content = action.payload.content;
           if (action.payload.metadata !== undefined) {
-            last.metadata = { 
-              ...last.metadata, 
-              ...action.payload.metadata 
-            };
+            last.metadata = castDraft({
+              ...last.metadata,
+              ...action.payload.metadata,
+            });
           }
         }
       }
@@ -120,6 +122,7 @@ export const chatSlice = createSlice({
     setActiveAdaptiveData: (state, action: PayloadAction<AdaptiveData[]>) => {
       state.activeAdaptiveData = action.payload;
     },
+    /** @Store.Action.Chat.AddActiveAdaptiveData */
     addActiveAdaptiveData: (state, action: PayloadAction<AdaptiveData>) => {
       state.activeAdaptiveData.push(action.payload);
     },

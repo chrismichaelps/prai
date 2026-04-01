@@ -1,7 +1,7 @@
 import { Layer, ManagedRuntime, ConfigProvider, Effect } from "effect";
 import { BrowserHttpClient } from "@effect/platform-browser";
 import { ConfigService } from "./services/Config";
-import { OpenRouter } from "./services/OpenRouter";
+import { OpenRouter, OpenRouterLayer } from "./services/OpenRouter";
 import { Redux } from "./services/Redux";
 import { PromptBuilderService } from "./services/PromptBuilder";
 import { VoiceServiceLive } from "./services/Voice";
@@ -47,7 +47,7 @@ const MainLayer = Layer.mergeAll(
   SeoService.Default.pipe(
     Layer.provideMerge(ConfigLayer)
   ),
-  OpenRouter.Default.pipe(
+  OpenRouterLayer.pipe(
     Layer.provideMerge(ConfigLayer),
     Layer.provideMerge(BaseLayer)
   )
