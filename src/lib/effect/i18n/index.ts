@@ -17,6 +17,19 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "common.saving": "Guardando...",
     "common.delete": "Eliminar",
 
+    /** @Logic.I18n.Section.Error */
+    "error.api.unknown": "Error desconocido",
+    "error.api.400": "Solicitud inválida",
+    "error.api.401": "Credenciales inválidas",
+    "error.api.402": "Créditos insuficientes",
+    "error.api.403": "Contenido no permitido",
+    "error.api.408": "Tiempo de espera agotado",
+    "error.api.429": "Demasiadas solicitudes. Espera un momento.",
+    "error.api.500": "Error del servidor",
+    "error.api.502": "Modelo no disponible",
+    "error.api.503": "Servicio no disponible",
+    "error.api.close": "Cerrar error",
+
     /** @Logic.I18n.Section.A11y */
     "a11y.open_chat": "Abrir chat con PR AI",
     "a11y.sign_in_google": "Iniciar sesión con Google",
@@ -201,6 +214,15 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "chat.thinking.finalizing": "Finalizando el razonamiento...",
     "chat.thinking.prefix": "Pensando...",
     "chat.thinking.completed": "Pensado durante",
+
+    /** @Logic.I18n.Section.Suggestion */
+    "chat.suggestion.error": "Error al generar sugerencia",
+    "chat.suggestion.retry": "Reintentar",
+    "chat.suggestion.empty": "No hay sugerencias disponibles",
+    "chat.suggestion.loading": "Generando sugerencias...",
+    "chat.suggestion.rate_limited": "Espera un momento...",
+    "chat.suggestion.click_to_use": "Clic para usar",
+    "chat.suggestion.from_ai": "Sugerido por IA",
 
     /** @Logic.I18n.Section.Footer */
     "footer.rights": "Todos los derechos reservados.",
@@ -431,6 +453,19 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "common.saving": "Saving...",
     "common.delete": "Delete",
 
+    /** @Logic.I18n.Section.Error */
+    "error.api.unknown": "Unknown error",
+    "error.api.400": "Invalid request",
+    "error.api.401": "Invalid credentials",
+    "error.api.402": "Insufficient credits",
+    "error.api.403": "Content not allowed",
+    "error.api.408": "Request timed out",
+    "error.api.429": "Too many requests. Please wait.",
+    "error.api.500": "Server error",
+    "error.api.502": "Model unavailable",
+    "error.api.503": "Service unavailable",
+    "error.api.close": "Close error",
+
     /** @Logic.I18n.Section.A11y */
     "a11y.open_chat": "Open chat with PR AI",
     "a11y.sign_in_google": "Sign in with Google",
@@ -615,6 +650,15 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "chat.thinking.finalizing": "Finalizing the reasoning...",
     "chat.thinking.prefix": "Thinking...",
     "chat.thinking.completed": "Thought for",
+
+    /** @Logic.I18n.Section.Suggestion */
+    "chat.suggestion.error": "Error generating suggestion",
+    "chat.suggestion.retry": "Retry",
+    "chat.suggestion.empty": "No suggestions available",
+    "chat.suggestion.loading": "Generating suggestions...",
+    "chat.suggestion.rate_limited": "Please wait...",
+    "chat.suggestion.click_to_use": "Click to use",
+    "chat.suggestion.from_ai": "AI suggested",
 
     /** @Logic.I18n.Section.Footer */
     "footer.rights": "All rights reserved.",

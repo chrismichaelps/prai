@@ -11,7 +11,16 @@ import { DiscoveryLoader } from './DiscoveryLoader'
 import { useI18n } from '@/lib/effect/I18nProvider'
 import { MemoizedMessageBubble } from './MessageBubble'
 import { SourcesSidebar } from './SourcesSidebar'
-import { ArrowDown, AlertCircle, Loader2, Mic, Square, X } from 'lucide-react'
+import { useAiSuggestions } from '@/hooks/useAiSuggestions'
+import {
+  ArrowDown,
+  AlertCircle,
+  Loader2,
+  Mic,
+  Square,
+  X,
+  ChevronRight,
+} from 'lucide-react'
 /** @Module.UI.Motion */
 import { motion } from 'framer-motion'
 /** @Module.UI.Utils */
@@ -144,7 +153,7 @@ export const Chat = {
       <div className="w-full max-w-2xl flex flex-col items-center space-y-6">
         {/* @UI.Chat.Suggestions */}
         {!isLoading && suggestions && suggestions.length > 0 && (
-          <div className="flex flex-wrap justify-center gap-3 pointer-events-auto animate-in fade-in slide-in-from-bottom-4 duration-1000">
+          <div className="flex flex-wrap justify-center gap-3 pointer-events-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
             {suggestions.map((suggestion, idx) => (
               <button
                 key={suggestion.label + idx}
@@ -152,10 +161,10 @@ export const Chat = {
                   haptics?.light()
                   onSend(suggestion.action || suggestion.label)
                 }}
-                className="px-5 py-2.5 rounded-2xl bg-[#1a1a1a] border border-white/[0.08] text-xs font-bold text-white/40 hover:bg-white/5 hover:text-white transition-all shadow-xl flex items-center gap-3 group"
+                className="px-5 py-2 rounded-full bg-white/5 border border-white/10 text-[13px] font-bold text-white/40 hover:bg-white/10 hover:border-white/20 hover:text-white transition-all shadow-xl flex items-center gap-3 group active:scale-95"
               >
                 <span>{suggestion.label}</span>
-                <ArrowDown className="w-3 h-3 -rotate-90 opacity-0 group-hover:opacity-100 transition-all transform translate-x-[-2px] group-hover:translate-x-0" />
+                <ChevronRight className="w-3.5 h-3.5 text-white/20 group-hover:text-white/60 transition-all transform group-hover:translate-x-0.5" />
               </button>
             ))}
           </div>
@@ -317,6 +326,10 @@ export const ChatContainer: React.FC = () => {
   const [isRecording, setIsRecording] = useState(false)
   const [isLockedToBottom, setIsLockedToBottom] = useState(true)
   const [showScrollButton, setShowScrollButton] = useState(false)
+  const { aiSuggestions, clearSuggestions } = useAiSuggestions(
+    messages,
+    isLoading,
+  )
 
   const scrollAreaRef = useRef<HTMLDivElement>(null)
   const innerContainerRef = useRef<HTMLDivElement>(null)
@@ -398,7 +411,7 @@ export const ChatContainer: React.FC = () => {
     }
   }, [messages, activeAdaptiveData, isLockedToBottom, scrollToBottom])
 
-  /** @UI.Chat.LoadingState */
+  /** @UI.Chat.LoadingState.ScrollSync */
   useEffect(() => {
     if (!isLoading) {
       scrollToBottom('smooth')
@@ -471,6 +484,7 @@ export const ChatContainer: React.FC = () => {
       }
 
       setUserInput('')
+      clearSuggestions()
       setIsLockedToBottom(true)
 
       await ensureChatExists()
@@ -577,6 +591,7 @@ export const ChatContainer: React.FC = () => {
         isUsageVisible={isUsageVisible}
         onToggleUsage={() => setIsUsageVisible(false)}
         haptics={haptics}
+        suggestions={aiSuggestions.map((s) => ({ label: s }))}
       />
       <SourcesSidebar />
     </Chat.Root>
