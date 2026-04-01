@@ -1,6 +1,7 @@
 import { Effect, Ref, Stream } from "effect"
 import type { SearchResult } from "@/types/chat"
-import { OpenRouter, type ChatResponse } from "./services/OpenRouter"
+import { OpenRouter } from "./services/OpenRouter"
+import type { ChatResponse } from "./schemas/OpenRouterSchema"
 import { ConfigService } from "./services/Config"
 import { Redux } from "./services/Redux"
 import { ChatApi } from "./services/ChatApi"
@@ -98,6 +99,7 @@ const generateResponse = (
   /** @Logic.Chat.Refs */
   const contentRef = yield* Ref.make("")
   const reasoningRef = yield* Ref.make("")
+  const toolCallsRef = yield* Ref.make<Array<{ id: string; name: string; arguments: string; result?: string }>>([])
 
   /** @Logic.Chat.SourceTracking */
   const sourcesRef = yield* Ref.make<SearchResult[]>([])
@@ -116,6 +118,7 @@ const generateResponse = (
       const content = response.content
       const reasoning = response.reasoning
       const annotations = response.annotations
+      const toolCalls = response.toolCalls
 
       /** @Logic.Chat.ProcessReasoning */
       if (reasoning) {
@@ -123,6 +126,21 @@ const generateResponse = (
         const currentReasoning = yield* Ref.get(reasoningRef)
         yield* Redux.dispatch(updateLastMessage({
           metadata: { thought: currentReasoning, isThinking: true }
+        }))
+      }
+
+      /** @Logic.Chat.ProcessToolCalls */
+      if (toolCalls && toolCalls.length > 0) {
+        const toolCallMetadata = toolCalls.map(tc => ({
+          id: tc.id,
+          name: tc.name,
+          arguments: tc.arguments
+        }))
+        const currentMeta = yield* Redux.getState().pipe(
+          Effect.map(s => s.chat.messages[s.chat.messages.length - 1]?.metadata)
+        )
+        yield* Redux.dispatch(updateLastMessage({
+          metadata: { ...currentMeta, tool_calls: toolCallMetadata }
         }))
       }
 

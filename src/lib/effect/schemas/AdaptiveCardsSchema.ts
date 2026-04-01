@@ -222,3 +222,11 @@ export const AdaptiveCardTypeSchema = Schema.Literal(
 )
 
 export type CardType = Schema.Schema.Type<typeof AdaptiveCardTypeSchema>
+/** @Schema.Effect.AdaptiveCards.Data */
+export const AdaptiveDataSchema = Schema.Struct({
+  type: AdaptiveCardTypeSchema,
+  data: Schema.Unknown,
+})
+
+/** @Type.Effect.AdaptiveCards.Data */
+export type AdaptiveData = Schema.Schema.Type<typeof AdaptiveDataSchema>

@@ -3,27 +3,33 @@
 /** @Hook.UseAiSuggestions */
 
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { Effect, Exit, Stream, Cause } from 'effect'
 import type { ChatMessage } from '@/types/chat'
 import { ChatRole } from '@/types/chat'
-import { 
-  shouldShowSuggestion, 
-  buildSuggestionPrompt, 
-  processSuggestionResponse, 
+import { SuggestionError } from '@/lib/effect/errors'
+import type { SuggestionMessage } from '@/lib/effect/schemas/SuggestionSchema'
+import {
+  shouldShowSuggestion,
+  buildSuggestionPrompt,
+  processSuggestionResponse,
   getSuggestionSystemPrompt,
-  SUGGESTION_CONFIG
+  SUGGESTION_GENERATE_TOKEN,
+  SUGGESTION_CONFIG,
 } from '@/lib/effect/services/Suggestion'
 import { runtime } from '@/lib/effect/runtime'
 import { OpenRouter } from '@/lib/effect/services/OpenRouter'
-import { Effect, Stream } from 'effect'
 
 /** @Hook.UseAiSuggestions */
 export function useAiSuggestions(messages: readonly ChatMessage[], isLoading: boolean) {
   /** @State.Suggestions */
   const [aiSuggestions, setAiSuggestions] = useState<string[]>([])
+
   /** @Ref.AbortController */
   const abortControllerRef = useRef<AbortController | null>(null)
+
   /** @Ref.IsMounted */
   const isMountedRef = useRef(true)
+
   /** @Ref.LastRequestTime */
   const lastRequestTimeRef = useRef<number>(0)
 
@@ -32,19 +38,52 @@ export function useAiSuggestions(messages: readonly ChatMessage[], isLoading: bo
     isMountedRef.current = true
     return () => {
       isMountedRef.current = false
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort()
-      }
+      abortControllerRef.current?.abort()
     }
   }, [])
 
   /** @Logic.Suggestion.AbortPrevious */
-  const abortPrevious = useCallback(() => {
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort()
-    }
-    abortControllerRef.current = new AbortController()
+  const abortPrevious = useCallback((): AbortController => {
+    abortControllerRef.current?.abort()
+    const controller = new AbortController()
+    abortControllerRef.current = controller
+    return controller
   }, [])
+
+  /** @Logic.Suggestion.BuildEffect */
+  const buildSuggestionEffect = useCallback(
+    (promptMessages: SuggestionMessage[]) =>
+      Effect.gen(function* () {
+        /** @Effect.Suggestion.GetService */
+        const or = yield* OpenRouter
+
+        /** @Effect.Suggestion.Stream */
+        const stream = or.chat(promptMessages)
+
+        /** @Effect.Suggestion.Collect */
+        const chunks = yield* Stream.runCollect(Stream.take(stream, 1))
+
+        /** @Effect.Suggestion.Aggregate */
+        let raw = ''
+        for (const chunk of chunks) {
+          raw += chunk.content
+        }
+
+        /** @Effect.Suggestion.Process */
+        return yield* processSuggestionResponse(raw)
+      }).pipe(
+        Effect.mapError((err) => {
+          /** @Error.Suggestion.MapGeneration */
+          if (err instanceof SuggestionError) return err
+          return new SuggestionError({
+            message: String(err),
+            reason: 'generation',
+            cause: err,
+          })
+        }),
+      ),
+    [],
+  )
 
   /** @Hook.Effect.Trigger */
   useEffect(() => {
@@ -56,10 +95,7 @@ export function useAiSuggestions(messages: readonly ChatMessage[], isLoading: bo
 
     /** @Check.RateLimit */
     const now = Date.now()
-    const timeSinceLastRequest = now - lastRequestTimeRef.current
-    if (timeSinceLastRequest < SUGGESTION_CONFIG.RATE_LIMIT_MS) {
-      return
-    }
+    if (now - lastRequestTimeRef.current < SUGGESTION_CONFIG.RATE_LIMIT_MS) return
 
     /** @Check.ShouldShow */
     if (!shouldShowSuggestion(messages)) {
@@ -68,71 +104,53 @@ export function useAiSuggestions(messages: readonly ChatMessage[], isLoading: bo
     }
 
     /** @Logic.Suggestion.Generate */
-    const generateAISuggestion = async () => {
-      /** @Logic.AbortPrevious */
+    const generate = async () => {
       abortPrevious()
-      /** @Logic.UpdateLastRequestTime */
       lastRequestTimeRef.current = Date.now()
 
-      try {
-        /** @Logic.BuildPrompt */
-        const prompt = buildSuggestionPrompt(messages)
-        /** @Logic.GetSystemPrompt */
-        const systemPrompt = getSuggestionSystemPrompt()
-        
-        /** @Logic.BuildMessages */
-        const suggestionMessages: Array<{ role: typeof ChatRole[keyof typeof ChatRole]; content: string }> = [
-          { role: ChatRole.SYSTEM, content: systemPrompt + '\n\n' + prompt },
-          { role: ChatRole.USER, content: '[Generar sugerencia]' }
-        ]
-        
-        /** @Effect.RunAI */
-        const runEffect = Effect.gen(function* () {
-          const or = yield* OpenRouter
-          const stream = or.chat(suggestionMessages)
-          const collected = yield* Stream.runCollect(Stream.take(stream, 1))
-          let content = ''
-          for (const response of collected) {
-            content += response.content
-          }
-          return content
-        })
-        
-        /** @Logic.RunEffect */
-        const result = await runtime.runPromise(
-          Effect.provide(runEffect, OpenRouter.Default)
-        )
-        
-        /** @Check.Mounted */
-        if (!isMountedRef.current) return
-        
-        /** @Logic.ProcessResponse */
-        const processed = processSuggestionResponse(result)
-        
-        /** @Check.Confidence */
-        if (
-          processed.suggestion && 
-          processed.confidence >= SUGGESTION_CONFIG.CONFIDENCE_THRESHOLD
-        ) {
-          setAiSuggestions([processed.suggestion])
-        } else {
-          setAiSuggestions([])
-        }
-      } catch (err) {
-        /** @Check.Mounted */
-        if (!isMountedRef.current) return
-        /** @Check.AbortError */
-        if (err instanceof Error && err.name === 'AbortError') return
-        
-        setAiSuggestions([])
-      }
-    }
-    
-    /** @Logic.Generate */
-    generateAISuggestion()
-  }, [isLoading, messages, abortPrevious])
+      /** @Logic.Suggestion.BuildMessages */
+      const systemPrompt = getSuggestionSystemPrompt()
+      const contextPrompt = buildSuggestionPrompt(messages)
 
-  /** @Logic.ClearSuggestions */
+      const promptMessages: SuggestionMessage[] = [
+        { role: ChatRole.SYSTEM, content: `${systemPrompt}\n\n${contextPrompt}` },
+        { role: ChatRole.USER, content: SUGGESTION_GENERATE_TOKEN },
+      ]
+
+      /** @Logic.Suggestion.RunEffect */
+      const exit = await runtime.runPromiseExit(buildSuggestionEffect(promptMessages))
+
+      /** @Check.Mounted */
+      if (!isMountedRef.current) return
+
+      /** @Logic.Suggestion.HandleExit */
+      Exit.match(exit, {
+        onSuccess: (result) => {
+          setAiSuggestions([result.suggestion])
+        },
+        onFailure: (cause) => {
+          /** @Logic.Suggestion.HandleFailure */
+          const maybeErr = Cause.failureOption(cause)
+          if (maybeErr._tag === 'Some') {
+            const suggErr = maybeErr.value
+            /** @Check.Abort */
+            if (suggErr instanceof SuggestionError) {
+              if (
+                suggErr.reason === 'aborted' ||
+                suggErr.reason === 'rate_limit' ||
+                suggErr.reason === 'unmounted'
+              ) return
+            }
+          }
+          setAiSuggestions([])
+        },
+      })
+    }
+
+    generate()
+  }, [isLoading, messages, abortPrevious, buildSuggestionEffect])
+
+  /** @Logic.Suggestion.Clear */
   const clearSuggestions = useCallback(() => {
     setAiSuggestions([])
     abortPrevious()
@@ -142,6 +160,6 @@ export function useAiSuggestions(messages: readonly ChatMessage[], isLoading: bo
   return {
     aiSuggestions,
     clearSuggestions,
-    setAiSuggestions
+    setAiSuggestions,
   }
 }

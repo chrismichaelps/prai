@@ -1,10 +1,19 @@
-/** @Type.FilterRule */
-export interface FilterRule {
-  readonly id: string
-  readonly check: (suggestion: string) => boolean
-}
+/** @Config.Suggestion.FilterRules */
 
-/** @Rule.FilterAll */
+import type { FilterRule } from "@/lib/effect/schemas/SuggestionSchema"
+
+/** @Constant.Suggestion.AllowedShortWords */
+export const ALLOWED_SHORT_WORDS = new Set([
+  "si",
+  "yes",
+  "no",
+  "ok",
+  "continuar",
+  "continue",
+  "gracias",
+] as const)
+
+/** @Constant.Suggestion.FilterRules */
 export const SUGGESTION_FILTER_RULES: FilterRule[] = [
   /** @Rule.Done */
   {
@@ -40,28 +49,19 @@ export const SUGGESTION_FILTER_RULES: FilterRule[] = [
     id: "too_few_words",
     check: (s) => {
       const words = s.trim().split(/\s+/)
-      if (words.length >= 2) return false
-      const ALLOWED = new Set([
-        "si",
-        "yes",
-        "no",
-        "ok",
-        "continuar",
-        "continue",
-        "gracias",
-      ])
-      return !ALLOWED.has(s.toLowerCase())
+      if (words.length >= SUGGESTION_CONFIG.MIN_WORDS) return false
+      return !ALLOWED_SHORT_WORDS.has(s.toLowerCase() as never)
     },
   },
   /** @Rule.TooManyWords */
   {
     id: "too_many_words",
-    check: (s) => s.trim().split(/\s+/).length > 12,
+    check: (s) => s.trim().split(/\s+/).length > SUGGESTION_CONFIG.MAX_WORDS,
   },
   /** @Rule.TooLong */
   {
     id: "too_long",
-    check: (s) => s.length >= 100,
+    check: (s) => s.length >= SUGGESTION_CONFIG.MAX_LENGTH,
   },
   /** @Rule.MultipleSentences */
   {
@@ -83,7 +83,10 @@ export const SUGGESTION_CONFIG = {
   CONVERSATION_HISTORY_SIZE: 6,
   MAX_CONTEXT_LENGTH: 200,
   CONFIDENCE_THRESHOLD: 0.7,
-  MIN_ASSISTANT_MESSAGES: 1,
-  /** @Config.RateLimit */
-  RATE_LIMIT_MS: 10000, // 10 seconds between requests
+  MIN_ASSISTANT_MESSAGES: 2,
+  /** @Config.Suggestion.RateLimit */
+  RATE_LIMIT_MS: 10_000,
 } as const
+
+/** @Type.Suggestion.Config */
+export type SuggestionConfig = typeof SUGGESTION_CONFIG
