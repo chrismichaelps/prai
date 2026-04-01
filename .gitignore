@@ -55,3 +55,6 @@ FMCF-MASTER-SEED.md
 supabase/
 supabase/.temp/
 !src/app/api/health/supabase/
+
+# claude-src
+claude-src/
