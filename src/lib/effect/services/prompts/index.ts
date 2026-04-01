@@ -10,6 +10,8 @@ import { output_format } from "./output_format";
 import { titleSystemPrompt } from "./chat_prompts";
 import { search_config } from "./search";
 import { buildPersonalizationPrompt } from "./personalization";
+import { suggestionPrompt, suggestionSystemPrompt } from "./suggestion";
+import { SUGGESTION_FILTER_RULES, SUGGESTION_CONFIG } from "./suggestion-filters";
 
 export {
   role,
@@ -22,5 +24,9 @@ export {
   output_format,
   titleSystemPrompt,
   search_config,
-  buildPersonalizationPrompt
+  buildPersonalizationPrompt,
+  suggestionPrompt,
+  suggestionSystemPrompt,
+  SUGGESTION_FILTER_RULES,
+  SUGGESTION_CONFIG
 };
