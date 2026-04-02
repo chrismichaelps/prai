@@ -9,6 +9,8 @@ import {
   accuracy_and_media, 
   action_handling, 
   output_format,
+  output_efficiency,
+  cyber_risk,
   buildPersonalizationPrompt 
 } from "./prompts";
 import type { Personalization } from "../schemas/PersonalizationSchema";
@@ -31,6 +33,8 @@ export class PromptBuilderService extends Effect.Service<PromptBuilderService>()
         accuracy_and_media,
         action_handling,
         output_format,
+        output_efficiency,
+        cyber_risk,
         personalizationPrompt,
         extraCapabilities ?? ""
       ].join("\n\n").trim();
