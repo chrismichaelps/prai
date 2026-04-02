@@ -26,13 +26,16 @@ export const SUGGESTION_FILTER_RULES: FilterRule[] = [
     check: (s) =>
       s.toLowerCase().includes("nada que") ||
       s.toLowerCase().includes("sin suggestion") ||
-      s.toLowerCase().includes("silencio"),
+      s.toLowerCase().includes("silencio") ||
+      s.toLowerCase().includes("qué tal si") ||
+      s.toLowerCase().includes("what if") ||
+      s.toLowerCase().includes("y si"),
   },
   /** @Rule.Evaluative */
   {
     id: "evaluative",
     check: (s) =>
-      /gracias|thank|está bien|sounds good|that works|perfect|awesome|excellent|bueno|perfecto|genial/i.test(
+      /gracias|thank|está bien|sounds good|that works|perfect|awesome|excellent|bueno|perfecto|genial|qué tal si|y si|what if/i.test(
         s,
       ),
   },
