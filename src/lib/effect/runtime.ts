@@ -1,7 +1,7 @@
 import { Layer, ManagedRuntime, ConfigProvider, Effect } from "effect";
 import { BrowserHttpClient } from "@effect/platform-browser";
 import { ConfigService } from "./services/Config";
-import { OpenRouter, OpenRouterLayer } from "./services/OpenRouter";
+import { OpenRouterLayer } from "./services/OpenRouter";
 import { Redux } from "./services/Redux";
 import { PromptBuilderService } from "./services/PromptBuilder";
 import { VoiceServiceLive } from "./services/Voice";
@@ -9,6 +9,13 @@ import { I18nLive } from "./i18n";
 import { BuildInfoService } from "./services/BuildInfo";
 import { SeoService } from "./services/Seo";
 import { ChatApiLayer } from "./services/ChatApi";
+import { TokenEstimationService } from "./services/token";
+import { CostTrackerService } from "./services/token";
+import { CompactionService } from "./services/compaction";
+import { CoordinatorService } from "./services/coordinator";
+import { ProactiveService } from "./services/proactive";
+import { SessionMemoryService } from "./services/memory";
+import { SkillsService } from "./services/skills";
 
 /** @Logic.Effect.Runtime */
 const BaseLayer = Layer.mergeAll(
@@ -35,11 +42,25 @@ export const nextJsConfigProvider = ConfigProvider.fromMap(
 /** @Logic.Effect.TelemetryLayer */
 const TelemetryLayer = Layer.empty
 
+/** @Logic.Effect.ContextLayer */
+const ContextLayer = Layer.mergeAll(
+  TokenEstimationService.Default,
+  CostTrackerService.Default,
+  CompactionService.Default.pipe(
+    Layer.provide(TokenEstimationService.Default)
+  ),
+  CoordinatorService.Default,
+  ProactiveService.Default,
+  SessionMemoryService.Default,
+  SkillsService.Default
+)
+
 /** @Logic.Effect.MainLayer.Init */
 const MainLayer = Layer.mergeAll(
   BaseLayer,
   ConfigLayer,
   TelemetryLayer,
+  ContextLayer,
   VoiceServiceLive,
   I18nLive,
   BuildInfoService.Default,

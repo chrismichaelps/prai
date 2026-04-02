@@ -74,3 +74,22 @@ export class SuggestionError extends Data.TaggedError("SuggestionError")<{
   readonly filterReason?: string
   readonly cause?: unknown
 }> {}
+
+/** @Error.Effect.TokenEstimation */
+export class TokenEstimationError extends Data.TaggedError("TokenEstimationError")<{
+  readonly message: string
+  readonly cause?: unknown
+}> {}
+
+/** @Error.Effect.CostTracking */
+export class CostTrackingError extends Data.TaggedError("CostTrackingError")<{
+  readonly message: string
+  readonly cause?: unknown
+}> {}
+
+/** @Error.Effect.Compaction */
+export class CompactionError extends Data.TaggedError("CompactionError")<{
+  readonly message: string
+  readonly method: "micro" | "full"
+  readonly cause?: unknown
+}> {}
