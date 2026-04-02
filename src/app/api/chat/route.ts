@@ -166,12 +166,15 @@ async function runStreamingAgenticLoop(
            systemPromptInsert += skills.buildSkillPrompt(match) + "\n\n"
         }
         
+        const hydrated = yield* memory.loadFromSupabase(userId)
+        
         const newMemories = yield* memory.extractMemories(messages)
         if (newMemories.length > 0) {
            yield* memory.storeMemories(newMemories)
+           yield* Effect.asVoid(memory.persistToSupabase(userId, newMemories))
         }
-        const currentMemory = yield* memory.getMemory()
-        const memoryPrompt = memory.buildMemoryPrompt(currentMemory)
+        
+        const memoryPrompt = memory.buildMemoryPrompt(hydrated)
         if (memoryPrompt) {
            systemPromptInsert += memoryPrompt + "\n\n"
         }
@@ -390,12 +393,15 @@ const runAgenticLoop = async (
            systemPromptInsert += skills.buildSkillPrompt(match) + "\n\n"
         }
         
+        const hydrated = yield* memory.loadFromSupabase(userId)
+        
         const newMemories = yield* memory.extractMemories(messages)
         if (newMemories.length > 0) {
            yield* memory.storeMemories(newMemories)
+           yield* Effect.asVoid(memory.persistToSupabase(userId, newMemories))
         }
-        const currentMemory = yield* memory.getMemory()
-        const memoryPrompt = memory.buildMemoryPrompt(currentMemory)
+        
+        const memoryPrompt = memory.buildMemoryPrompt(hydrated)
         if (memoryPrompt) {
            systemPromptInsert += memoryPrompt + "\n\n"
         }

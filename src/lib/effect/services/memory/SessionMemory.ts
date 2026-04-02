@@ -2,11 +2,75 @@
 
 import { Effect } from "effect"
 import type { MemoryEntry, SessionMemory, MemoryCategory } from "../../schemas/memory/SessionMemorySchema"
+import { createClient } from "@/lib/supabase/server"
+
+type SessionMemoryRow = {
+  memory_key: string
+  memory_value: string
+  category: string
+  extracted_at: number
+}
 
 /** @Service.Effect.SessionMemory.Class */
 export class SessionMemoryService extends Effect.Service<SessionMemoryService>()("SessionMemory", {
   effect: Effect.gen(function* () {
     let currentMemory: SessionMemory = { entries: [], conversationSummary: undefined }
+
+    const loadFromSupabase = (
+      uid: string
+    ): Effect.Effect<SessionMemory> =>
+      Effect.gen(function* () {
+        const supabase = yield* Effect.promise(() => createClient())
+        const { data, error } = yield* Effect.promise(() =>
+          supabase
+            .from("session_memory")
+            .select("memory_key, memory_value, category, extracted_at")
+            .eq("user_id", uid)
+        )
+
+        if (error) {
+          console.error("[SessionMemory] Failed to load from Supabase:", error)
+          return { entries: [], conversationSummary: undefined }
+        }
+
+        if (!data || data.length === 0) {
+          return { entries: [], conversationSummary: undefined }
+        }
+
+        const entries: MemoryEntry[] = (data as SessionMemoryRow[]).map((row) => ({
+          key: row.memory_key,
+          value: row.memory_value,
+          category: row.category as MemoryCategory,
+          extractedAt: row.extracted_at
+        }))
+
+        return { entries, conversationSummary: undefined }
+      })
+
+    const persistToSupabase = (
+      uid: string,
+      entries: ReadonlyArray<MemoryEntry>
+    ): Effect.Effect<void> =>
+      Effect.gen(function* () {
+        const supabase = yield* Effect.promise(() => createClient())
+        const records = entries.map((entry) => ({
+          user_id: uid,
+          memory_key: entry.key,
+          memory_value: entry.value,
+          category: entry.category,
+          extracted_at: entry.extractedAt
+        }))
+
+        const { error } = yield* Effect.promise(() =>
+          supabase
+            .from("session_memory")
+            .upsert(records, { onConflict: "user_id,memory_key" })
+        )
+
+        if (error) {
+          console.error("[SessionMemory] Persist error:", error)
+        }
+      })
 
     const extractMemories = (
       messages: ReadonlyArray<{ readonly role: string; readonly content: string }>
@@ -85,6 +149,14 @@ export class SessionMemoryService extends Effect.Service<SessionMemoryService>()
         currentMemory = { entries: [], conversationSummary: undefined }
       })
 
-    return { extractMemories, storeMemories, buildMemoryPrompt, getMemory, reset } as const
+    return { 
+      extractMemories, 
+      storeMemories, 
+      buildMemoryPrompt, 
+      getMemory, 
+      reset,
+      loadFromSupabase,
+      persistToSupabase
+    } as const
   })
 }) {}
