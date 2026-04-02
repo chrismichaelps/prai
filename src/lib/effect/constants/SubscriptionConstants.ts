@@ -52,19 +52,5 @@ export type ModelConfigReasoning = {
   reasoning_effort: ReasoningEffortType
 }
 
-export const WebSearchPlugins = [{
-  id: "web",
-  enabled: true,
-  max_results: 3,
-  include_domains: [
-    "discoverpuertorico.com",
-    "seepuertorico.com",
-    "elnuevodia.com",
-    "primerahora.com",
-    "lonelyplanet.com/puerto-rico",
-    "booking.com/puerto-rico",
-    "youtube.com",
-    "instagram.com",
-    "facebook.com"
-  ]
-}] as const
+/** @Constant.WebSearch.Tool */
+export const WebSearchTool = { type: "openrouter:web_search" } as const

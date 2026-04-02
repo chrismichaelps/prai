@@ -1,5 +1,4 @@
 import { Effect } from "effect"
-import { BuildInfoError } from "../errors"
 
 export interface BuildInfo {
   readonly buildHash: string
@@ -10,11 +9,18 @@ export class BuildInfoService extends Effect.Service<BuildInfoService>()("BuildI
   effect: Effect.gen(function* () {
     const fetchBuildInfo = Effect.tryPromise({
       try: async () => {
-        const res = await fetch('/api/build-info')
-        const data = await res.json() as { buildHash: string }
-        return data.buildHash
+        try {
+          const res = await fetch('/api/build-info')
+          if (res.ok) {
+            const data = await res.json() as { buildHash: string }
+            return data.buildHash
+          }
+        } catch {
+          return "dev-build"
+        }
+        return "dev-build"
       },
-      catch: () => new BuildInfoError({ message: "Failed to fetch build info" }),
+      catch: () => "dev-build",
     })
 
     const buildHash = yield* fetchBuildInfo
