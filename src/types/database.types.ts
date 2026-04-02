@@ -7,7 +7,8 @@ export type Json =
   | Json[]
 
 export type Database = {
-  /** @Type.Database.SupabaseOptions */
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "14.4"
   }
@@ -331,6 +332,39 @@ export type Database = {
         }
         Relationships: []
       }
+      session_memory: {
+        Row: {
+          category: string
+          created_at: string | null
+          extracted_at: number
+          id: string
+          memory_key: string
+          memory_value: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          extracted_at: number
+          id?: string
+          memory_key: string
+          memory_value: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          extracted_at?: number
+          id?: string
+          memory_key?: string
+          memory_value?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -413,6 +447,7 @@ export type Database = {
       show_trgm: { Args: { "": string }; Returns: string[] }
     }
     Enums: {
+      blog_post_status: "draft" | "published"
       issue_label: "bug" | "feature" | "question" | "docs"
       issue_status: "open" | "in_progress" | "closed"
       notification_type: "mention" | "comment" | "status_change"
@@ -543,6 +578,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      blog_post_status: ["draft", "published"],
       issue_label: ["bug", "feature", "question", "docs"],
       issue_status: ["open", "in_progress", "closed"],
       notification_type: ["mention", "comment", "status_change"],
