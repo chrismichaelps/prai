@@ -60,7 +60,7 @@ async function executeSingleTool(
 ): Promise<string> {
   const tool = getToolByName(toolName)
   if (!tool) {
-    throw new Error(`Tool not found: ${toolName}`)
+    throw new ToolError({ toolName, message: `Herramienta no encontrada: ${toolName}`, cause: undefined })
   }
   
   const effectiveTimeout = timeoutMs ?? tool.timeoutMs ?? 30000

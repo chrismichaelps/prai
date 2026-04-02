@@ -12,6 +12,8 @@ import { search_config } from "./search";
 import { buildPersonalizationPrompt } from "./personalization";
 import { suggestionPrompt, suggestionSystemPrompt } from "./suggestion";
 import { SUGGESTION_FILTER_RULES, SUGGESTION_CONFIG } from "./suggestion-filters";
+import { output_efficiency } from "./output_efficiency";
+import { cyber_risk } from "./cyber_risk";
 
 export {
   role,
@@ -28,5 +30,7 @@ export {
   suggestionPrompt,
   suggestionSystemPrompt,
   SUGGESTION_FILTER_RULES,
-  SUGGESTION_CONFIG
+  SUGGESTION_CONFIG,
+  output_efficiency,
+  cyber_risk
 };
