@@ -5,16 +5,14 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react'
 import dynamic from 'next/dynamic'
 import { useAppSelector, useAppDispatch } from '@/store/hooks'
-import { addChat, setCurrentChat } from '@/store/slices/chatSlice'
+import { addChat, setCurrentChat, setSuggestions } from '@/store/slices/chatSlice'
 import { useChatActions } from '@/lib/effect/ChatProvider'
 import { DiscoveryLoader } from './DiscoveryLoader'
 import { useI18n } from '@/lib/effect/I18nProvider'
 import { MemoizedMessageBubble } from './MessageBubble'
 import { SourcesSidebar } from './SourcesSidebar'
-import { useAiSuggestions } from '@/hooks/useAiSuggestions'
 import {
   ArrowDown,
-  AlertCircle,
   Loader2,
   Mic,
   Square,
@@ -308,7 +306,7 @@ export const Chat = {
 
 /** @UI.Chat.Container.Main */
 export const ChatContainer: React.FC = () => {
-  const { messages, isLoading, error, activeAdaptiveData, currentChatId } =
+  const { messages, isLoading, error: _error, activeAdaptiveData, currentChatId, suggestions } =
     useAppSelector((state) => state.chat)
   /** @UI.Hooks.ChatActions */
   const dispatch = useAppDispatch()
@@ -326,11 +324,6 @@ export const ChatContainer: React.FC = () => {
   const [isRecording, setIsRecording] = useState(false)
   const [isLockedToBottom, setIsLockedToBottom] = useState(true)
   const [showScrollButton, setShowScrollButton] = useState(false)
-  const { aiSuggestions, clearSuggestions } = useAiSuggestions(
-    messages,
-    isLoading,
-  )
-
   const scrollAreaRef = useRef<HTMLDivElement>(null)
   const innerContainerRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -484,7 +477,7 @@ export const ChatContainer: React.FC = () => {
       }
 
       setUserInput('')
-      clearSuggestions()
+      dispatch(setSuggestions([]))
       setIsLockedToBottom(true)
 
       await ensureChatExists()
@@ -503,6 +496,7 @@ export const ChatContainer: React.FC = () => {
       handleMicClick,
       personalization,
       haptics,
+      dispatch,
     ],
   )
 
@@ -563,12 +557,6 @@ export const ChatContainer: React.FC = () => {
           </div>
         )}
 
-        {error && (
-          <div className="bg-red-50 text-red-600 p-5 rounded-2xl text-sm flex items-center gap-4 border border-red-100 shadow-sm animate-shake">
-            <AlertCircle className="w-5 h-5 flex-shrink-0" />
-            <p className="font-medium">{error}</p>
-          </div>
-        )}
 
         {/* Suggestions handled by Chat.Input pills */}
       </Chat.Messages>
@@ -591,7 +579,7 @@ export const ChatContainer: React.FC = () => {
         isUsageVisible={isUsageVisible}
         onToggleUsage={() => setIsUsageVisible(false)}
         haptics={haptics}
-        suggestions={aiSuggestions.map((s) => ({ label: s }))}
+        suggestions={suggestions}
       />
       <SourcesSidebar />
     </Chat.Root>
