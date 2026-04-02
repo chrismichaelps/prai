@@ -14,6 +14,11 @@ import { ApiConstants, CacheControlConstants, SSEConstants } from "@/lib/constan
 import type { SubscriptionTierType, ReasoningEffortType } from "@/lib/effect/constants/SubscriptionConstants"
 import type { Database } from "@/types/database.types"
 import { toolsToOpenRouter, executeTool, validateToolInput, isReadOnlyTool } from "@/lib/effect/services/tools"
+import { runtime } from "@/lib/effect/runtime"
+import { CompactionService } from "@/lib/effect/services/compaction"
+import { SessionMemoryService } from "@/lib/effect/services/memory"
+import { SkillsService } from "@/lib/effect/services/skills"
+import { CostTrackerService } from "@/lib/effect/services/token"
 
 type UserUsage = Database["public"]["Functions"]["get_user_usage"]["Returns"][number]
 
@@ -147,8 +152,60 @@ async function runStreamingAgenticLoop(
   try {
     let messages = [...initialMessages]
 
+    /** @Logic.Chat.PreFlight.MemoryAndSkills */
+    const preflight = await runtime.runPromise(
+      Effect.gen(function* () {
+        const skills = yield* SkillsService
+        const memory = yield* SessionMemoryService
+        
+        const lastUserMsg = [...messages].reverse().find(m => m.role === "user")?.content || ""
+        let systemPromptInsert = ""
+        
+        const match = yield* skills.matchSkill(lastUserMsg)
+        if (match) {
+           systemPromptInsert += skills.buildSkillPrompt(match) + "\n\n"
+        }
+        
+        const newMemories = yield* memory.extractMemories(messages)
+        if (newMemories.length > 0) {
+           yield* memory.storeMemories(newMemories)
+        }
+        const currentMemory = yield* memory.getMemory()
+        const memoryPrompt = memory.buildMemoryPrompt(currentMemory)
+        if (memoryPrompt) {
+           systemPromptInsert += memoryPrompt + "\n\n"
+        }
+        return systemPromptInsert
+      })
+    )
+
+    if (preflight.trim()) {
+      const systemMsgIndex = messages.findIndex(m => m.role === "system")
+      if (systemMsgIndex >= 0) {
+        const existing = messages[systemMsgIndex]
+        if (existing) {
+          messages[systemMsgIndex] = { 
+            ...existing, 
+            role: existing.role || "system",
+            content: (existing.content || "") + "\n\n" + preflight 
+          }
+        }
+      } else {
+        messages = [{ role: "system", content: preflight }, ...messages]
+      }
+    }
+
     for (let i = 0; i < MAX_TOOL_ITERATIONS; i++) {
       console.log(`[StreamToolLoop] Iteration ${i + 1}/${MAX_TOOL_ITERATIONS}`)
+
+      /** @Logic.Chat.MicroCompaction */
+      const compacted = await runtime.runPromise(
+        Effect.gen(function* () {
+          const compaction = yield* CompactionService
+          return yield* compaction.microCompact(messages)
+        })
+      )
+      const payloadMessages = compacted.messages
 
       const response = await fetch(ApiConstants.OPENROUTER_CHAT_COMPLETIONS, {
         method: 'POST',
@@ -158,7 +215,7 @@ async function runStreamingAgenticLoop(
           'HTTP-Referer': process.env.NEXT_PUBLIC_SITE_URL || '',
           'X-Title': 'PR\\AI Assistant',
         },
-        body: JSON.stringify(buildRequestBody(messages)),
+        body: JSON.stringify(buildRequestBody(payloadMessages)),
         signal: controller.signal
       })
 
@@ -211,6 +268,18 @@ async function runStreamingAgenticLoop(
 
             if (delta?.content) {
               onChunk(line + '\n')
+            }
+
+            if (parsed.usage) {
+               await runtime.runPromise(
+                 Effect.gen(function* () {
+                   const costTracker = yield* CostTrackerService
+                   yield* costTracker.recordUsage(getModelConfig(tier).default, {
+                     input_tokens: parsed.usage.prompt_tokens,
+                     output_tokens: parsed.usage.completion_tokens
+                   })
+                 }).pipe(Effect.catchAll(() => Effect.succeed({})))
+               )
             }
           } catch {
             onChunk(line + '\n')
@@ -307,8 +376,60 @@ const runAgenticLoop = async (
 
     let messages = [...initialMessages]
 
+    /** @Logic.Chat.PreFlight.MemoryAndSkills */
+    const preflight = await runtime.runPromise(
+      Effect.gen(function* () {
+        const skills = yield* SkillsService
+        const memory = yield* SessionMemoryService
+        
+        const lastUserMsg = [...messages].reverse().find(m => m.role === "user")?.content || ""
+        let systemPromptInsert = ""
+        
+        const match = yield* skills.matchSkill(lastUserMsg)
+        if (match) {
+           systemPromptInsert += skills.buildSkillPrompt(match) + "\n\n"
+        }
+        
+        const newMemories = yield* memory.extractMemories(messages)
+        if (newMemories.length > 0) {
+           yield* memory.storeMemories(newMemories)
+        }
+        const currentMemory = yield* memory.getMemory()
+        const memoryPrompt = memory.buildMemoryPrompt(currentMemory)
+        if (memoryPrompt) {
+           systemPromptInsert += memoryPrompt + "\n\n"
+        }
+        return systemPromptInsert
+      })
+    )
+
+    if (preflight.trim()) {
+      const systemMsgIndex = messages.findIndex(m => m.role === "system")
+      if (systemMsgIndex >= 0) {
+        const existing = messages[systemMsgIndex]
+        if (existing) {
+          messages[systemMsgIndex] = { 
+            ...existing, 
+            role: existing.role || "system",
+            content: (existing.content || "") + "\n\n" + preflight 
+          }
+        }
+      } else {
+        messages = [{ role: "system", content: preflight }, ...messages]
+      }
+    }
+
     for (let i = 0; i < MAX_TOOL_ITERATIONS; i++) {
       console.log(`[ToolLoop] Iteration ${i + 1}/${MAX_TOOL_ITERATIONS}`)
+
+      /** @Logic.Chat.MicroCompaction */
+      const compacted = await runtime.runPromise(
+        Effect.gen(function* () {
+          const compaction = yield* CompactionService
+          return yield* compaction.microCompact(messages)
+        })
+      )
+      const payloadMessages = compacted.messages
 
       const response = await fetch(ApiConstants.OPENROUTER_CHAT_COMPLETIONS, {
         method: 'POST',
@@ -318,7 +439,7 @@ const runAgenticLoop = async (
           'HTTP-Referer': process.env.NEXT_PUBLIC_SITE_URL || '',
           'X-Title': 'PR\\AI Assistant',
         },
-        body: JSON.stringify(buildRequestBody(messages)),
+        body: JSON.stringify(buildRequestBody(payloadMessages)),
         signal: controller.signal
       })
 
@@ -330,6 +451,18 @@ const runAgenticLoop = async (
 
       const data = await response.json()
       const assistantMessage = data.choices?.[0]?.message
+
+      if (data.usage) {
+        await runtime.runPromise(
+          Effect.gen(function* () {
+            const costTracker = yield* CostTrackerService
+            yield* costTracker.recordUsage(getModelConfig(tier).default, {
+              input_tokens: data.usage.prompt_tokens,
+              output_tokens: data.usage.completion_tokens
+            })
+          }).pipe(Effect.catchAll(() => Effect.succeed({})))
+        )
+      }
 
       if (!assistantMessage) {
         return { success: true, data }
