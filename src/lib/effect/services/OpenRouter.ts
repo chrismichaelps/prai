@@ -14,9 +14,7 @@ import { createSearchContext, createSearchMessage, getDiscoveryQuery } from "./s
 import type { Personalization } from "../schemas/PersonalizationSchema"
 import { SSEConstants } from "@/lib/constants/app-constants"
 import { HttpStatus } from "@/app/api/_lib/constants/status-codes"
-import { toolsToOpenRouter } from "./tools"
-
-import { ChatResponseSchema, type ChatResponse } from "../schemas/OpenRouterSchema"
+import { type ChatResponse } from "../schemas/OpenRouterSchema"
 
 export const OpenRouter = Context.GenericTag<OpenRouter>("OpenRouter")
 
@@ -45,6 +43,7 @@ export const OpenRouterLayer = Layer.effect(
     const config = yield* ConfigService
     const promptBuilder = yield* PromptBuilderService
 
+    /** @Logic.OpenRouter.BuildSystemPrompt */
     const buildSystemPrompt = (t: (key: string, params?: Record<string, string>) => string, searchOptions?: PuertoRicoSearchOptions, personalization?: Personalization): string => {
       const basePrompt = promptBuilder.compose(t, undefined, personalization)
       return searchOptions
@@ -52,6 +51,7 @@ export const OpenRouterLayer = Layer.effect(
         : basePrompt
     }
 
+    /** @Logic.OpenRouter.Chat */
     const chat = (
       messages: ChatMessage[],
       searchOptions?: PuertoRicoSearchOptions,
@@ -68,33 +68,19 @@ export const OpenRouterLayer = Layer.effect(
           ...chatMessages
         ]
 
-        const requestBody: Record<string, unknown> = {
-          model: config.models.default,
+        const requestBody = {
           messages: enhancedMessages,
           stream: config.chatRequestConfig.stream,
-          temperature: config.chatRequestConfig.temperature,
-          max_tokens: config.chatRequestConfig.maxTokens,
-          tools: toolsToOpenRouter(),
-          provider: {
-            allow_fallbacks: true,
-            data_collection: "deny"
-          }
+          model: config.models.default
         }
 
-        if (sessionId) {
-          requestBody.session_id = sessionId
-        }
-
-        const request = yield* HttpClientRequest.post(`${config.openRouterBaseUrl}/chat/completions`).pipe(
-          HttpClientRequest.setHeader("Authorization", `Bearer ${config.apiKey}`),
-          HttpClientRequest.setHeader("HTTP-Referer", config.siteUrl),
-          HttpClientRequest.setHeader("X-Title", "PR AI Tourism Assistant"),
+        const request = yield* HttpClientRequest.post(`${config.siteUrl || ''}/api/chat`).pipe(
           HttpClientRequest.setHeader("Content-Type", "application/json"),
           HttpClientRequest.bodyJson(requestBody)
         )
 
         const res = yield* baseClient.execute(request)
-        
+
         if (!res.status || res.status >= HttpStatus.BAD_REQUEST) {
           const statusCode = res.status || HttpStatus.INTERNAL_SERVER_ERROR
           return yield* Effect.fail(new OpenRouterError({
@@ -123,9 +109,9 @@ export const OpenRouterLayer = Layer.effect(
             const toolCalls = parsed.choices?.[0]?.delta?.tool_calls || parsed.choices?.[0]?.message?.tool_calls || []
 
             if (content || reasoning || annotations.length > 0 || toolCalls.length > 0) {
-              return Option.some({ 
-                content, 
-                reasoning: reasoning || undefined, 
+              return Option.some({
+                content,
+                reasoning: reasoning || undefined,
                 annotations,
                 toolCalls: toolCalls.length > 0 ? toolCalls.map((tc: { id: string; function: { name: string; arguments: string } }) => ({
                   id: tc.id,

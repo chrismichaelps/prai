@@ -18,9 +18,10 @@ import type { Personalization } from "../schemas/PersonalizationSchema";
 /** @Service.Effect.PromptBuilder */
 export class PromptBuilderService extends Effect.Service<PromptBuilderService>()("PromptBuilder", {
   effect: Effect.gen(function* () {
-    const compose = (t: (key: string, params?: Record<string, string>) => string, extraCapabilities?: string, personalization?: Personalization) => {
+    // eslint-disable-next-line no-unused-vars
+    const compose = (_t: (key: string, params?: Record<string, string>) => string, extraCapabilities?: string, personalization?: Personalization) => {
       const personalizationPrompt = personalization 
-        ? buildPersonalizationPrompt(personalization, { t })
+        ? buildPersonalizationPrompt(personalization, { t: _t })
         : "";
 
       return [
