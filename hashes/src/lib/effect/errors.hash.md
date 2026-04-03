@@ -1,51 +1,29 @@
 ---
-State_ID: BigInt(0x2)
+State_ID: BigInt(0x3)
 Git_SHA: LATEST
-Grammar_Lock: "@root/hashes/grammar/effect.hash.md"
+Grammar_Lock: "@root/hashes/grammar/typescript.hash.md"
 ---
 
 ## @Effect.Errors
 
 ### [Signatures]
 ```ts
-export class ConfigError extends Data.TaggedError("ConfigError")<{
+export class QueryExpansionError extends Data.TaggedError("QueryExpansionError")<{
   readonly message: string
   readonly cause?: unknown
 }> {}
 
-export class OpenRouterError extends Data.TaggedError("OpenRouterError")<{
-  readonly message: string
-  readonly code: number
-  readonly rateLimit?: { readonly limit: string; readonly remaining: string; readonly reset: string }
-  readonly cause?: unknown
-}> {}
-
-export class AuthError extends Data.TaggedError("AuthError")<{
+export class ToolRelevanceError extends Data.TaggedError("ToolRelevanceError")<{
   readonly message: string
   readonly cause?: unknown
 }> {}
 
-export class BuildInfoError extends Data.TaggedError("BuildInfoError")<{
+export class SearchFilterError extends Data.TaggedError("SearchFilterError")<{
   readonly message: string
   readonly cause?: unknown
 }> {}
 
-export class ParseError extends Data.TaggedError("ParseError")<{
-  readonly message: string
-  readonly cause?: unknown
-}> {}
-
-export class RuntimeError extends Data.TaggedError("RuntimeError")<{
-  readonly message: string
-  readonly cause?: unknown
-}> {}
-
-export class AccessibilityError extends Data.TaggedError("AccessibilityError")<{
-  readonly message: string
-  readonly cause?: unknown
-}> {}
-
-export class SeoError extends Data.TaggedError("SeoError")<{
+export class FollowUpError extends Data.TaggedError("FollowUpError")<{
   readonly message: string
   readonly cause?: unknown
 }> {}
@@ -55,9 +33,10 @@ export class SeoError extends Data.TaggedError("SeoError")<{
 - **Error_Law:** All errors use `Data.TaggedError` — typed in E channel, yieldable in Effect.gen.
 - **Export_Law:** Flat exports from `@/lib/effect/errors`.
 - **Propagation_Law:** Errors propagate up to handlers via `Effect.catchAll` or `Effect.gen`.
+- **Domain_Separation_Law:** New services have their own error types: QueryExpansionError, ToolRelevanceError, SearchFilterError, FollowUpError.
 
 ### [Semantic Hash]
-Domain-level typed error definitions for all Effect services.
+Domain-level typed error definitions for all Effect services. Extended with new error types for query expansion, tool relevance, search filters, and follow-up suggestions.
 
 ### [Linkage]
-- **Used by:** All Effect services (`AuthError`, `ConfigError`, `OpenRouterError`, etc.)
+- **Used by:** All Effect services (`QueryExpansionError`, `ToolRelevanceError`, `SearchFilterError`, `FollowUpError`)

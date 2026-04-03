@@ -1,6 +1,6 @@
 ---
-State_ID: BigInt(0x1)
-Git_SHA: INIT
+State_ID: BigInt(0x2)
+Git_SHA: LATEST
 Grammar_Lock: "@root/hashes/grammar/effect.hash.md"
 ---
 
@@ -10,7 +10,11 @@ Grammar_Lock: "@root/hashes/grammar/effect.hash.md"
 ```ts
 export class PromptBuilderService extends Effect.Service<PromptBuilderService>()("PromptBuilder", {
   effect: Effect.gen(function* () {
-    // ...
+    const compose: (
+      _t: (key: string, params?: Record<string, string>) => string,
+      extraCapabilities?: string,
+      personalization?: Personalization
+    ) => string
     return { compose } as const
   })
 }) {}
@@ -19,7 +23,7 @@ export class PromptBuilderService extends Effect.Service<PromptBuilderService>()
 **Interface:**
 ```ts
 interface PromptBuilderShape {
-  readonly compose: (extraCapabilities?: string, personalization?: Personalization) => string
+  readonly compose: (_t: (key: string, params?: Record<string, string>) => string, extraCapabilities?: string, personalization?: Personalization) => string
 }
 ```
 
@@ -28,9 +32,10 @@ interface PromptBuilderShape {
 - **Export_Law:** Single Effect.Service class export. Consumed via tag yield*.
 - **Transformation_Law:** Pure string composition — no I/O, no side effects.
 - **Personalization_Law:** Injects personalization section into system prompt when provided.
+- **I18n_Law:** Accepts translation function `_t` for localized prompt composition.
 
 ### [Semantic Hash]
-Builds the LLM system prompt string by composing domain template sections. Includes role, safety, rules, guardrails, media accuracy, output format, and personalization templates.
+Builds the LLM system prompt string by composing domain template sections. Includes role, safety, rules, guardrails, media accuracy, output format, and personalization templates. Accepts an i18n translation function for localized prompt building.
 
 ### [Linkage]
 - **Upstream:** None
