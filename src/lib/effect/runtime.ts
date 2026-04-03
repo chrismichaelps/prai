@@ -15,7 +15,11 @@ import { CompactionService } from "./services/compaction";
 import { CoordinatorService } from "./services/coordinator";
 import { ProactiveService } from "./services/proactive";
 import { SessionMemoryService } from "./services/memory";
-import { SkillsService } from "./services/skills";
+import { SkillsService } from "./services/skills"
+import { QueryExpansionService } from "./services/query";
+import { ToolRelevanceService } from "./services/relevance";
+import { SearchFilterService } from "./services/filters";
+import { FollowUpSuggestionsService } from "./services/followup";
 
 /** @Logic.Effect.Runtime */
 const BaseLayer = Layer.mergeAll(
@@ -52,7 +56,13 @@ const ContextLayer = Layer.mergeAll(
   CoordinatorService.Default,
   ProactiveService.Default,
   SessionMemoryService.Default,
-  SkillsService.Default
+  SkillsService.Default,
+  QueryExpansionService.Default.pipe(
+    Layer.provide(SessionMemoryService.Default)
+  ),
+  ToolRelevanceService.Default,
+  SearchFilterService.Default,
+  FollowUpSuggestionsService.Default
 )
 
 /** @Logic.Effect.MainLayer.Init */

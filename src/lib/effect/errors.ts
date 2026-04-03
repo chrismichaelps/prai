@@ -93,3 +93,27 @@ export class CompactionError extends Data.TaggedError("CompactionError")<{
   readonly method: "micro" | "full"
   readonly cause?: unknown
 }> {}
+
+/** @Error.Effect.QueryExpansion */
+export class QueryExpansionError extends Data.TaggedError("QueryExpansionError")<{
+  readonly message: string
+  readonly cause?: unknown
+}> {}
+
+/** @Error.Effect.ToolRelevance */
+export class ToolRelevanceError extends Data.TaggedError("ToolRelevanceError")<{
+  readonly message: string
+  readonly cause?: unknown
+}> {}
+
+/** @Error.Effect.SearchFilter */
+export class SearchFilterError extends Data.TaggedError("SearchFilterError")<{
+  readonly message: string
+  readonly cause?: unknown
+}> {}
+
+/** @Error.Effect.FollowUp */
+export class FollowUpError extends Data.TaggedError("FollowUpError")<{
+  readonly message: string
+  readonly cause?: unknown
+}> {}

@@ -15,6 +15,12 @@ export const COMPACT_MAX_OUTPUT_TOKENS = 8_000
 /** @Constant.Compaction.MinMessagesToCompact */
 export const MIN_MESSAGES_TO_COMPACT = 4
 
+/** @Constant.Compaction.FullCompactMinMessages */
+export const FULL_COMPACT_MIN_MESSAGES = 20
+
+/** @Constant.Compaction.SystemInstruction */
+export const COMPACT_SYSTEM_INSTRUCTION = "Eres un asistente que crea resúmenes concisos de conversaciones. Responde solo con el resumen, sin texto adicional."
+
 /** @Constant.Compaction.SummaryPrompt */
 export const COMPACT_SUMMARY_PROMPT = `Resume la conversación hasta ahora en un formato conciso que preserve:
 1. Preferencias clave del usuario y objetivos declarados

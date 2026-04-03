@@ -17,9 +17,20 @@ import type { Database } from "@/types/database.types"
 import { toolsToOpenRouter, executeTool, validateToolInput, isReadOnlyTool } from "@/lib/effect/services/tools"
 import { runtime } from "@/lib/effect/runtime"
 import { CompactionService } from "@/lib/effect/services/compaction"
+import { COMPACT_MAX_OUTPUT_TOKENS } from "@/lib/effect/constants/compaction/CompactionConstants"
 import { SessionMemoryService } from "@/lib/effect/services/memory"
 import { SkillsService } from "@/lib/effect/services/skills"
 import { CostTrackerService } from "@/lib/effect/services/token"
+import { QueryExpansionService } from "@/lib/effect/services/query"
+import { ToolRelevanceService } from "@/lib/effect/services/relevance"
+import { SearchFilterService, enrichSearchQuery, hasFilters } from "@/lib/effect/services/filters"
+import type { SearchFilters } from "@/lib/effect/services/filters"
+import { FollowUpSuggestionsService } from "@/lib/effect/services/followup"
+import {
+  FULL_COMPACT_MIN_MESSAGES,
+  COMPACT_SYSTEM_INSTRUCTION
+} from "@/lib/effect/constants/compaction/CompactionConstants"
+import { QUERY_EXPANSION_MIN_LENGTH } from "@/lib/effect/constants/query/QueryExpansionConstants"
 
 type UserUsage = Database["public"]["Functions"]["get_user_usage"]["Returns"][number]
 
@@ -144,11 +155,13 @@ export async function POST(req: Request) {
     messages: AgentMessage[],
     supabaseClient: SupabaseClient,
     userId: string
-  ): Promise<string> =>
+  ): Promise<{ systemPromptInsert: string; filters: SearchFilters }> =>
     runtime.runPromise(
       Effect.gen(function* () {
         const skills = yield* SkillsService
         const memory = yield* SessionMemoryService
+        const expansion = yield* QueryExpansionService
+        const filterSvc = yield* SearchFilterService
 
         const lastUserMsg = [...messages].reverse().find(m => m.role === "user")?.content || ""
         let systemPromptInsert = ""
@@ -170,9 +183,129 @@ export async function POST(req: Request) {
         if (memoryPrompt) {
           systemPromptInsert += memoryPrompt + "\n\n"
         }
-        return systemPromptInsert
+
+        /** @Logic.Chat.PreFlight.QueryExpansion */
+        const [expansionResult, filters] = yield* Effect.all(
+          [
+            lastUserMsg.length >= QUERY_EXPANSION_MIN_LENGTH
+              ? expansion.expand(lastUserMsg, messages)
+              : Effect.succeed({ semantic: lastUserMsg, keywords: [] as readonly string[] }),
+            filterSvc.extract(lastUserMsg, messages)
+          ],
+          { concurrency: "unbounded" }
+        )
+
+        const { semantic, keywords } = expansionResult
+        const hasGuidance = semantic !== lastUserMsg || keywords.length > 0
+        if (hasGuidance) {
+          const lines = [`semantic: ${semantic}`]
+          if (keywords.length > 0) lines.push(`keywords: ${keywords.join("; ")}`)
+          systemPromptInsert += `<search_guidance>\n${lines.join("\n")}\n</search_guidance>\n\n`
+        }
+
+        if (hasFilters(filters)) {
+          const filterLines: string[] = []
+          if (filters.time) filterLines.push(`time: ${filters.time}`)
+          if (filters.location) filterLines.push(`location: ${filters.location}`)
+          if (filters.budget) filterLines.push(`budget: ${filters.budget}`)
+          systemPromptInsert += `<search_filters>\n${filterLines.join("\n")}\n</search_filters>\n\n`
+        }
+
+        return { systemPromptInsert, filters }
       })
     )
+
+  /** @Logic.Chat.FullCompaction */
+  const runFullCompactionIfNeeded = async (
+    messages: AgentMessage[],
+    tier: SubscriptionTierType
+  ): Promise<AgentMessage[]> => {
+    const nonSystemCount = messages.filter(m => m.role !== "system").length
+    if (nonSystemCount < FULL_COMPACT_MIN_MESSAGES) return messages
+
+    return runtime.runPromise(
+      Effect.gen(function* () {
+        const compaction = yield* CompactionService
+        const prompt = compaction.buildCompactPrompt(messages)
+
+        const response = yield* Effect.tryPromise({
+          try: () => fetch(ApiConstants.OPENROUTER_CHAT_COMPLETIONS, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
+              "HTTP-Referer": process.env.NEXT_PUBLIC_SITE_URL || "",
+              "X-Title": "PR\\AI Assistant"
+            },
+            body: JSON.stringify({
+              model: getModelConfig(tier).default,
+              messages: [
+                { role: "system", content: COMPACT_SYSTEM_INSTRUCTION },
+                { role: "user", content: prompt }
+              ],
+              stream: false,
+              max_tokens: COMPACT_MAX_OUTPUT_TOKENS
+            })
+          }),
+          catch: () => null as Response | null
+        })
+
+        if (!response?.ok) return messages
+
+        const data = yield* Effect.tryPromise({
+          try: () => response.json() as Promise<{ choices?: Array<{ message?: { content?: string } }> }>,
+          catch: () => null
+        })
+
+        const summary = data?.choices?.[0]?.message?.content?.trim()
+        if (!summary) return messages
+
+        const { messages: compacted } = yield* compaction.fullCompact(messages, summary)
+        const systemMsg = messages.find(m => m.role === "system")
+        return systemMsg ? [systemMsg, ...compacted] : compacted
+      }).pipe(
+        Effect.catchAll(() => Effect.succeed(messages))
+      )
+    )
+  }
+
+  /** @Logic.Chat.PostFlight.Memory */
+  const runPostFlight = async (
+    supabaseClient: SupabaseClient,
+    userId: string
+  ): Promise<void> => {
+    if (!userId) return
+    await runtime.runPromise(
+      Effect.gen(function* () {
+        const memory = yield* SessionMemoryService
+        const currentMem = yield* memory.getMemory()
+        if (currentMem.entries.length > 0) {
+          yield* Effect.asVoid(memory.persistToSupabase(supabaseClient, userId, currentMem.entries))
+        }
+      }).pipe(Effect.catchAll(() => Effect.succeed(undefined)))
+    )
+  }
+
+  /** @Logic.Chat.PostFlight.FollowUps */
+  const runFollowUps = async (
+    messages: AgentMessage[],
+    onChunk: (_chunk: string) => void
+  ): Promise<void> => {
+    await runtime.runPromise(
+      Effect.gen(function* () {
+        const followUp = yield* FollowUpSuggestionsService
+        const suggestions = yield* followUp.generate(messages)
+        if (suggestions.length > 0) {
+          const nextActions = `<next_actions>${JSON.stringify(suggestions)}</next_actions>`
+          onChunk(
+            SSEConstants.DATA_PREFIX +
+            JSON.stringify({ choices: [{ delta: { content: nextActions }, finish_reason: null }] }) +
+            '\n'
+          )
+        }
+      }).pipe(Effect.catchAll(() => Effect.succeed(undefined)))
+    )
+  }
 
   /** @Logic.Chat.ApplyPreflight */
   const applyPreflight = (messages: AgentMessage[], preflight: string): AgentMessage[] => {
@@ -221,8 +354,9 @@ export async function POST(req: Request) {
     }
 
     try {
-      const preflight = await runPreflight(initialMessages, supabaseClient, userId)
-      let messages = applyPreflight([...initialMessages], preflight)
+      let messages = await runFullCompactionIfNeeded([...initialMessages], tier)
+      const { systemPromptInsert, filters } = await runPreflight(messages, supabaseClient, userId)
+      messages = applyPreflight(messages, systemPromptInsert)
 
       for (let i = 0; i < MAX_TOOL_ITERATIONS; i++) {
 
@@ -343,62 +477,78 @@ export async function POST(req: Request) {
           return { success: true }
         }
 
-        const toolMessages: { role: string; tool_call_id: string; name: string; content: string }[] = []
-
-        for (const tc of mergedToolCalls) {
+        /** @Logic.Chat.StreamingTools.Parse */
+        type ParsedStreamingCall = { id: string; toolName: string; args: Record<string, unknown> | null }
+        const parsedCalls: ParsedStreamingCall[] = mergedToolCalls.map(tc => {
           const { id, function: fn } = tc
-          const toolName = fn.name
+          if (!fn.name) return { id, toolName: '', args: null }
+          if (!fn.arguments?.trim() || fn.arguments.trim() === "{}") return { id, toolName: fn.name, args: null }
+          try { return { id, toolName: fn.name, args: JSON.parse(fn.arguments) } }
+          catch { return { id, toolName: fn.name, args: null } }
+        })
 
-          if (!toolName) {
-            continue
-          }
-
-          let args = {}
+        const execStreamingTool = async (toolName: string, args: Record<string, unknown>): Promise<string> => {
+          /** @Logic.Chat.SearchFilter.ExecutorInjection */
+          const enrichedArgs = isReadOnlyTool(toolName) && typeof args.query === "string"
+            ? { ...args, query: enrichSearchQuery(args.query, filters) }
+            : args
+          const validation = validateToolInput(toolName, enrichedArgs)
+          if (!validation.success) return JSON.stringify({ error: validation.error })
           try {
-            if (fn.arguments && fn.arguments.trim() && fn.arguments.trim() !== "{}") {
-              args = JSON.parse(fn.arguments)
-            } else {
-              toolMessages.push({
-                role: "tool",
-                tool_call_id: id,
-                name: toolName,
-                content: JSON.stringify({ error: "Invalid tool arguments" })
-              })
-              continue
-            }
-          } catch {
-            toolMessages.push({
-              role: "tool",
-              tool_call_id: id,
-              name: toolName,
-              content: JSON.stringify({ error: "Invalid tool arguments" })
-            })
-            continue
-          }
-
-          const validation = validateToolInput(toolName, args)
-          let toolResult: string
-
-          if (!validation.success) {
-            toolResult = JSON.stringify({ error: validation.error })
-          } else {
-            try {
-              const execResult = await Effect.runPromise(
-                Effect.timeout(executeTool(toolName, validation.parsed || args), TOOL_EXECUTION_TIMEOUT_MS)
-              )
-              toolResult = execResult
-            } catch (execError) {
-              toolResult = JSON.stringify({ error: `Tool execution failed: ${String(execError)}` })
-            }
-          }
-
-          toolMessages.push({
-            role: "tool",
-            tool_call_id: id,
-            name: toolName,
-            content: toolResult
-          })
+            return await Effect.runPromise(
+              Effect.timeout(executeTool(toolName, validation.parsed || enrichedArgs), TOOL_EXECUTION_TIMEOUT_MS)
+            )
+          } catch (e) { return JSON.stringify({ error: `Tool execution failed: ${String(e)}` }) }
         }
+
+        /** @Logic.Chat.StreamingTools.ParallelExec */
+        const resultMap = new Map<number, string>()
+        const readOnlyIdx = parsedCalls.map((p, i) => p.args && isReadOnlyTool(p.toolName) ? i : -1).filter(i => i >= 0)
+        const writeIdx = parsedCalls.map((p, i) => p.args && !isReadOnlyTool(p.toolName) ? i : -1).filter(i => i >= 0)
+
+        await Promise.all(readOnlyIdx.map(async i => {
+          const p = parsedCalls[i]!
+          resultMap.set(i, await execStreamingTool(p.toolName, p.args!))
+        }))
+
+        for (const i of writeIdx) {
+          const p = parsedCalls[i]!
+          resultMap.set(i, await execStreamingTool(p.toolName, p.args!))
+        }
+
+        /** @Logic.Chat.ToolRelevance */
+        const lastQuery = [...messages].reverse().find(m => m.role === "user")?.content || ""
+        const rawResults = parsedCalls
+          .filter(p => p.toolName !== '' && p.args !== null && isReadOnlyTool(p.toolName))
+          .map((p, i) => ({ toolName: p.toolName, result: resultMap.get(i) ?? "" }))
+
+        const scoredResults = rawResults.length > 0
+          ? await runtime.runPromise(
+              Effect.gen(function* () {
+                const relevance = yield* ToolRelevanceService
+                return yield* relevance.score(lastQuery, rawResults)
+              })
+            )
+          : rawResults
+
+        const scoredMap = new Map(scoredResults.map((r, i) => [`${rawResults[i]?.toolName ?? ""}${i}`, r.result]))
+
+        let readOnlyCounter = 0
+        const toolMessages = parsedCalls
+          .filter(p => p.toolName !== '')
+          .map((p, i) => {
+            let content: string
+            if (p.args === null) {
+              content = JSON.stringify({ error: "Invalid tool arguments" })
+            } else if (isReadOnlyTool(p.toolName)) {
+              const key = p.toolName + readOnlyCounter
+              content = scoredMap.get(key) ?? (resultMap.get(i) ?? JSON.stringify({ error: "Execution error" }))
+              readOnlyCounter++
+            } else {
+              content = resultMap.get(i) ?? JSON.stringify({ error: "Execution error" })
+            }
+            return { role: "tool" as const, tool_call_id: p.id, name: p.toolName, content }
+          })
 
         messages = [
           ...messages,
@@ -440,8 +590,9 @@ export async function POST(req: Request) {
         ]
       })
 
-      const preflight = await runPreflight(initialMessages, supabaseClient, userId)
-      let messages = applyPreflight([...initialMessages], preflight)
+      let messages = await runFullCompactionIfNeeded([...initialMessages], tier)
+      const { systemPromptInsert, filters } = await runPreflight(messages, supabaseClient, userId)
+      messages = applyPreflight(messages, systemPromptInsert)
 
       for (let i = 0; i < MAX_TOOL_ITERATIONS; i++) {
 
@@ -511,16 +662,17 @@ export async function POST(req: Request) {
         const readOnlyCalls = parsedToolCalls.filter((tc: { name: string }) => isReadOnlyTool(tc.name))
         const writeCalls = parsedToolCalls.filter((tc: { name: string }) => !isReadOnlyTool(tc.name))
 
-        const executeToolCall = async (id: string, toolName: string, args: Record<string, unknown>): Promise<string> => {
-          const validation = validateToolInput(toolName, args)
-          if (!validation.success) {
-            return JSON.stringify({ error: validation.error })
-          }
+        const executeToolCall = async (toolName: string, args: Record<string, unknown>): Promise<string> => {
+          /** @Logic.Chat.SearchFilter.ExecutorInjection */
+          const enrichedArgs = isReadOnlyTool(toolName) && typeof args.query === "string"
+            ? { ...args, query: enrichSearchQuery(args.query, filters) }
+            : args
+          const validation = validateToolInput(toolName, enrichedArgs)
+          if (!validation.success) return JSON.stringify({ error: validation.error })
           try {
-            const execResult = await Effect.runPromise(
-              Effect.timeout(executeTool(toolName, validation.parsed || args), TOOL_EXECUTION_TIMEOUT_MS)
+            return await Effect.runPromise(
+              Effect.timeout(executeTool(toolName, validation.parsed || enrichedArgs), TOOL_EXECUTION_TIMEOUT_MS)
             )
-            return execResult
           } catch (execError) {
             return JSON.stringify({ error: `Tool execution failed: ${String(execError)}` })
           }
@@ -529,20 +681,31 @@ export async function POST(req: Request) {
         if (readOnlyCalls.length > 0) {
           const readOnlyResults = await Promise.all(
             readOnlyCalls.map(async (tc: { id: string; name: string; args: Record<string, unknown> }) => {
-              const result = await executeToolCall(tc.id, tc.name, tc.args)
+              const result = await executeToolCall(tc.name, tc.args)
               return { id: tc.id, name: tc.name, content: result }
             })
           )
-          toolMessages.push(...readOnlyResults.map(r => ({
+
+          /** @Logic.Chat.ToolRelevance */
+          const lastQuery = [...messages].reverse().find(m => m.role === "user")?.content || ""
+          const toScore = readOnlyResults.map(r => ({ toolName: r.name, result: r.content }))
+          const scored = await runtime.runPromise(
+            Effect.gen(function* () {
+              const relevance = yield* ToolRelevanceService
+              return yield* relevance.score(lastQuery, toScore)
+            })
+          )
+
+          toolMessages.push(...scored.map((r, idx) => ({
             role: "tool" as const,
-            tool_call_id: r.id,
-            name: r.name,
-            content: r.content
+            tool_call_id: readOnlyCalls[idx]!.id,
+            name: r.toolName,
+            content: r.result
           })))
         }
 
         for (const tc of writeCalls) {
-          const result = await executeToolCall(tc.id, tc.name, tc.args)
+          const result = await executeToolCall(tc.name, tc.args)
           toolMessages.push({
             role: "tool",
             tool_call_id: tc.id,
@@ -590,6 +753,7 @@ export async function POST(req: Request) {
 
           if (!isStreaming) {
             const result = await runAgenticLoop([...params.messages], auth.userId, auth.tier, auth.supabaseClient)
+            void runPostFlight(auth.supabaseClient, auth.userId)
             const usageData = result.data && typeof result.data === 'object' ? (result.data as { usage?: { total_tokens?: number; cost?: number } }).usage || {} : {}
             const totalTokens = usageData.total_tokens || 0
             const cost = usageData.cost || 0
@@ -630,11 +794,16 @@ export async function POST(req: Request) {
                   onChunk
                 )
 
+                void runPostFlight(auth.supabaseClient, auth.userId)
+
                 if (!result.success) {
                   const errorMessage = result.error || "Request failed"
                   onChunk(SSEConstants.DATA_PREFIX + JSON.stringify({
                     choices: [{ delta: { content: "" }, finish_reason: "stop", error: errorMessage }]
                   }) + '\n')
+                } else {
+                  /** @Logic.Chat.PostFlight.FollowUps */
+                  await runFollowUps(initialMessages, onChunk)
                 }
 
                 controller.enqueue(encoder.encode(SSEConstants.DATA_PREFIX + SSEConstants.DONE + '\n'))
