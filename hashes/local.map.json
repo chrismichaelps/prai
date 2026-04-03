@@ -1,6 +1,6 @@
 {
   "shard_id": "@root/src",
-  "state_anchor": "BigInt:0x0fc98cc",
+  "state_anchor": "BigInt:0x1fc98dd",
   "parent_bridge": "@root/hashes/local.map.json",
   "git_anchor": "LATEST",
   "cache_integrity": "VERIFIED",
@@ -560,7 +560,11 @@
         "VoiceServiceLive",
         "I18nLive",
         "BuildInfoService",
-        "SeoService"
+        "SeoService",
+        "QueryExpansionService",
+        "ToolRelevanceService",
+        "SearchFilterService",
+        "FollowUpSuggestionsService"
       ],
       "fidelity_level": "Active"
     },
@@ -1177,6 +1181,101 @@
       "hash_reference": "@root/hashes/src/types/ui.hash.md",
       "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
       "dependencies": [],
+      "fidelity_level": "Active"
+    },
+    "lib_effect_services_query_QueryExpansion": {
+      "file_path": "@root/src/lib/effect/services/query/QueryExpansion.ts",
+      "hash_reference": "@root/hashes/src/lib/effect/services/query/QueryExpansion.ts.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "SessionMemoryService",
+        "QueryExpansionConstants",
+        "ApiConstants"
+      ],
+      "fidelity_level": "Active"
+    },
+    "lib_effect_services_relevance_ToolRelevance": {
+      "file_path": "@root/src/lib/effect/services/relevance/ToolRelevance.ts",
+      "hash_reference": "@root/hashes/src/lib/effect/services/relevance/ToolRelevance.ts.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "ToolRelevanceConstants",
+        "ApiConstants"
+      ],
+      "fidelity_level": "Active"
+    },
+    "lib_effect_services_filters_SearchFilter": {
+      "file_path": "@root/src/lib/effect/services/filters/SearchFilter.ts",
+      "hash_reference": "@root/hashes/src/lib/effect/services/filters/SearchFilter.ts.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "SearchFilterConstants",
+        "ApiConstants"
+      ],
+      "fidelity_level": "Active"
+    },
+    "lib_effect_services_followup_FollowUp": {
+      "file_path": "@root/src/lib/effect/services/followup/FollowUp.ts",
+      "hash_reference": "@root/hashes/src/lib/effect/services/followup/FollowUp.ts.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "FollowUpConstants",
+        "ApiConstants"
+      ],
+      "fidelity_level": "Active"
+    },
+    "lib_effect_constants_query_QueryExpansionConstants": {
+      "file_path": "@root/src/lib/effect/constants/query/QueryExpansionConstants.ts",
+      "hash_reference": "@root/hashes/src/lib/effect/constants/query/QueryExpansionConstants.ts.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [],
+      "fidelity_level": "Active"
+    },
+    "lib_effect_constants_relevance_ToolRelevanceConstants": {
+      "file_path": "@root/src/lib/effect/constants/relevance/ToolRelevanceConstants.ts",
+      "hash_reference": "@root/hashes/src/lib/effect/constants/relevance/ToolRelevanceConstants.ts.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [],
+      "fidelity_level": "Active"
+    },
+    "lib_effect_constants_filters_SearchFilterConstants": {
+      "file_path": "@root/src/lib/effect/constants/filters/SearchFilterConstants.ts",
+      "hash_reference": "@root/hashes/src/lib/effect/constants/filters/SearchFilterConstants.ts.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [],
+      "fidelity_level": "Active"
+    },
+    "lib_effect_constants_followup_FollowUpConstants": {
+      "file_path": "@root/src/lib/effect/constants/followup/FollowUpConstants.ts",
+      "hash_reference": "@root/hashes/src/lib/effect/constants/followup/FollowUpConstants.ts.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [],
+      "fidelity_level": "Active"
+    },
+    "lib_effect_services_tools_executor": {
+      "file_path": "@root/src/lib/effect/services/tools/executor.ts",
+      "hash_reference": "@root/hashes/src/lib/effect/services/tools/executor.ts.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "Tool types/schemas",
+        "SessionMemoryService"
+      ],
+      "fidelity_level": "Active"
+    },
+    "lib_effect_services_tools_schemas": {
+      "file_path": "@root/src/lib/effect/services/tools/schemas.ts",
+      "hash_reference": "@root/hashes/src/lib/effect/services/tools/schemas.ts.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [],
+      "fidelity_level": "Active"
+    },
+    "lib_effect_services_tools_types": {
+      "file_path": "@root/src/lib/effect/services/tools/types.ts",
+      "hash_reference": "@root/hashes/src/lib/effect/services/tools/types.ts.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "ToolParamsSchemas"
+      ],
       "fidelity_level": "Active"
     }
   }

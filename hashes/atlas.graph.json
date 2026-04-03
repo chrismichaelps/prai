@@ -1,6 +1,6 @@
 {
   "graph_version": "2.0",
-  "state_anchor": "BigInt:0x0fc98cc",
+  "state_anchor": "BigInt:0x1fc98dd",
   "description": "Directional dependency edges auto-generated from Linkage blocks in .hash.md contracts.",
   "grammar_refs": {
     "effect": "@root/hashes/grammar/effect.hash.md",
@@ -1002,6 +1002,69 @@
       "type": "LAYER_DEPENDENCY",
       "impact": "HIGH",
       "reason": "Leverages the core domain issue and comment types to strictly type the Redux state."
+    },
+    {
+      "from": "@root/src/app/api/chat/route.ts",
+      "to": "@root/src/lib/effect/services/query/QueryExpansion.ts",
+      "type": "SERVICE_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Invokes QueryExpansionService during preflight to rephrase user queries for semantic search and keyword extraction."
+    },
+    {
+      "from": "@root/src/app/api/chat/route.ts",
+      "to": "@root/src/lib/effect/services/filters/SearchFilter.ts",
+      "type": "SERVICE_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Extracts time/location/budget filters during preflight and enriches search tool queries."
+    },
+    {
+      "from": "@root/src/app/api/chat/route.ts",
+      "to": "@root/src/lib/effect/services/relevance/ToolRelevance.ts",
+      "type": "SERVICE_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Scores tool execution results for relevance and filters out irrelevant ones post-execution."
+    },
+    {
+      "from": "@root/src/app/api/chat/route.ts",
+      "to": "@root/src/lib/effect/services/followup/FollowUp.ts",
+      "type": "SERVICE_DEPENDENCY",
+      "impact": "MEDIUM",
+      "reason": "Generates follow-up suggestion pills after response completion, injected as SSE <next_actions> tags."
+    },
+    {
+      "from": "@root/src/lib/effect/services/query/QueryExpansion.ts",
+      "to": "@root/src/lib/effect/services/memory/SessionMemory.ts",
+      "type": "SERVICE_DEPENDENCY",
+      "impact": "MEDIUM",
+      "reason": "Injects user memory context into expansion prompts for personalized query reformulation."
+    },
+    {
+      "from": "@root/src/lib/effect/runtime.ts",
+      "to": "@root/src/lib/effect/services/query/QueryExpansion.ts",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Registers QueryExpansionService in ContextLayer with SessionMemoryService dependency."
+    },
+    {
+      "from": "@root/src/lib/effect/runtime.ts",
+      "to": "@root/src/lib/effect/services/relevance/ToolRelevance.ts",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Registers ToolRelevanceService in ContextLayer."
+    },
+    {
+      "from": "@root/src/lib/effect/runtime.ts",
+      "to": "@root/src/lib/effect/services/filters/SearchFilter.ts",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Registers SearchFilterService in ContextLayer."
+    },
+    {
+      "from": "@root/src/lib/effect/runtime.ts",
+      "to": "@root/src/lib/effect/services/followup/FollowUp.ts",
+      "type": "LAYER_DEPENDENCY",
+      "impact": "HIGH",
+      "reason": "Registers FollowUpSuggestionsService in ContextLayer."
     }
   ]
 }
