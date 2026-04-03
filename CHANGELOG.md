@@ -1,5 +1,27 @@
 # Changelog
 
+## 2026-04-03
+
+This is the biggest update to the AI engine so far. We completely redesigned how the chat processes requests with a new **preflight pipeline** that runs before every response. The AI now understands search context — it can extract filters like time, location, and budget from your messages and automatically apply them to searches. It also rephrases ambiguous queries into better search terms using your conversation history.
+
+We added a **relevance scoring system** that evaluates tool results and filters out irrelevant ones, so you only see useful information. After each response, the AI now generates **follow-up suggestion pills** with natural, topic-style actions you can tap to continue exploring.
+
+Long conversations now auto-compact into concise summaries so the AI never loses context. Your preferences and facts shared during chats are now **remembered across sessions** — tell the AI about allergies, dietary restrictions, budget, or travel companions once, and it'll remember next time.
+
+We also added a new `remember_user_fact` tool so the AI can explicitly save important details you share, and localized all tool descriptions to Spanish for more consistent behavior.
+
+## 2026-04-02
+
+Stabilized the agentic loop with fetch retry logic for API rate limits. Migrated exception handling and suggestion display to Redux state for consistency. Expanded memory extraction regex patterns to catch more edge cases like "soy alérgico a los mariscos". Pointed the OpenRouter client to the secure internal gateway.
+
+## 2026-04-01
+
+A massive foundation day. We shipped **tool calling** so the AI can search for beaches, restaurants, hotels, events, weather, and transport in Puerto Rico. Added **token estimation and cost tracking** services behind the scenes. Built the **context compaction** system for long conversations. Laid the groundwork for **session memory** and **skill extraction**. Added a **coordinator and proactive alert** system. Wired up the full Effect runtime with proper dependency injection across all services. Started implementing **SessionMemory persistence** in Supabase with improved prompt guidelines.
+
+## 2026-03-31
+
+Added **prompt suggestions** — the AI now generates follow-up questions you can tap to continue the conversation. This includes the core logic, React hook, and UI integration.
+
 ## 2026-03-30
 
 We added haptic feedback for mobile interactions, so tapping buttons like Send, the microphone, suggestions, and sidebar items now feels more responsive and satisfying. We also standardized all code comments into clean JSDoc format and moved a lot of scattered magic values and constants into a central file to make the codebase cleaner and more maintainable.
