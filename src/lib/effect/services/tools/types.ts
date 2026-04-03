@@ -33,71 +33,79 @@ export interface ToolDefinition {
 export const PUERTO_RICO_TOOLS: ToolDefinition[] = [
   {
     name: "search_beaches",
-    description: "Search for beaches in Puerto Rico by location, activities, or characteristics. Use this when users ask about beaches, swimming, surfing, snorkeling, or beach activities.",
+    description: "Busca playas en Puerto Rico por ubicación, actividades o características. Úsalo cuando el usuario pregunte sobre playas, natación, surf, snorkel o actividades en la playa.",
     parameters: ToolParamsSchemas.search_beaches,
     readOnly: true,
     alwaysLoad: true
   },
   {
     name: "search_restaurants",
-    description: "Search for restaurants in Puerto Rico by cuisine, location, or price range. Use this when users ask about food, dining, local cuisine, or specific dishes.",
+    description: "Busca restaurantes en Puerto Rico por tipo de cocina, ubicación o rango de precios. Úsalo cuando el usuario pregunte sobre comida, restaurantes, cocina local o platos específicos.",
     parameters: ToolParamsSchemas.search_restaurants,
     readOnly: true,
     alwaysLoad: true
   },
   {
     name: "search_events",
-    description: "Search for events, festivals, concerts, and nightlife in Puerto Rico. Use this when users ask about what's happening, festivals, live music, or nightlife.",
+    description: "Busca eventos, festivales, conciertos y vida nocturna en Puerto Rico. Úsalo cuando el usuario pregunte qué está pasando, sobre festivales, música en vivo o salidas nocturnas.",
     parameters: ToolParamsSchemas.search_events,
     readOnly: true,
     alwaysLoad: true
   },
   {
     name: "search_places",
-    description: "Search for general places, attractions, and things to do in Puerto Rico. Use this for general tourism questions about places to visit, attractions, or activities.",
+    description: "Busca lugares generales, atracciones y actividades turísticas en Puerto Rico. Úsalo para preguntas generales sobre lugares que visitar, atracciones o cosas que hacer.",
     parameters: ToolParamsSchemas.search_places,
     readOnly: true,
     alwaysLoad: true
   },
   {
     name: "search_hotels",
-    description: "Search for accommodation in Puerto Rico including hotels, resorts, and rentals. Use this when users ask about where to stay, hotels, or lodging.",
+    description: "Busca hospedaje en Puerto Rico incluyendo hoteles, resorts y alquileres. Úsalo cuando el usuario pregunte dónde quedarse, hoteles o alojamiento.",
     parameters: ToolParamsSchemas.search_hotels,
     readOnly: true,
     alwaysLoad: true
   },
   {
     name: "search_weather",
-    description: "Get weather information for Puerto Rico. Use this when users ask about weather, best time to visit, or current conditions.",
+    description: "Obtén información del tiempo en Puerto Rico. Úsalo cuando el usuario pregunte sobre el clima, la mejor época para visitar o las condiciones actuales.",
     parameters: ToolParamsSchemas.search_weather,
     readOnly: true,
     alwaysLoad: true
   },
   {
     name: "search_transport",
-    description: "Get transportation information for Puerto Rico. Use this for how to get around, car rental, public transport, or directions.",
+    description: "Obtén información de transporte en Puerto Rico. Úsalo para preguntas sobre cómo moverse, alquiler de carro, transporte público o direcciones.",
     parameters: ToolParamsSchemas.search_transport,
     readOnly: true,
     alwaysLoad: true,
-    searchHint: "transportation options"
+    searchHint: "opciones de transporte"
   },
   {
     name: "save_favorite",
-    description: "Save a place to the user's favorites list. Use this when user wants to save or bookmark a place they liked.",
+    description: "Guarda un lugar en la lista de favoritos del usuario. Úsalo cuando el usuario quiera guardar o marcar un lugar que le gustó.",
     parameters: ToolParamsSchemas.save_favorite,
     readOnly: false,
     alwaysLoad: true,
     isDestructive: false,
-    searchHint: "save favorite place"
+    searchHint: "guardar lugar favorito"
   },
   {
     name: "save_itinerary",
-    description: "Save a trip itinerary for the user's travel plans. Use this when user wants to save their travel plan or schedule.",
+    description: "Guarda un itinerario de viaje para los planes del usuario. Úsalo cuando el usuario quiera guardar su plan o agenda de viaje.",
     parameters: ToolParamsSchemas.save_itinerary,
     readOnly: false,
     alwaysLoad: true,
     isDestructive: false,
-    searchHint: "save travel itinerary"
+    searchHint: "guardar itinerario de viaje"
+  },
+  {
+    name: "remember_user_fact",
+    description: "Guarda un dato personal del usuario para referencia futura. Úsalo cuando el usuario comparta preferencias, restricciones alimentarias, acompañantes de viaje, presupuesto u otra información personal relevante.",
+    parameters: ToolParamsSchemas.remember_user_fact,
+    readOnly: false,
+    alwaysLoad: true,
+    isDestructive: false
   }
 ]
 

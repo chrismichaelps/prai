@@ -72,6 +72,13 @@ export const SaveItineraryParamsSchema = asSchema(Schema.Struct({
   notes: Schema.optional(Schema.String)
 }))
 
+/** @Schema.RememberUserFactParams */
+export const RememberUserFactParamsSchema = asSchema(Schema.Struct({
+  key: Schema.String,
+  value: Schema.String,
+  category: Schema.optional(Schema.Literal("preference", "fact", "itinerary", "contact"))
+}))
+
 export const ToolParamsSchemas = {
   search_beaches: SearchBeachesParamsSchema,
   search_restaurants: SearchRestaurantsParamsSchema,
@@ -81,5 +88,6 @@ export const ToolParamsSchemas = {
   search_weather: SearchWeatherParamsSchema,
   search_transport: SearchTransportParamsSchema,
   save_favorite: SaveFavoriteParamsSchema,
-  save_itinerary: SaveItineraryParamsSchema
+  save_itinerary: SaveItineraryParamsSchema,
+  remember_user_fact: RememberUserFactParamsSchema
 } as const

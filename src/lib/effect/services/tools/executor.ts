@@ -3,6 +3,8 @@
 import { Effect, Schema } from "effect"
 import { getToolByName, isReadOnlyTool } from "./types"
 import { ToolError } from "../../errors"
+import { SessionMemoryService } from "../memory"
+import type { MemoryCategory } from "../../schemas/memory/SessionMemorySchema"
 
 /** @Schema.ToolExecutionContext */
 export const ToolExecutionContextSchema = Schema.Struct({
@@ -211,6 +213,26 @@ function executeWriteTool(toolName: string, args: Record<string, unknown>): Effe
         `[TOOL_INVOKED] save_itinerary saved: "${title}" with ${dayCount} days and ${activityCount} activities. ` +
         `Notes: ${notes || 'none'}. This will be persisted to user's itineraries.`
       )
+    }
+    case "remember_user_fact": {
+      const { key, value, category } = args as { key: string; value: string; category?: string }
+      return Effect.tryPromise({
+        try: () => import("../../runtime").then(({ runtime }) =>
+          runtime.runPromise(
+            Effect.gen(function* () {
+              const mem = yield* SessionMemoryService
+              yield* mem.storeMemories([{
+                key,
+                value,
+                category: (category ?? "fact") as MemoryCategory,
+                extractedAt: Date.now()
+              }])
+              return `Recordado: "${key}" → "${value}"`
+            })
+          )
+        ),
+        catch: (e) => new ToolError({ toolName: "remember_user_fact", message: `Store failed: ${String(e)}`, cause: e })
+      })
     }
     default:
       return Effect.succeed(`[TOOL_INVOKED] ${toolName} with params: ${JSON.stringify(args)}`)
