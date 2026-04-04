@@ -2,15 +2,18 @@
 
 /** @UI.Chat.Container */
 
-import React, { useState, useRef, useEffect, useCallback } from 'react'
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react'
+import { Effect } from 'effect'
 import dynamic from 'next/dynamic'
 import { useAppSelector, useAppDispatch } from '@/store/hooks'
 import { addChat, setCurrentChat, setSuggestions } from '@/store/slices/chatSlice'
+import { clearApiError } from '@/store/slices/uiSlice'
 import { useChatActions } from '@/lib/effect/ChatProvider'
 import { DiscoveryLoader } from './DiscoveryLoader'
 import { useI18n } from '@/lib/effect/I18nProvider'
 import { MemoizedMessageBubble } from './MessageBubble'
 import { SourcesSidebar } from './SourcesSidebar'
+import { CommandInput } from './CommandInput'
 import {
   ArrowDown,
   Loader2,
@@ -18,7 +21,10 @@ import {
   Square,
   X,
   ChevronRight,
+  RefreshCw,
+  AlertCircle,
 } from 'lucide-react'
+import { getRandomGreeting } from '@/lib/chat/greetingMessages'
 /** @Module.UI.Motion */
 import { motion } from 'framer-motion'
 /** @Module.UI.Utils */
@@ -32,6 +38,10 @@ import { useUsage } from '@/hooks/useUsage'
 import { usePersonalization } from '@/hooks/usePersonalization'
 import { useHaptics } from '@/hooks/useHaptics'
 import type { UserUsage } from '@/hooks/useUsage'
+import type { ChatCommand } from '@/lib/commands/types'
+import { CommandService, type CommandFeedback } from '@/lib/effect/services/CommandService'
+import { FB_ERR } from '@/lib/constants/command-figures'
+import { runtime } from '@/lib/effect/runtime'
 
 /** @UI.Chat.AdaptiveCard.Lazy */
 const AdaptiveCard = dynamic(
@@ -114,6 +124,7 @@ export const Chat = {
     isUsageVisible,
     onToggleUsage,
     haptics,
+    onCommandExecute,
   }: {
     value: string
     onChange: (val: string) => void
@@ -133,7 +144,9 @@ export const Chat = {
     isUsageVisible: boolean
     onToggleUsage: () => void
     haptics?: { light: () => void; medium: () => void }
-  }) => (
+    onCommandExecute?: (cmd: ChatCommand, args: string) => Promise<CommandFeedback>
+  }) => {
+  return (
     <footer className="w-full h-fit flex flex-col items-center z-30 pointer-events-none pb-12 px-6">
       {showScrollButton && (
         <button
@@ -156,10 +169,15 @@ export const Chat = {
               <button
                 key={suggestion.label + idx}
                 onClick={() => {
+                  if (isAtLimit) return
                   haptics?.light()
                   onSend(suggestion.action || suggestion.label)
                 }}
-                className="px-5 py-2 rounded-full bg-white/5 border border-white/10 text-[13px] font-bold text-white/40 hover:bg-white/10 hover:border-white/20 hover:text-white transition-all shadow-xl flex items-center gap-3 group active:scale-95"
+                disabled={isAtLimit}
+                className={cn(
+                  "px-5 py-2 rounded-full bg-white/5 border border-white/10 text-[13px] font-bold text-white/40 hover:bg-white/10 hover:border-white/20 hover:text-white transition-all shadow-xl flex items-center gap-3 group active:scale-95",
+                  isAtLimit && "opacity-40 cursor-not-allowed pointer-events-none"
+                )}
               >
                 <span>{suggestion.label}</span>
                 <ChevronRight className="w-3.5 h-3.5 text-white/20 group-hover:text-white/60 transition-all transform group-hover:translate-x-0.5" />
@@ -204,7 +222,7 @@ export const Chat = {
         {/* @UI.Chat.Input.Box */}
         <div
           className={cn(
-            'w-full bg-[#1a1a1a] shadow-2xl pointer-events-auto flex flex-col border border-white/[0.08] hover:border-white/[0.12] transition-all duration-300 group overflow-hidden',
+            'w-full bg-[#1a1a1a] shadow-2xl pointer-events-auto flex flex-col border border-white/[0.08] hover:border-white/[0.12] transition-all duration-300 group',
             isAuthenticated && usage && isUsageVisible
               ? 'rounded-b-[1.5rem]'
               : 'rounded-[1.5rem]',
@@ -213,6 +231,20 @@ export const Chat = {
         >
           <div className="flex-1 flex flex-col px-1.5 max-h-[400px]">
             {/** @UI.Chat.Input.Textarea */}
+            {onCommandExecute ? (
+              <CommandInput
+                value={value}
+                onChange={onChange}
+                onSubmit={() => { if (!isAtLimit) onSend() }}
+                onCommandExecute={onCommandExecute}
+                placeholder={
+                  isAtLimit
+                    ? t('usage.limit_reached') || 'Límite alcanzado'
+                    : t('chat.placeholder')
+                }
+                disabled={isAtLimit}
+              />
+            ) : (
             <textarea
               ref={textareaRef}
               value={value}
@@ -236,10 +268,11 @@ export const Chat = {
               }
               style={{ height: 'auto', outline: 'none', boxShadow: 'none' }}
             />
+            )}
           </div>
 
           {/* @UI.Chat.Actions */}
-          <div className="flex items-center justify-end px-3 pb-3">
+          <div className="flex items-center justify-end px-3 pb-3 pt-2">
             <div className="flex items-center gap-2">
               {/** @UI.Chat.Action.Mic */}
               <button
@@ -301,22 +334,24 @@ export const Chat = {
         </div>
       </div>
     </footer>
-  ),
+  )
+  },
 }
 
 /** @UI.Chat.Container.Main */
 export const ChatContainer: React.FC = () => {
   const { messages, isLoading, error: _error, activeAdaptiveData, currentChatId, suggestions } =
     useAppSelector((state) => state.chat)
+  const apiError = useAppSelector((state) => state.ui.apiError)
   /** @UI.Hooks.ChatActions */
   const dispatch = useAppDispatch()
   const { user } = useAuth()
   const router = useRouter()
   const pathname = usePathname()
-  const { sendMessage, stopResponse, editMessage, startVoice, stopVoice } =
+  const { sendMessage, stopResponse, editMessage, startVoice, stopVoice, regenerateMessage } =
     useChatActions()
   const { t } = useI18n()
-  const { usage, isAtLimit, setUsage } = useUsage()
+  const { usage, isAtLimit, setUsage, fetchUsage } = useUsage()
   const { personalization } = usePersonalization()
   const haptics = useHaptics()
   const [isUsageVisible, setIsUsageVisible] = useState(true)
@@ -327,6 +362,22 @@ export const ChatContainer: React.FC = () => {
   const scrollAreaRef = useRef<HTMLDivElement>(null)
   const innerContainerRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const wasLoadingRef = useRef(false)
+  /** @Logic.Chat.Greeting */
+  const greeting = useMemo(() => getRandomGreeting(), [])
+
+  /** @Logic.Command.Execute */
+  const handleCommandExecute = useCallback(
+    (cmd: ChatCommand, args: string): Promise<CommandFeedback> => {
+      return runtime.runPromise(
+        Effect.gen(function* () {
+          const commands = yield* CommandService
+          return yield* commands.run(cmd, args, currentChatId)
+        })
+      ).catch((): CommandFeedback => ({ text: `${FB_ERR} Error inesperado`, type: 'error' }))
+    },
+    [currentChatId]
+  )
 
   const createNewChat = useCallback(async () => {
     if (!user) return null
@@ -364,18 +415,15 @@ export const ChatContainer: React.FC = () => {
 
   /** @Logic.Chat.Input.Resize */
   useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto'
-      const nextHeight = textareaRef.current.scrollHeight
-      textareaRef.current.style.height = `${nextHeight}px`
-
-      /** @UI.Chat.ScrollHandling */
-      if (nextHeight > 400) {
-        textareaRef.current.style.overflowY = 'auto'
-      } else {
-        textareaRef.current.style.overflowY = 'hidden'
-      }
-    }
+    const el = textareaRef.current
+    if (!el) return
+    const raf = requestAnimationFrame(() => {
+      el.style.height = 'auto'
+      const nextHeight = el.scrollHeight
+      el.style.height = `${nextHeight}px`
+      el.style.overflowY = nextHeight > 400 ? 'auto' : 'hidden'
+    })
+    return () => cancelAnimationFrame(raf)
   }, [userInput])
 
   const handleScroll = useCallback(() => {
@@ -436,21 +484,30 @@ export const ChatContainer: React.FC = () => {
     }
   }, [user, currentChatId, ensureChatExists])
 
-  const handleMicClick = () => {
+  /** @Logic.Usage.PostResponseSync */
+  useEffect(() => {
+    if (wasLoadingRef.current && !isLoading) {
+      void fetchUsage()
+      setIsUsageVisible(true)
+    }
+    wasLoadingRef.current = isLoading
+  }, [isLoading, fetchUsage])
+
+  const handleMicClick = useCallback(() => {
     if (isRecording) {
       stopVoice()
       setIsRecording(false)
     } else {
       setIsRecording(true)
-      startVoice((text, isFinal) => {
-        setUserInput(text)
-        if (isFinal) {
-          setIsRecording(false)
-          stopVoice()
-        }
-      })
+      startVoice(
+        (text, isFinal) => {
+          setUserInput(text)
+          if (isFinal) { setIsRecording(false); stopVoice() }
+        },
+        () => setIsRecording(false)
+      )
     }
-  }
+  }, [isRecording, stopVoice, startVoice])
 
   const handleSend = useCallback(
     async (text?: string) => {
@@ -462,7 +519,6 @@ export const ChatContainer: React.FC = () => {
       if (!content.trim() || isAtLimit) return
 
       haptics.medium()
-      // Optimistic usage update
       if (usage && usage.messages_remaining > 0) {
         setUsage({
           ...usage,
@@ -508,13 +564,18 @@ export const ChatContainer: React.FC = () => {
         onScroll={handleScroll}
         t={t}
       >
-        {messages.length === 0 && (
-          <div className="h-full flex flex-col items-center justify-center py-32 animate-in fade-in duration-1000" />
+        {messages.length === 0 && !isLoading && (
+          /** @UI.Chat.WelcomeScreen */
+          <div className="h-full flex items-center justify-center py-20 animate-in fade-in duration-700">
+            <h2 className="text-[26px] md:text-[32px] font-black tracking-tight text-white/80 text-center">
+              {greeting}
+            </h2>
+          </div>
         )}
 
         {messages.map((msg, index) => (
           <MemoizedMessageBubble
-            key={index}
+            key={msg._key}
             message={msg}
             index={index}
             onEdit={(idx, content) =>
@@ -538,7 +599,42 @@ export const ChatContainer: React.FC = () => {
             </div>
           ))}
 
-        {isLoading && (
+        {/** @UI.Chat.ErrorBubble */}
+        {apiError && !isLoading && (
+          <div className="flex flex-col items-start gap-3 animate-in fade-in slide-in-from-bottom-2 duration-300">
+            <div className="flex items-start gap-3 max-w-[85%]">
+              <div className="w-8 h-8 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center shrink-0 mt-0.5">
+                <AlertCircle className="w-4 h-4 text-red-400" />
+              </div>
+              <div className="flex flex-col gap-2">
+                <div className="bg-red-500/5 border border-red-500/15 rounded-2xl px-5 py-3.5 text-[15px] text-red-300/80 leading-relaxed">
+                  {apiError.message}
+                </div>
+                <button
+                  onClick={() => dispatch(clearApiError())}
+                  className="self-start text-[12px] text-white/25 hover:text-white/60 transition-colors px-1"
+                >
+                  {t('chat.dismiss') || 'Descartar'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/** @UI.Chat.RegenerateButton */}
+        {!isLoading && !apiError && messages.length > 0 && messages[messages.length - 1]?.role === 'assistant' && (
+          <div className="flex justify-start animate-in fade-in duration-500">
+            <button
+              onClick={() => regenerateMessage(personalization)}
+              className="flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-bold text-white/25 hover:text-white/70 hover:bg-white/5 border border-transparent hover:border-white/10 transition-all duration-200 active:scale-95 group"
+            >
+              <RefreshCw className="w-3.5 h-3.5 group-hover:rotate-180 transition-transform duration-500" />
+              {t('chat.regenerate') || 'Regenerar'}
+            </button>
+          </div>
+        )}
+
+        {isLoading && (messages.length === 0 || messages[messages.length - 1]?.role !== 'assistant' || !messages[messages.length - 1]?.content) && (
           <div className="flex flex-col space-y-6 animate-in fade-in duration-300">
             <div className="flex items-center space-x-4">
               <div className="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white shadow-2xl overflow-hidden">
@@ -580,6 +676,7 @@ export const ChatContainer: React.FC = () => {
         onToggleUsage={() => setIsUsageVisible(false)}
         haptics={haptics}
         suggestions={suggestions}
+        onCommandExecute={handleCommandExecute}
       />
       <SourcesSidebar />
     </Chat.Root>
