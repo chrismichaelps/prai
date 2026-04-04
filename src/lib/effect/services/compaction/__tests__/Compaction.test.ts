@@ -120,7 +120,7 @@ describe("Compaction", () => {
       if (Exit.isSuccess(exit)) {
         const { messages: compacted, result } = exit.value
         expect(compacted).toHaveLength(1)
-        expect(compacted.at(0)?.content).toContain("Previous conversation summary")
+        expect(compacted.at(0)?.content).toContain("Resumen de conversación previa")
         expect(result.method).toBe("full")
       }
     })
