@@ -8,7 +8,8 @@ import { VoiceServiceLive } from "./services/Voice";
 import { I18nLive } from "./i18n";
 import { BuildInfoService } from "./services/BuildInfo";
 import { SeoService } from "./services/Seo";
-import { ChatApiLayer } from "./services/ChatApi";
+import { ChatApiLayer } from "./services/ChatApi"
+import { MemoryApiLayer } from "./services/MemoryApi";
 import { TokenEstimationService } from "./services/token";
 import { CostTrackerService } from "./services/token";
 import { CompactionService } from "./services/compaction";
@@ -19,7 +20,8 @@ import { SkillsService } from "./services/skills"
 import { QueryExpansionService } from "./services/query";
 import { ToolRelevanceService } from "./services/relevance";
 import { SearchFilterService } from "./services/filters";
-import { FollowUpSuggestionsService } from "./services/followup";
+import { FollowUpSuggestionsService } from "./services/followup"
+import { CommandService } from "./services/CommandService";
 
 /** @Logic.Effect.Runtime */
 const BaseLayer = Layer.mergeAll(
@@ -62,7 +64,8 @@ const ContextLayer = Layer.mergeAll(
   ),
   ToolRelevanceService.Default,
   SearchFilterService.Default,
-  FollowUpSuggestionsService.Default
+  FollowUpSuggestionsService.Default,
+  CommandService.Default
 )
 
 /** @Logic.Effect.MainLayer.Init */
@@ -75,6 +78,7 @@ const MainLayer = Layer.mergeAll(
   I18nLive,
   BuildInfoService.Default,
   ChatApiLayer,
+  MemoryApiLayer,
   SeoService.Default.pipe(
     Layer.provideMerge(ConfigLayer)
   ),

@@ -59,11 +59,15 @@ export async function PATCH(
       pipe(
         decodeBody(
           S.Struct({
-            is_archived: S.Boolean
+            is_archived: S.optional(S.Boolean),
+            settings: S.optional(S.Record({ key: S.String, value: S.Unknown })),
           })
         )(request),
-        Effect.flatMap((body) => 
-          chatService.updateChat(validated.id, { is_archived: body.is_archived })
+        Effect.flatMap((body) =>
+          chatService.updateChat(validated.id, {
+            ...(body.is_archived !== undefined && { is_archived: body.is_archived }),
+            ...(body.settings !== undefined && { settings: body.settings }),
+          })
         )
       )
     )

@@ -3,7 +3,11 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 import { castDraft } from 'immer';
 import type { ChatMessage, AdaptiveData, Suggestion, SearchResult } from '@/types/chat';
 import { ChatRole } from '@/types/chat';
+import type { ChatSettings } from '@/lib/effect/schemas/CommandSchema';
+import { DEFAULT_CHAT_SETTINGS } from '@/lib/effect/schemas/CommandSchema';
 
+/** @Type.Chat.RichMessage */
+export type RichChatMessage = ChatMessage & { _key: string }
 
 /** @Type.Chat */
 export interface Chat {
@@ -11,6 +15,7 @@ export interface Chat {
   user_id: string;
   title: string | null;
   is_archived: boolean | null;
+  settings: Record<string, unknown> | null;
   created_at: string | null;
   updated_at: string | null;
 }
@@ -19,7 +24,7 @@ export interface Chat {
 export interface ChatState {
   currentChatId: string | null;
   chats: Chat[];
-  messages: ChatMessage[];
+  messages: RichChatMessage[];
   isLoading: boolean;
   error: string | null;
   suggestions: Suggestion[];
@@ -29,6 +34,7 @@ export interface ChatState {
     query: string;
     sources: SearchResult[];
   } | null;
+  chatSettings: ChatSettings;
 }
 
 const initialState: ChatState = {
@@ -41,6 +47,7 @@ const initialState: ChatState = {
   activeAdaptiveData: [],
   isSourcesOpen: false,
   selectedSources: null,
+  chatSettings: DEFAULT_CHAT_SETTINGS,
 };
 
 /** @Store.Slice.Chat */
@@ -83,11 +90,11 @@ export const chatSlice = createSlice({
     },
     /** @Store.Action.Chat.SetMessages */
     setMessages: (state, action: PayloadAction<ChatMessage[]>) => {
-      state.messages = castDraft(action.payload);
+      state.messages = castDraft(action.payload.map(m => ({ ...m, _key: Math.random().toString(36).slice(2) })));
     },
     /** @Store.Action.Chat.AddMessage */
     addMessage: (state, action: PayloadAction<ChatMessage>) => {
-      state.messages.push(castDraft(action.payload));
+      state.messages.push(castDraft({ ...action.payload, _key: Math.random().toString(36).slice(2) }));
     },
     /** @Store.Action.Chat.UpdateLastMessage */
     updateLastMessage: (state, action: PayloadAction<string | { content?: string; metadata?: ChatMessage['metadata'] }>) => {
@@ -142,6 +149,9 @@ export const chatSlice = createSlice({
       state.suggestions = [];
       state.isSourcesOpen = false;
       state.selectedSources = null;
+      state.isLoading = false;
+      state.error = null;
+      state.chatSettings = DEFAULT_CHAT_SETTINGS;
     },
     /** @Store.Action.Chat.EditMessage */
     editMessage: (state, action: PayloadAction<{ index: number; content: string }>) => {
@@ -159,6 +169,18 @@ export const chatSlice = createSlice({
       }
       state.activeAdaptiveData = [];
       state.suggestions = [];
+    },
+    /** @Store.Action.Chat.UpdateChatSettings */
+    updateChatSettings: (state, action: PayloadAction<{ key: string; value: unknown }>) => {
+      (state.chatSettings as Record<string, unknown>)[action.payload.key] = action.payload.value;
+    },
+    /** @Store.Action.Chat.ClearChatSettings */
+    clearChatSettings: (state) => {
+      state.chatSettings = DEFAULT_CHAT_SETTINGS;
+    },
+    /** @Store.Action.Chat.SetChatSettings */
+    setChatSettings: (state, action: PayloadAction<ChatSettings>) => {
+      state.chatSettings = action.payload;
     },
   },
 });
@@ -181,6 +203,9 @@ export const {
   closeSources,
   clearHistory,
   editMessage,
+  updateChatSettings,
+  clearChatSettings,
+  setChatSettings,
 } = chatSlice.actions;
 
 export default chatSlice.reducer;

@@ -10,7 +10,6 @@ import {
   Archive,
   Trash2,
   MoreVertical,
-  X,
   Loader2,
   ArchiveRestore,
   Inbox,
@@ -23,8 +22,11 @@ import {
   removeChat,
   clearHistory,
   setMessages,
+  setChatSettings,
   type Chat,
 } from '@/store/slices/chatSlice'
+import { Schema } from 'effect'
+import { ChatSettingsSchema, DEFAULT_CHAT_SETTINGS } from '@/lib/effect/schemas/CommandSchema'
 import { ChatRole } from '@/types/chat'
 import { useAuth } from '@/contexts/AuthContext'
 import { useI18n } from '@/lib/effect/I18nProvider'
@@ -58,48 +60,52 @@ export function ChatSidebar({ isOpen, onClose }: ChatSidebarProps) {
 
   /** @Logic.UI.Lifecycle.AutoLoadChats */
   useEffect(() => {
-    if (user && isOpen) {
-      loadChats()
-    }
+    if (!user || !isOpen) return
+    const controller = new AbortController()
+    loadChats(controller.signal)
+    return () => controller.abort()
   }, [user, isOpen])
 
   useEffect(() => {
-    if (user && showArchived) {
-      loadArchivedChats()
-    }
+    if (!user || !showArchived) return
+    const controller = new AbortController()
+    loadArchivedChats(controller.signal)
+    return () => controller.abort()
   }, [user, showArchived])
 
   /** @Logic.UI.Chat.LoadActive */
-  const loadChats = async () => {
+  const loadChats = async (signal?: AbortSignal) => {
     if (!user) return
     setIsLoading(true)
     try {
-      const res = await fetch(`/api/chat/chats?userId=${user.id}`)
+      const res = await fetch(`/api/chat/chats?userId=${user.id}`, { signal })
+      if (signal?.aborted) return
       const data = await res.json()
-
       if (!res.ok) throw new Error(data.error)
       dispatch(setChats(data as Chat[]))
     } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') return
       console.error('Error loading chats:', err)
     } finally {
-      setIsLoading(false)
+      if (!signal?.aborted) setIsLoading(false)
     }
   }
 
   /** @Logic.UI.Chat.LoadArchived */
-  const loadArchivedChats = async () => {
+  const loadArchivedChats = async (signal?: AbortSignal) => {
     if (!user) return
     setIsLoadingArchived(true)
     try {
-      const res = await fetch(`/api/chat/chats/archived?userId=${user.id}`)
+      const res = await fetch(`/api/chat/chats/archived?userId=${user.id}`, { signal })
+      if (signal?.aborted) return
       const data = await res.json()
-
       if (!res.ok) throw new Error(data.error)
       setArchivedChats(data as Chat[])
     } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') return
       console.error('Error loading archived chats:', err)
     } finally {
-      setIsLoadingArchived(false)
+      if (!signal?.aborted) setIsLoadingArchived(false)
     }
   }
 
@@ -155,6 +161,12 @@ export function ChatSidebar({ isOpen, onClose }: ChatSidebarProps) {
       )
 
       dispatch(setMessages(formattedMessages))
+
+      const chatData = chats.find(c => c.id === chatId)
+      const rawSettings = chatData?.settings ?? {}
+      const settingsResult = Schema.decodeUnknownEither(ChatSettingsSchema)(rawSettings)
+      dispatch(setChatSettings(settingsResult._tag === 'Right' ? settingsResult.right : DEFAULT_CHAT_SETTINGS))
+
       router.push(`/chat/${chatId}`)
       onClose()
     } catch (err) {
@@ -282,7 +294,7 @@ export function ChatSidebar({ isOpen, onClose }: ChatSidebarProps) {
                   aria-label={t('a11y.new_chat')}
                   className="p-2 text-white/70 hover:text-white transition-colors"
                 >
-                  <X className="w-5 h-5" />
+                  <SquarePen className="w-5 h-5" />
                 </button>
               </div>
             </div>

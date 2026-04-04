@@ -3,7 +3,7 @@ import type { Chat, Message } from "./Chat"
 import { AppConstants } from "@/lib/constants/app-constants"
 
 /** @Type.Effect.ApiError */
-export class ApiError extends Data.TaggedError("ApiError")<{ message: string; status?: number }> {}
+export class ApiError extends Data.TaggedError("ApiError")<{ message: string; status?: number }> { }
 
 export interface AddMessagePayload {
   chatId: string
@@ -18,6 +18,15 @@ export interface UpdateChatPayload {
   is_archived?: boolean
 }
 
+export interface UpdateSettingsPayload {
+  chatId: string
+  settings: Record<string, unknown>
+}
+
+export interface UpdateUserLanguagePayload {
+  language: "es" | "en"
+}
+
 /** @Service.Effect.ChatApi */
 export const ChatApi = Context.GenericTag<ChatApi>("ChatApi")
 
@@ -27,6 +36,8 @@ export interface ChatApi {
   readonly getMessages: (chatId: string) => Effect.Effect<Message[], ApiError>
   readonly updateChat: (payload: UpdateChatPayload) => Effect.Effect<Chat, ApiError>
   readonly getChat: (chatId: string) => Effect.Effect<Chat, ApiError>
+  readonly updateSettings: (payload: UpdateSettingsPayload) => Effect.Effect<void, ApiError>
+  readonly updateUserLanguage: (payload: UpdateUserLanguagePayload) => Effect.Effect<void, ApiError>
 }
 
 /** @Layer.Effect.ChatApi */
@@ -49,9 +60,9 @@ export const ChatApiLayer = Layer.effect(
 
           if (!response.ok) {
             const error = yield* Effect.promise(() => response.json() as Promise<{ error: string }>)
-            return yield* Effect.fail(new ApiError({ 
+            return yield* Effect.fail(new ApiError({
               message: error.error || 'Failed to add message',
-              status: response.status 
+              status: response.status
             }))
           }
 
@@ -69,9 +80,9 @@ export const ChatApiLayer = Layer.effect(
 
           if (!response.ok) {
             const error = yield* Effect.promise(() => response.json() as Promise<{ error: string }>)
-            return yield* Effect.fail(new ApiError({ 
+            return yield* Effect.fail(new ApiError({
               message: error.error || 'Failed to get messages',
-              status: response.status 
+              status: response.status
             }))
           }
 
@@ -90,9 +101,9 @@ export const ChatApiLayer = Layer.effect(
 
           if (!response.ok) {
             const error = yield* Effect.promise(() => response.json() as Promise<{ error: string }>)
-            return yield* Effect.fail(new ApiError({ 
+            return yield* Effect.fail(new ApiError({
               message: error.error || 'Failed to update chat',
-              status: response.status 
+              status: response.status
             }))
           }
 
@@ -109,14 +120,54 @@ export const ChatApiLayer = Layer.effect(
 
           if (!response.ok) {
             const error = yield* Effect.promise(() => response.json() as Promise<{ error: string }>)
-            return yield* Effect.fail(new ApiError({ 
+            return yield* Effect.fail(new ApiError({
               message: error.error || 'Failed to get chat',
-              status: response.status 
+              status: response.status
             }))
           }
 
           return yield* Effect.promise(() => response.json() as Promise<Chat>)
-        })
+        }),
+
+      /** @Logic.Effect.ChatApi.UpdateSettings */
+      updateSettings: (payload: UpdateSettingsPayload) =>
+        Effect.gen(function* () {
+          const response = yield* Effect.promise(() =>
+            fetch(`${baseUrl}/api/chat/chats/${encodeURIComponent(payload.chatId)}`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ settings: payload.settings })
+            })
+          )
+
+          if (!response.ok) {
+            const error = yield* Effect.promise(() => response.json() as Promise<{ error: string }>)
+            return yield* Effect.fail(new ApiError({
+              message: error.error || 'Failed to update settings',
+              status: response.status
+            }))
+          }
+        }),
+
+      /** @Logic.Effect.ChatApi.UpdateUserLanguage */
+      updateUserLanguage: (payload: UpdateUserLanguagePayload) =>
+        Effect.gen(function* () {
+          const response = yield* Effect.promise(() =>
+            fetch(`${baseUrl}/api/user/language`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ language: payload.language })
+            })
+          )
+
+          if (!response.ok) {
+            const error = yield* Effect.promise(() => response.json() as Promise<{ error: string }>)
+            return yield* Effect.fail(new ApiError({
+              message: error.error || 'Failed to update user language',
+              status: response.status
+            }))
+          }
+        }),
     }
   })
 )

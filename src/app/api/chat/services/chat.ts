@@ -76,8 +76,8 @@ export const chatService = {
 
   /** @Logic.Api.Chat.UpdateChat */
   updateChat: (
-    chatId: string, 
-    updates: { title?: string; is_archived?: boolean }
+    chatId: string,
+    updates: { title?: string; is_archived?: boolean; settings?: Record<string, unknown> }
   ): Effect.Effect<Chat, ChatDbError> => {
     return pipe(
       Effect.tryPromise({

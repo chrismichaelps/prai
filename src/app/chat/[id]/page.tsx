@@ -7,8 +7,10 @@ import { ChatContainer } from '@/components/chat/ChatContainer'
 import { ChatSidebar } from '@/components/chat/ChatSidebar'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 import { useAppDispatch } from '@/store/hooks'
-import { setCurrentChat, setMessages } from '@/store/slices/chatSlice'
+import { setCurrentChat, setMessages, clearHistory, setChatSettings } from '@/store/slices/chatSlice'
 import { useAuth } from '@/contexts/AuthContext'
+import { Schema } from 'effect'
+import { ChatSettingsSchema, DEFAULT_CHAT_SETTINGS } from '@/lib/effect/schemas/CommandSchema'
 import { Loader2 } from 'lucide-react'
 
 /** @Route.Chat.ById */
@@ -30,23 +32,34 @@ export default function ChatByIdPage() {
   /** @Logic.UI.Chat.LoadChatById */
   const loadChat = async () => {
     if (!user || !chatId) return
-    
+
     setIsLoading(true)
+    dispatch(clearHistory())
     try {
       const res = await fetch(`/api/chat/chats/${chatId}`)
       const messages = await res.json()
-      
+
       if (!res.ok) throw new Error(messages.error)
 
       dispatch(setCurrentChat(chatId))
-      
+
       const formattedMessages = messages.map((msg: { role: string; content: string; metadata: Record<string, unknown> | null }) => ({
         role: msg.role as 'user' | 'assistant',
         content: msg.content,
         metadata: msg.metadata as Record<string, unknown> | undefined,
       }))
-      
+
       dispatch(setMessages(formattedMessages))
+
+      // Fetch chat metadata to load per-chat settings
+      const chatsRes = await fetch(`/api/chat/chats?userId=${user.id}`)
+      if (chatsRes.ok) {
+        const chats = await chatsRes.json() as Array<{ id: string; settings?: Record<string, unknown> | null }>
+        const chatData = chats.find(c => c.id === chatId)
+        const rawSettings = chatData?.settings ?? {}
+        const settingsResult = Schema.decodeUnknownEither(ChatSettingsSchema)(rawSettings)
+        dispatch(setChatSettings(settingsResult._tag === 'Right' ? settingsResult.right : DEFAULT_CHAT_SETTINGS))
+      }
     } catch (err) {
       console.error('Error loading chat:', err)
       router.push('/chat')
