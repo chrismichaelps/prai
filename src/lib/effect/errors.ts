@@ -117,3 +117,10 @@ export class FollowUpError extends Data.TaggedError("FollowUpError")<{
   readonly message: string
   readonly cause?: unknown
 }> {}
+
+/** @Error.Effect.Command */
+export class CommandError extends Data.TaggedError("CommandError")<{
+  readonly code: "UNKNOWN_COMMAND" | "INVALID_ARGS" | "EXECUTION_FAILED"
+  readonly message: string
+  readonly cause?: unknown
+}> {}
