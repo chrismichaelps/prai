@@ -10,13 +10,14 @@ import { clearHistory as clearChatAction, editMessage as editChatMessageAction }
 import { useAppDispatch } from '@/store/hooks'
 import type { Personalization } from './schemas/PersonalizationSchema'
 
+/** @Type.Context.Chat */
 interface ChatContextType {
   sendMessage: (content: string, personalization?: Personalization) => Promise<void>
   regenerateMessage: (personalization?: Personalization) => Promise<void>
   editMessage: (index: number, content: string, personalization?: Personalization) => Promise<void>
   stopResponse: () => void
   clearHistory: () => void
-  startVoice: (onResult: (text: string, isFinal: boolean) => void) => void
+  startVoice: (onResult: (text: string, isFinal: boolean) => void, onError?: () => void) => void
   stopVoice: () => void
 }
 
@@ -38,13 +39,11 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
   }, [init])
 
   const sendMessage = useCallback(async (content: string, personalization?: Personalization) => {
+    if (activeFiber.current) return
     const fiber = runtime.runFork(sendChatMessage(content, personalization))
     activeFiber.current = fiber
-    
     runtime.runPromise(Fiber.await(fiber)).then(() => {
-      if (activeFiber.current === fiber) {
-        activeFiber.current = null
-      }
+      if (activeFiber.current === fiber) activeFiber.current = null
     })
   }, [])
 
@@ -75,12 +74,12 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
-  const startVoice = useCallback((onResult: (text: string, isFinal: boolean) => void) => {
+  const startVoice = useCallback((onResult: (text: string, isFinal: boolean) => void, onError?: () => void) => {
     startSpeechToText({
       onResult,
       onStart: () => {},
       onEnd: () => {},
-      onError: (err: string) => console.error("[ChatProvider] Voice error:", err),
+      onError: () => { onError?.() },
     })
   }, [])
 

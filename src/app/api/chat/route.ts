@@ -524,11 +524,11 @@ export async function POST(req: Request) {
 
         const scoredResults = rawResults.length > 0
           ? await runtime.runPromise(
-              Effect.gen(function* () {
-                const relevance = yield* ToolRelevanceService
-                return yield* relevance.score(lastQuery, rawResults)
-              })
-            )
+            Effect.gen(function* () {
+              const relevance = yield* ToolRelevanceService
+              return yield* relevance.score(lastQuery, rawResults)
+            })
+          )
           : rawResults
 
         const scoredMap = new Map(scoredResults.map((r, i) => [`${rawResults[i]?.toolName ?? ""}${i}`, r.result]))
@@ -760,10 +760,9 @@ export async function POST(req: Request) {
 
             if (auth.userId && totalTokens > 0) {
               try {
-                await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || ''}/api/user/usage/increment`, {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ amount: 1, tokens: totalTokens, cost })
+                await auth.supabaseClient.rpc('increment_user_usage', {
+                  p_user_id: auth.userId,
+                  p_amount: 1
                 })
               } catch { /** @Logic.Chat.SilentFailure */ }
             }
@@ -802,6 +801,14 @@ export async function POST(req: Request) {
                     choices: [{ delta: { content: "" }, finish_reason: "stop", error: errorMessage }]
                   }) + '\n')
                 } else {
+                  if (auth.userId) {
+                    try {
+                      await auth.supabaseClient.rpc('increment_user_usage', {
+                        p_user_id: auth.userId,
+                        p_amount: 1
+                      })
+                    } catch { /** @Logic.Chat.SilentFailure */ }
+                  }
                   /** @Logic.Chat.PostFlight.FollowUps */
                   await runFollowUps(initialMessages, onChunk)
                 }

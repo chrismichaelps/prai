@@ -19,9 +19,9 @@ import { LimitConstants } from "@/lib/constants/app-constants"
 import { toSource, deduplicateSources } from "@/lib/url"
 import type { SearchResult } from "@/types/chat"
 import { HttpStatus } from "@/app/api/_lib/constants/status-codes"
+import { buildSettingsPrompt } from "@/lib/commands/settingsPrompt"
 import { shouldShowSuggestion, shouldFilterSuggestion } from "./services/Suggestion"
 
-/** @Logic.Effect.GenerateTitle */
 /** @Logic.Chat.GenerateTitle */
 const generateChatTitle = (
   currentMessage: string,
@@ -54,6 +54,11 @@ const generateResponse = (
     role: m.role,
     content: m.content
   }))
+
+  const settingsBlock = buildSettingsPrompt(state.chat.chatSettings)
+  if (settingsBlock) {
+    chatMessages.splice(1, 0, { role: "system", content: settingsBlock })
+  }
 
   const apiUrl = `${process.env.NEXT_PUBLIC_SITE_URL || ''}/api/chat`
 
@@ -101,11 +106,38 @@ const generateResponse = (
     let tagBuffer = ""
     let inNextActions = false
 
+    /** @Logic.Chat.FlushTagBuffer */
+    const flushTagBuffer = (buf: string): string[] => {
+      if (!buf.trim()) return []
+      try {
+        const actions = JSON.parse(buf)
+        if (Array.isArray(actions)) return actions as string[]
+      } catch { /* */ }
+      return []
+    }
+
     try {
       while (true) {
         const { done, value } = yield* Effect.promise(() => reader.read())
 
-        if (done) break
+        if (done) {
+          if (inNextActions && tagBuffer) {
+            const actions = flushTagBuffer(tagBuffer)
+            if (actions && actions.length > 0) {
+              const snapState = yield* Redux.getState()
+              if (shouldShowSuggestion(snapState.chat.messages)) {
+                const filtered = (actions as string[])
+                  .map((s: string) => shouldFilterSuggestion(s))
+                  .filter(r => r.suggestion !== null)
+                  .map(r => ({ label: r.suggestion!, action: r.suggestion! }))
+                if (filtered.length > 0) {
+                  yield* Redux.dispatch(setSuggestions(filtered))
+                }
+              }
+            }
+          }
+          break
+        }
 
         buffer += decoder.decode(value, { stream: true })
 
