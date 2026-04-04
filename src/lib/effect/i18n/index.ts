@@ -98,6 +98,7 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "chat.edit": "Editar",
     "chat.save": "Guardar",
     "chat.cancel": "Cancelar",
+    "chat.regenerate": "Regenerar",
     "chat.new_chat": "Nueva Conversación",
     "chat.history": "Historial",
     "chat.no_chats": "Sin conversaciones aún",
@@ -118,6 +119,14 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "chat.archived_title": "Archivadas",
     "chat.back_to_menu": "Volver",
     "chat.tools": "Herramientas",
+
+    /** @Logic.I18n.Section.Commands */
+    "command.placeholder": "Escribe / para ver comandos...",
+    "command.no_match": "Comando no encontrado",
+    "command.help.title": "Comandos disponibles",
+    "command.setting.saved": "Configuración guardada",
+    "command.clear.confirm": "Historial limpiado",
+    "command.new.confirm": "Nueva conversación",
 
     /** @Logic.I18n.Section.Issues */
     "issues.title": "Reportar un Error",
@@ -535,6 +544,7 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "chat.edit": "Edit",
     "chat.save": "Save",
     "chat.cancel": "Cancel",
+    "chat.regenerate": "Regenerate",
     "chat.new_chat": "New Conversation",
     "chat.history": "History",
     "chat.no_chats": "No conversations yet",
@@ -555,6 +565,14 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "chat.archived_title": "Archived",
     "chat.back_to_menu": "Back",
     "chat.tools": "Tools",
+
+    /** @Logic.I18n.Section.Commands */
+    "command.placeholder": "Type / to see commands...",
+    "command.no_match": "Command not found",
+    "command.help.title": "Available commands",
+    "command.setting.saved": "Setting saved",
+    "command.clear.confirm": "History cleared",
+    "command.new.confirm": "New conversation",
 
     /** @Logic.I18n.Section.Issues */
     "issues.title": "Report a Bug",

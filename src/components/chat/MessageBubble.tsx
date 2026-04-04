@@ -53,6 +53,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = memo(
     const [isEditing, setIsEditing] = useState(false)
     const [isCopied, setIsCopied] = useState(false)
     const [editContent, setEditContent] = useState(message.content)
+    const [expandedTools, setExpandedTools] = useState<Set<number>>(new Set())
 
     const isUser = message.role === ChatRole.USER
     const isSystem = message.role === ChatRole.SYSTEM
@@ -318,7 +319,10 @@ export const MessageBubble: React.FC<MessageBubbleProps> = memo(
                 ))}
 
                 {(() => {
-                  const metaCalls = (message.metadata?.tool_calls as readonly ToolCallRecord[] | undefined) || []
+                  const metaCalls =
+                    (message.metadata?.tool_calls as
+                      | readonly ToolCallRecord[]
+                      | undefined) || []
 
                   if (metaCalls.length === 0) return null
 
@@ -378,13 +382,47 @@ export const MessageBubble: React.FC<MessageBubbleProps> = memo(
                                   </div>
                                 )}
 
-                              {toolResult && (
-                                <div className="text-white/60 text-[13px] border-l-2 border-orange-400/30 pl-3 mt-1 bg-black/20 p-2 rounded-r-lg truncate">
-                                  {typeof toolResult === 'string'
-                                    ? toolResult
-                                    : JSON.stringify(toolResult, null, 2)}
-                                </div>
-                              )}
+                              {toolResult &&
+                                (() => {
+                                  const raw =
+                                    typeof toolResult === 'string'
+                                      ? toolResult
+                                      : JSON.stringify(toolResult, null, 2)
+                                  const isLong = raw.length > 120
+                                  const isExpanded = expandedTools.has(idx)
+                                  return (
+                                    <div className="flex flex-col gap-1 mt-1">
+                                      <div
+                                        className={cn(
+                                          'text-white/60 text-[13px] border-l-2 border-orange-400/30 pl-3 bg-black/20 p-2 rounded-r-lg whitespace-pre-wrap break-words',
+                                          isLong &&
+                                            !isExpanded &&
+                                            'line-clamp-3',
+                                        )}
+                                      >
+                                        {raw}
+                                      </div>
+                                      {isLong && (
+                                        <button
+                                          onClick={() =>
+                                            setExpandedTools((prev) => {
+                                              const next = new Set(prev)
+                                              if (next.has(idx))
+                                                next.delete(idx)
+                                              else next.add(idx)
+                                              return next
+                                            })
+                                          }
+                                          className="self-start text-[11px] font-bold text-orange-400/50 hover:text-orange-400 transition-colors px-1"
+                                        >
+                                          {isExpanded
+                                            ? t('common.show_less')
+                                            : t('common.show_more')}
+                                        </button>
+                                      )}
+                                    </div>
+                                  )
+                                })()}
                             </div>
                           )
                         })}
@@ -393,6 +431,65 @@ export const MessageBubble: React.FC<MessageBubbleProps> = memo(
                   )
                 })()}
               </div>
+
+              {visibleSources.length > 0 && (
+                <div className="flex flex-wrap gap-2 pb-3 mb-1">
+                  {visibleSources.slice(0, 4).map((s, i) => {
+                    const domain = (() => {
+                      try {
+                        return new URL(s.url).hostname.replace('www.', '')
+                      } catch {
+                        return s.source || s.url
+                      }
+                    })()
+                    return (
+                      <a
+                        key={i}
+                        href={s.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 px-3 py-2 bg-white/[0.04] border border-white/[0.08] hover:border-white/20 hover:bg-white/[0.07] rounded-xl transition-all duration-200 active:scale-95 max-w-[200px] group/src"
+                      >
+                        <div className="w-4 h-4 rounded-full shrink-0 bg-white/10 flex items-center justify-center overflow-hidden">
+                          {s.icon ? (
+                            <img
+                              src={s.icon}
+                              alt=""
+                              className="w-full h-full object-contain"
+                              onError={(e) => {
+                                ;(e.target as HTMLImageElement).style.display =
+                                  'none'
+                              }}
+                            />
+                          ) : (
+                            <Globe className="w-2.5 h-2.5 text-white/40" />
+                          )}
+                        </div>
+                        <span className="text-[12px] font-medium text-white/50 group-hover/src:text-white/80 transition-colors truncate">
+                          {s.title ? s.title.slice(0, 28) : domain}
+                        </span>
+                      </a>
+                    )
+                  })}
+                  {visibleSources.length > 4 && (
+                    <button
+                      onClick={() =>
+                        dispatch(
+                          openSources({
+                            query:
+                              message.metadata?.searchQuery ||
+                              message.content.slice(0, 50),
+                            sources: visibleSources,
+                          }),
+                        )
+                      }
+                      className="flex items-center gap-1.5 px-3 py-2 bg-white/[0.04] border border-white/[0.08] hover:border-white/20 rounded-xl text-[12px] font-medium text-white/40 hover:text-white/70 transition-all"
+                    >
+                      +{visibleSources.length - 4} {t('chat.sources')}
+                    </button>
+                  )}
+                </div>
+              )}
 
               <div
                 className={cn(
@@ -406,50 +503,6 @@ export const MessageBubble: React.FC<MessageBubbleProps> = memo(
                 )}
                 dangerouslySetInnerHTML={htmlContent}
               />
-
-              {visibleSources.length > 0 && (
-                <div className="flex flex-wrap gap-2 pt-4 mt-2 border-t border-white/[0.03]">
-                  <button
-                    onClick={() => {
-                      dispatch(
-                        openSources({
-                          query:
-                            message.metadata?.searchQuery ||
-                            message.content.slice(0, 50),
-                          sources: visibleSources,
-                        }),
-                      )
-                    }}
-                    className="group/sources flex items-center gap-2.5 px-3 py-1.5 bg-white/5 border border-white/10 hover:border-white/20 rounded-full transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-xl"
-                  >
-                    <div className="flex -space-x-2.5 overflow-hidden">
-                      {visibleSources.slice(0, 3).map((s, i) => (
-                        <div
-                          key={i}
-                          className="inline-block h-5 w-5 rounded-full ring-2 ring-black bg-white/10 backdrop-blur-xl flex items-center justify-center"
-                        >
-                          {s.icon ? (
-                            <img
-                              src={s.icon}
-                              alt=""
-                              className="h-full w-full object-contain p-0.5"
-                              onError={(e) => {
-                                ;(e.target as HTMLImageElement).style.display =
-                                  'none'
-                              }}
-                            />
-                          ) : null}
-                          <Globe className="h-3 w-3 text-white/40" />
-                        </div>
-                      ))}
-                    </div>
-                    <span className="text-[13px] font-bold text-white/50 group-hover/sources:text-white transition-colors">
-                      {visibleSources.length} {t('chat.sources')}
-                    </span>
-                    <ChevronRight className="w-3.5 h-3.5 text-white/20 group-hover/sources:text-white/60 transition-all transform group-hover/sources:translate-x-0.5" />
-                  </button>
-                </div>
-              )}
             </div>
           )}
         </div>
