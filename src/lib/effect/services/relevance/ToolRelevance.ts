@@ -46,7 +46,7 @@ export class ToolRelevanceService extends Effect.Service<ToolRelevanceService>()
     const score = (
       query: string,
       results: ToolResult[]
-    ): Effect.Effect<ToolResult[], never> =>
+    ): Effect.Effect<ToolResult[]> =>
       Effect.gen(function* () {
         if (results.length === 0) return results
 

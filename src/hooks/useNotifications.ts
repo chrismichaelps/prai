@@ -3,6 +3,7 @@
 /** @Hook.Notifications */
 
 import { useEffect, useState, useCallback, useRef } from 'react'
+import { REALTIME_SUBSCRIBE_STATES } from '@supabase/supabase-js'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 import { useAuth } from '@/contexts/AuthContext'
 import { LimitConstants } from '@/lib/constants/app-constants'
@@ -74,7 +75,7 @@ export function useNotifications() {
           }
         )
         .subscribe((status) => {
-          if (status === 'SUBSCRIBED') {
+          if (status === REALTIME_SUBSCRIBE_STATES.SUBSCRIBED) {
             channelRef.current = channel
           }
         })

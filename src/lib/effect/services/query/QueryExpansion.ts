@@ -104,7 +104,7 @@ export class QueryExpansionService extends Effect.Service<QueryExpansionService>
     const expand = (
       query: string,
       history: ReadonlyArray<ConversationMessage>
-    ): Effect.Effect<QueryExpansionResult, never> =>
+    ): Effect.Effect<QueryExpansionResult> =>
       Effect.gen(function* () {
         const mem = yield* memory.getMemory()
         const memContext = mem.entries.length > 0

@@ -756,7 +756,6 @@ export async function POST(req: Request) {
             void runPostFlight(auth.supabaseClient, auth.userId)
             const usageData = result.data && typeof result.data === 'object' ? (result.data as { usage?: { total_tokens?: number; cost?: number } }).usage || {} : {}
             const totalTokens = usageData.total_tokens || 0
-            const cost = usageData.cost || 0
 
             if (auth.userId && totalTokens > 0) {
               try {

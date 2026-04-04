@@ -15,6 +15,13 @@ import type { RootState } from "@/store"
 import { getCommands, filterCommands } from "../registry"
 import { applyResult } from "../executor"
 import { COMMAND_DEFS } from "@/lib/effect/schemas/CommandSchema"
+import type { CommandResult } from "@/lib/effect/schemas/CommandSchema"
+
+type SettingResult = Extract<CommandResult, { type: "setting" }>
+type SystemInjectResult = Extract<CommandResult, { type: "system_inject" }>
+type NavigateResult = Extract<CommandResult, { type: "navigate" }>
+type PayloadAction = { type: string; payload: Record<string, unknown> }
+type CommandDef = { name: string; description: string; category: string; type: string; settingKey?: string }
 
 const cmd = (name: string) => {
   const c = getCommands().find((c) => c.name === name)
@@ -254,7 +261,7 @@ describe("/region", () => {
       expect(isSuccess(exit)).toBe(true)
       if (isSuccess(exit)) {
         expect(exit.value.type).toBe("setting")
-        expect((exit.value as any).value).toBe(value)
+        expect((exit.value as SettingResult).value).toBe(value)
       }
     })
   }
@@ -273,7 +280,7 @@ describe("/region", () => {
       const exit = await runCommand(cmd("/region").execute(english), dispatched)
       expect(isSuccess(exit)).toBe(true)
       if (isSuccess(exit)) {
-        expect((exit.value as any).value).toBe(spanish)
+        expect((exit.value as SettingResult).value).toBe(spanish)
       }
     })
   }
@@ -286,7 +293,7 @@ describe("/region", () => {
   it("toast is in Spanish", async () => {
     const exit = await runCommand(cmd("/region").execute("norte"), dispatched)
     if (isSuccess(exit)) {
-      expect((exit.value as any).toast).toContain("North")
+      expect((exit.value as SettingResult).toast).toContain("North")
     }
   })
 
@@ -336,7 +343,7 @@ describe("/mode", () => {
       const exit = await runCommand(cmd("/mode").execute(value), dispatched)
       expect(isSuccess(exit)).toBe(true)
       if (isSuccess(exit)) {
-        expect((exit.value as any).value).toBe(value)
+        expect((exit.value as SettingResult).value).toBe(value)
       }
     })
   }
@@ -352,7 +359,7 @@ describe("/mode", () => {
       const exit = await runCommand(cmd("/mode").execute(english), dispatched)
       expect(isSuccess(exit)).toBe(true)
       if (isSuccess(exit)) {
-        expect((exit.value as any).value).toBe(spanish)
+        expect((exit.value as SettingResult).value).toBe(spanish)
       }
     })
   }
@@ -409,7 +416,7 @@ describe("/personality", () => {
       const exit = await runCommand(cmd("/personality").execute(english), dispatched)
       expect(isSuccess(exit)).toBe(true)
       if (isSuccess(exit)) {
-        expect((exit.value as any).value).toBe(spanish)
+        expect((exit.value as SettingResult).value).toBe(spanish)
       }
     })
   }
@@ -418,8 +425,8 @@ describe("/personality", () => {
     const exit = await runCommand(cmd("/personality").execute(""), dispatched)
     expect(isSuccess(exit)).toBe(true)
     if (isSuccess(exit)) {
-      expect((exit.value as any).value).toBe("guía")
-      expect((exit.value as any).toast).toBe("Personality: tour guide")
+      expect((exit.value as SettingResult).value).toBe("guía")
+      expect((exit.value as SettingResult).toast).toBe("Personality: tour guide")
     }
     // No dispatch for default case
     expect(dispatched).toHaveLength(0)
@@ -461,7 +468,7 @@ describe("/budget", () => {
       const exit = await runCommand(cmd("/budget").execute(value), dispatched)
       expect(isSuccess(exit)).toBe(true)
       if (isSuccess(exit)) {
-        expect((exit.value as any).value).toBe(value)
+        expect((exit.value as SettingResult).value).toBe(value)
       }
     })
   }
@@ -477,7 +484,7 @@ describe("/budget", () => {
       const exit = await runCommand(cmd("/budget").execute(english), dispatched)
       expect(isSuccess(exit)).toBe(true)
       if (isSuccess(exit)) {
-        expect((exit.value as any).value).toBe(spanish)
+        expect((exit.value as SettingResult).value).toBe(spanish)
       }
     })
   }
@@ -485,7 +492,7 @@ describe("/budget", () => {
   it("toast label is in Spanish", async () => {
     const exit = await runCommand(cmd("/budget").execute("lujo"), dispatched)
     if (isSuccess(exit)) {
-      expect((exit.value as any).toast).toContain("Luxury")
+      expect((exit.value as SettingResult).toast).toContain("Luxury")
     }
   })
 
@@ -515,8 +522,8 @@ describe("/language", () => {
     const exit = await runCommand(cmd("/language").execute("es"), dispatched)
     expect(isSuccess(exit)).toBe(true)
     if (isSuccess(exit)) {
-      expect((exit.value as any).value).toBe("es")
-      expect((exit.value as any).toast).toBe("Language: Español")
+      expect((exit.value as SettingResult).value).toBe("es")
+      expect((exit.value as SettingResult).toast).toBe("Language: Español")
     }
   })
 
@@ -524,8 +531,8 @@ describe("/language", () => {
     const exit = await runCommand(cmd("/language").execute("en"), dispatched)
     expect(isSuccess(exit)).toBe(true)
     if (isSuccess(exit)) {
-      expect((exit.value as any).value).toBe("en")
-      expect((exit.value as any).toast).toBe("Language: English")
+      expect((exit.value as SettingResult).value).toBe("en")
+      expect((exit.value as SettingResult).toast).toBe("Language: English")
     }
   })
 
@@ -560,8 +567,8 @@ describe("/trip", () => {
     const exit = await runCommand(cmd("/trip").execute("2025-03-15"), dispatched)
     expect(isSuccess(exit)).toBe(true)
     if (isSuccess(exit)) {
-      expect((exit.value as any).value).toBe("2025-03-15")
-      expect((exit.value as any).toast).toContain("2025-03-15")
+      expect((exit.value as SettingResult).value).toBe("2025-03-15")
+      expect((exit.value as SettingResult).toast).toContain("2025-03-15")
     }
   })
 
@@ -569,7 +576,7 @@ describe("/trip", () => {
     const exit = await runCommand(cmd("/trip").execute("Semana Santa 2025"), dispatched)
     expect(isSuccess(exit)).toBe(true)
     if (isSuccess(exit)) {
-      expect((exit.value as any).value).toBe("Semana Santa 2025")
+      expect((exit.value as SettingResult).value).toBe("Semana Santa 2025")
     }
   })
 
@@ -577,15 +584,15 @@ describe("/trip", () => {
     const exit = await runCommand(cmd("/trip").execute(""), dispatched)
     expect(isSuccess(exit)).toBe(true)
     if (isSuccess(exit)) {
-      expect((exit.value as any).value).toBe("")
-      expect((exit.value as any).toast).toContain("eliminada")
+      expect((exit.value as SettingResult).value).toBe("")
+      expect((exit.value as SettingResult).toast).toContain("eliminada")
     }
   })
 
   it("toast message is in Spanish", async () => {
     const exit = await runCommand(cmd("/trip").execute("2025-07-04"), dispatched)
     if (isSuccess(exit)) {
-      expect((exit.value as any).toast).toMatch(/Fecha de viaje/i)
+      expect((exit.value as SettingResult).toast).toMatch(/Fecha de viaje/i)
     }
   })
 
@@ -598,7 +605,7 @@ describe("/trip", () => {
     const exit = await runCommand(cmd("/trip").execute("  2025-06-01  "), dispatched)
     expect(isSuccess(exit)).toBe(true)
     if (isSuccess(exit)) {
-      expect((exit.value as any).value).toBe("2025-06-01")
+      expect((exit.value as SettingResult).value).toBe("2025-06-01")
     }
   })
 })
@@ -609,7 +616,7 @@ describe("/system", () => {
     expect(isSuccess(exit)).toBe(true)
     if (isSuccess(exit)) {
       expect(exit.value.type).toBe("system_inject")
-      expect((exit.value as any).content).toBe("Always speak like a pirate")
+      expect((exit.value as SystemInjectResult).content).toBe("Always speak like a pirate")
     }
   })
 
@@ -629,7 +636,7 @@ describe("/system", () => {
     const content = "Responde siempre en inglés y menciona el Morro"
     const exit = await runCommand(cmd("/system").execute(content))
     if (isSuccess(exit)) {
-      expect((exit.value as any).content).toBe(content)
+      expect((exit.value as SystemInjectResult).content).toBe(content)
     }
   })
 })
@@ -658,7 +665,7 @@ describe("/new", () => {
     expect(isSuccess(exit)).toBe(true)
     if (isSuccess(exit)) {
       expect(exit.value.type).toBe("navigate")
-      expect((exit.value as any).path).toBe("/chat")
+      expect((exit.value as NavigateResult).path).toBe("/chat")
     }
   })
 
@@ -674,7 +681,7 @@ describe("/help", () => {
     expect(isSuccess(exit)).toBe(true)
     if (isSuccess(exit)) {
       expect(exit.value.type).toBe("system_inject")
-      const content = (exit.value as any).content as string
+      const content = (exit.value as SystemInjectResult).content as string
       expect(content).toContain("/region")
       expect(content).toContain("/mode")
       expect(content).toContain("/budget")
@@ -687,7 +694,7 @@ describe("/help", () => {
   it("lists heading in Spanish", async () => {
     const exit = await runCommand(cmd("/help").execute(""))
     if (isSuccess(exit)) {
-      expect((exit.value as any).content).toMatch(/comandos disponibles/i)
+      expect((exit.value as SystemInjectResult).content).toMatch(/comandos disponibles/i)
     }
   })
 
@@ -696,7 +703,7 @@ describe("/help", () => {
     expect(isSuccess(exit)).toBe(true)
     if (isSuccess(exit)) {
       expect(exit.value.type).toBe("system_inject")
-      expect((exit.value as any).content).toContain("/region")
+      expect((exit.value as SystemInjectResult).content).toContain("/region")
     }
   })
 
@@ -704,7 +711,7 @@ describe("/help", () => {
     const exit = await runCommand(cmd("/help").execute("modo"))
     expect(isSuccess(exit)).toBe(true)
     if (isSuccess(exit)) {
-      expect((exit.value as any).content).toContain("/mode")
+      expect((exit.value as SystemInjectResult).content).toContain("/mode")
     }
   })
 
@@ -713,14 +720,14 @@ describe("/help", () => {
     expect(isSuccess(exit)).toBe(true)
     if (isSuccess(exit)) {
       // Falls back to full list when not found
-      expect((exit.value as any).content).toContain("/region")
+      expect((exit.value as SystemInjectResult).content).toContain("/region")
     }
   })
 
   it("listed commands include their argument hints", async () => {
     const exit = await runCommand(cmd("/help").execute(""))
     if (isSuccess(exit)) {
-      const content = (exit.value as any).content as string
+      const content = (exit.value as SystemInjectResult).content as string
       expect(content).toContain("[norte|sur|este|oeste|metro|todos]")
     }
   })
@@ -737,8 +744,8 @@ describe("executor / applyResult", () => {
     )
     expect(isSuccess(exit)).toBe(true)
     expect(dispatched.some((a) => a.type === "chat/updateChatSettings")).toBe(true)
-    const action = dispatched.find((a) => a.type === "chat/updateChatSettings") as any
-    expect(action.payload.key).toBe("region")
+    const action = dispatched.find((a) => a.type === "chat/updateChatSettings") as PayloadAction | undefined
+    expect(action?.payload.key).toBe("region")
     expect(action.payload.value).toBe("norte")
   })
 
@@ -749,8 +756,8 @@ describe("executor / applyResult", () => {
     )
     expect(isSuccess(exit)).toBe(true)
     expect(dispatched.some((a) => a.type === "chat/addMessage")).toBe(true)
-    const action = dispatched.find((a) => a.type === "chat/addMessage") as any
-    expect(action.payload.role).toBe("system")
+    const action = dispatched.find((a) => a.type === "chat/addMessage") as PayloadAction | undefined
+    expect(action?.payload.role).toBe("system")
     expect(action.payload.content).toBe("Be concise")
   })
 
@@ -793,17 +800,17 @@ describe("executor / applyResult", () => {
   for (const { key, value, toast } of settingCases) {
     it(`setting "${key}" dispatches updateChatSettings with correct payload`, async () => {
       await runExecutor(applyResult({ type: "setting", key, value, toast }, null), dispatched)
-      const action = dispatched.find((a) => a.type === "chat/updateChatSettings") as any
+      const action = dispatched.find((a) => a.type === "chat/updateChatSettings") as PayloadAction | undefined
       expect(action, `no updateChatSettings dispatched for "${key}"`).toBeDefined()
-      expect(action.payload.key).toBe(key)
-      expect(action.payload.value).toBe(value)
+      expect(action?.payload.key).toBe(key)
+      expect(action?.payload.value).toBe(value)
     })
   }
 
   it("language setting dispatches updateChatSettings with key 'language'", async () => {
     await runExecutor(applyResult({ type: "setting", key: "language", value: "es", toast: "Language: Español" }, null), dispatched)
-    const action = dispatched.find((a) => a.type === "chat/updateChatSettings") as any
-    expect(action.payload.key).toBe("language")
+    const action = dispatched.find((a) => a.type === "chat/updateChatSettings") as PayloadAction | undefined
+    expect(action?.payload.key).toBe("language")
     expect(action.payload.value).toBe("es")
   })
 })
@@ -855,7 +862,7 @@ describe("command metadata", () => {
     for (const cmd of settingCmds) {
       const def = Object.values(COMMAND_DEFS).find((d) => d.name === cmd.name)
       expect(def, `no COMMAND_DEF for ${cmd.name}`).toBeTruthy()
-      expect((def as any).settingKey, `${cmd.name} missing settingKey`).toBeTruthy()
+      expect((def as CommandDef).settingKey, `${cmd.name} missing settingKey`).toBeTruthy()
     }
   })
 })

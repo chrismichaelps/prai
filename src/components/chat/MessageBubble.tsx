@@ -53,7 +53,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = memo(
     const [isEditing, setIsEditing] = useState(false)
     const [isCopied, setIsCopied] = useState(false)
     const [editContent, setEditContent] = useState(message.content)
-    const [expandedTools, setExpandedTools] = useState<Set<number>>(new Set())
+    const [expandedTools, setExpandedTools] = useState(new Set<number>())
 
     const isUser = message.role === ChatRole.USER
     const isSystem = message.role === ChatRole.SYSTEM

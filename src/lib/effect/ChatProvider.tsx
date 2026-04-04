@@ -25,7 +25,7 @@ const ChatContext = createContext<ChatContextType | undefined>(undefined)
 
 /** @Context.Effect.Chat */
 export function ChatProvider({ children }: { children: React.ReactNode }) {
-  const activeFiber = useRef<Fiber.RuntimeFiber<any, any> | null>(null)
+  const activeFiber = useRef<Fiber.RuntimeFiber<void> | null>(null)
   const dispatch = useAppDispatch()
 
   const init = useCallback(async () => {

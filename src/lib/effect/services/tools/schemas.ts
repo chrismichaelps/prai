@@ -2,7 +2,7 @@
 
 import { Schema } from "effect"
 
-const asSchema = <I, O, R>(s: Schema.Schema<I, O, R>): Schema.Schema<unknown, unknown, never> => s as Schema.Schema<unknown, unknown, never>
+const asSchema = <I, O, R>(s: Schema.Schema<I, O, R>): Schema.Schema<unknown, unknown> => s as Schema.Schema<unknown, unknown>
 
 /** @Schema.SearchBeachesParams */
 export const SearchBeachesParamsSchema = asSchema(Schema.Struct({

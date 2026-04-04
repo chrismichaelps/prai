@@ -19,7 +19,7 @@ export interface ToolInput {
 export interface ToolDefinition {
   readonly name: string
   readonly description: string
-  readonly parameters: Schema.Schema<unknown, unknown, never>
+  readonly parameters: Schema.Schema<unknown, unknown>
   readonly readOnly?: boolean
   readonly shouldDefer?: boolean
   readonly alwaysLoad?: boolean
@@ -174,7 +174,7 @@ export function validateToolInput(toolName: string, args: unknown): { success: b
   return pipe(
     result,
     Either.match({
-      onLeft: (left: unknown) => ({ success: false, error: `Invalid arguments for ${toolName}: ${left}` }),
+      onLeft: (left: unknown) => ({ success: false, error: `Invalid arguments for ${toolName}: ${String(left)}` }),
       onRight: (right: unknown) => ({ success: true, parsed: right as Record<string, unknown> })
     })
   )

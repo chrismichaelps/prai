@@ -33,7 +33,7 @@ export class FollowUpSuggestionsService extends Effect.Service<FollowUpSuggestio
     /** @Logic.FollowUp.Generate */
     const generate = (
       messages: ReadonlyArray<ConversationMessage>
-    ): Effect.Effect<string[], never> =>
+    ): Effect.Effect<string[]> =>
       Effect.gen(function* () {
         const nonSystem = messages.filter(m => m.role !== "system")
         if (nonSystem.length < FOLLOWUP_MIN_MESSAGES) return []

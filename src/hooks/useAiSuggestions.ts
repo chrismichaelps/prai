@@ -31,7 +31,7 @@ export function useAiSuggestions(messages: readonly ChatMessage[], isLoading: bo
   const isMountedRef = useRef(true)
 
   /** @Ref.LastRequestTime */
-  const lastRequestTimeRef = useRef<number>(0)
+  const lastRequestTimeRef = useRef(0)
 
   /** @Hook.Effect.Cleanup */
   useEffect(() => {

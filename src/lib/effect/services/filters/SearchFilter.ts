@@ -55,7 +55,7 @@ export class SearchFilterService extends Effect.Service<SearchFilterService>()("
     const extract = (
       query: string,
       history: ReadonlyArray<ConversationMessage>
-    ): Effect.Effect<SearchFilters, never> =>
+    ): Effect.Effect<SearchFilters> =>
       Effect.gen(function* () {
         if (query.length < FILTER_EXTRACTION_MIN_QUERY_LENGTH) return {}
 
