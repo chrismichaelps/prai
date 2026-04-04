@@ -2,7 +2,7 @@
 
 /** @UI.Component.ChatSidebar */
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   SquarePen,
@@ -58,23 +58,8 @@ export function ChatSidebar({ isOpen, onClose }: ChatSidebarProps) {
   const [archivedChats, setArchivedChats] = useState<Chat[]>([])
   const [isLoadingArchived, setIsLoadingArchived] = useState(false)
 
-  /** @Logic.UI.Lifecycle.AutoLoadChats */
-  useEffect(() => {
-    if (!user || !isOpen) return
-    const controller = new AbortController()
-    loadChats(controller.signal)
-    return () => controller.abort()
-  }, [user, isOpen])
-
-  useEffect(() => {
-    if (!user || !showArchived) return
-    const controller = new AbortController()
-    loadArchivedChats(controller.signal)
-    return () => controller.abort()
-  }, [user, showArchived])
-
   /** @Logic.UI.Chat.LoadActive */
-  const loadChats = async (signal?: AbortSignal) => {
+  const loadChats = useCallback(async (signal?: AbortSignal) => {
     if (!user) return
     setIsLoading(true)
     try {
@@ -89,10 +74,10 @@ export function ChatSidebar({ isOpen, onClose }: ChatSidebarProps) {
     } finally {
       if (!signal?.aborted) setIsLoading(false)
     }
-  }
+  }, [user, dispatch])
 
   /** @Logic.UI.Chat.LoadArchived */
-  const loadArchivedChats = async (signal?: AbortSignal) => {
+  const loadArchivedChats = useCallback(async (signal?: AbortSignal) => {
     if (!user) return
     setIsLoadingArchived(true)
     try {
@@ -107,7 +92,22 @@ export function ChatSidebar({ isOpen, onClose }: ChatSidebarProps) {
     } finally {
       if (!signal?.aborted) setIsLoadingArchived(false)
     }
-  }
+  }, [user])
+
+  /** @Logic.UI.Lifecycle.AutoLoadChats */
+  useEffect(() => {
+    if (!user || !isOpen) return
+    const controller = new AbortController()
+    loadChats(controller.signal)
+    return () => controller.abort()
+  }, [user, isOpen, loadChats])
+
+  useEffect(() => {
+    if (!user || !showArchived) return
+    const controller = new AbortController()
+    loadArchivedChats(controller.signal)
+    return () => controller.abort()
+  }, [user, showArchived, loadArchivedChats])
 
   /** @Logic.UI.Chat.CreateNew */
   const createNewChat = async () => {

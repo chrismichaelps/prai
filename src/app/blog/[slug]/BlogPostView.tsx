@@ -77,6 +77,7 @@ export function BlogPostView({ enPost, esPost }: BlogPostViewProps) {
             {/* Post Banner / Hero */}
             {post.image && (
               <div className="relative w-full rounded-2xl md:rounded-3xl overflow-hidden border border-white/10 mb-12 shadow-2xl shadow-black/50 bg-white/[0.02]">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={post.image}
                   alt={post.title}

@@ -41,6 +41,15 @@ interface SpeechRecognition extends EventTarget {
   stop(): void
 }
 
+/** @Type.Effect.Voice.Window */
+declare global {
+  interface Window {
+    webkitSpeechRecognition?: new () => SpeechRecognition
+    SpeechRecognition?: new () => SpeechRecognition
+    _prai_recognition?: SpeechRecognition
+  }
+}
+
 /** @Service.Effect.Voice.Definition */
 export interface VoiceService {
   readonly isSupported: () => boolean
@@ -57,14 +66,14 @@ export interface VoiceCallbacks {
 
 export const startSpeechToText = (callbacks: VoiceCallbacks) => {
   if (typeof window === 'undefined') return
-  
-  const Recognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition
+
+  const Recognition = window.webkitSpeechRecognition ?? window.SpeechRecognition
   if (!Recognition) {
     callbacks.onError("Speech recognition not supported in this browser")
     return
   }
 
-  const recognition = new Recognition() as SpeechRecognition
+  const recognition = new Recognition()
   recognition.continuous = true
   recognition.interimResults = true
   recognition.lang = 'es-PR'
@@ -72,7 +81,7 @@ export const startSpeechToText = (callbacks: VoiceCallbacks) => {
   recognition.onstart = () => callbacks.onStart()
   recognition.onend = () => callbacks.onEnd()
   recognition.onerror = (event: SpeechRecognitionErrorEvent) => callbacks.onError(event.error)
-  
+
   recognition.onresult = (event: SpeechRecognitionEvent) => {
     let interimTranscript = ''
     let finalTranscript = ''
@@ -90,15 +99,15 @@ export const startSpeechToText = (callbacks: VoiceCallbacks) => {
   }
 
   recognition.start()
-  ;(window as any)._prai_recognition = recognition
+  window._prai_recognition = recognition
 }
 
 export const stopSpeechToText = () => {
   if (typeof window === 'undefined') return
-  const recognition = (window as any)._prai_recognition as SpeechRecognition | undefined
+  const recognition = window._prai_recognition
   if (recognition) {
     recognition.stop()
-    delete (window as any)._prai_recognition
+    delete window._prai_recognition
   }
 }
 
@@ -107,7 +116,7 @@ export const VoiceService = Context.GenericTag<VoiceService>("VoiceService")
 export const VoiceServiceLive = Layer.succeed(
   VoiceService,
   VoiceService.of({
-    isSupported: () => typeof window !== 'undefined' && (!!(window as any).webkitSpeechRecognition || !!(window as any).SpeechRecognition),
+    isSupported: () => typeof window !== 'undefined' && (!!(window.webkitSpeechRecognition) || !!(window.SpeechRecognition)),
     start: startSpeechToText,
     stop: stopSpeechToText
   })

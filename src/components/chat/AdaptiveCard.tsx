@@ -29,14 +29,30 @@ import type {
   DiningContent,
   ItineraryContent,
   MediaSearchContent,
+  ActivityContent,
+  EventContent,
 } from '../../lib/effect/schemas/AdaptiveCardsSchema'
+
+/** @Type.AdaptiveCard.Data */
+export type AdaptiveCardData =
+  | TourismContent
+  | DiningContent
+  | ActivityContent
+  | EventContent
+  | PhotosContent
+  | VideoContent
+  | SuggestionsContent
+  | ItineraryContent
+  | MediaSearchContent
+  | SearchLocation
+  | BaseContent
 import { ADAPTIVE_CARD_TYPES } from '../../lib/effect/constants/AdaptiveCardConstants'
 import { actionToNaturalMessage } from '@/lib/actions/actionToNaturalMessage'
 
 /** @Context.AdaptiveCard */
 type AdaptiveCardContextValue = {
   type: CardType
-  data: any
+  data: AdaptiveCardData
   onAction?: (action: string) => void
 }
 
@@ -54,7 +70,7 @@ function useAdaptiveCard() {
 
 interface AdaptiveCardProps {
   type: CardType
-  data: any
+  data: AdaptiveCardData
   onAction?: (action: string) => void
   className?: string
   children?: React.ReactNode
@@ -103,7 +119,7 @@ const Media = () => {
       : type === ADAPTIVE_CARD_TYPES.PHOTOS && photosData?.images?.length
         ? photosData.images[0]
         : undefined
-  }, [type, data, tourismData?.images, photosData?.images])
+  }, [type, tourismData?.images, photosData?.images])
 
   const secondaryImages = useMemo(() => {
     if (type === ADAPTIVE_CARD_TYPES.TOURISM && tourismData?.images?.length)
@@ -111,7 +127,7 @@ const Media = () => {
     if (type === ADAPTIVE_CARD_TYPES.PHOTOS && photosData?.images?.length)
       return photosData.images.slice(1, 4)
     return []
-  }, [type, data, tourismData?.images, photosData?.images])
+  }, [type, tourismData?.images, photosData?.images])
 
   if (type === ADAPTIVE_CARD_TYPES.VIDEO) {
     if (videoData.youtubeUrl) {
@@ -189,6 +205,7 @@ const Media = () => {
               key={i}
               className="aspect-square rounded-2xl overflow-hidden group"
             >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={img}
                 className="w-full h-full object-cover transition-transform group-hover:scale-110"
@@ -208,7 +225,7 @@ const Media = () => {
     type === ADAPTIVE_CARD_TYPES.EVENT ||
     type === ADAPTIVE_CARD_TYPES.MEDIA_SEARCH
   ) {
-    const displayData = data as any
+    const displayData = data as TourismContent & DiningContent & ActivityContent & EventContent
     const mediaSearchData = data as MediaSearchContent
 
     if (type === ADAPTIVE_CARD_TYPES.MEDIA_SEARCH) {
@@ -273,6 +290,7 @@ const Media = () => {
             )}
           >
             {displayImage ? (
+              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={displayImage}
                 alt={displayData.title}
@@ -292,6 +310,7 @@ const Media = () => {
             <div className="col-span-4 flex flex-col gap-1">
               {secondaryImages.map((img: string, i: number) => (
                 <div key={i} className="flex-1 overflow-hidden">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={img}
                     onError={(e) => {
@@ -381,9 +400,7 @@ const Header = () => {
     videoData.title ||
     suggestionsData.title ||
     (data as MediaSearchContent).title ||
-    (data.type === ADAPTIVE_CARD_TYPES.SEARCH_LOCATION
-      ? `${t('chat.search_for')} "${data.search}"`
-      : null) ||
+    ('search' in data ? `${t('chat.search_for')} "${(data as SearchLocation).search}"` : null) ||
     baseData.title
 
   return (
@@ -411,9 +428,9 @@ const Content = () => {
 
   return (
     <div className="space-y-6">
-      {data.description && (
+      {'description' in data && (
         <p className="text-white/60 leading-relaxed text-sm md:text-base max-w-2xl font-light italic">
-          "{data.description}"
+          "{(data as TourismContent).description}"
         </p>
       )}
 
@@ -538,33 +555,33 @@ const Content = () => {
       {(type === ADAPTIVE_CARD_TYPES.ACTIVITY ||
         type === ADAPTIVE_CARD_TYPES.EVENT) && (
         <div className="grid grid-cols-2 md:grid-cols-3 gap-6 pt-4 border-t border-white/10">
-          {(data as any).duration && (
+          {(data as ActivityContent).duration && (
             <div className="space-y-1">
               <div className="text-[10px] font-black uppercase tracking-widest text-white/20">
                 {t('chat.duration')}
               </div>
               <div className="text-sm text-white/70 font-bold">
-                {(data as any).duration}
+                {(data as ActivityContent).duration}
               </div>
             </div>
           )}
-          {(data as any).difficulty && (
+          {(data as ActivityContent).difficulty && (
             <div className="space-y-1">
               <div className="text-[10px] font-black uppercase tracking-widest text-white/20">
                 {t('chat.difficulty')}
               </div>
               <div className="text-sm text-white/70 font-bold capitalize">
-                {(data as any).difficulty}
+                {(data as ActivityContent).difficulty}
               </div>
             </div>
           )}
-          {(data as any).date && (
+          {(data as EventContent).date && (
             <div className="space-y-1">
               <div className="text-[10px] font-black uppercase tracking-widest text-white/20">
                 {t('chat.date')}
               </div>
               <div className="text-sm text-primary font-bold">
-                {(data as any).date}
+                {(data as EventContent).date}
               </div>
             </div>
           )}

@@ -134,6 +134,7 @@ export const SourcesSidebar: React.FC = () => {
                         {/* Favicon */}
                         <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/[0.06] flex items-center justify-center p-1.5 overflow-hidden shrink-0 mt-0.5">
                           {source.icon ? (
+                            // eslint-disable-next-line @next/next/no-img-element
                             <img
                               src={source.icon}
                               alt=""

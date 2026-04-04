@@ -452,6 +452,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = memo(
                       >
                         <div className="w-4 h-4 rounded-full shrink-0 bg-white/10 flex items-center justify-center overflow-hidden">
                           {s.icon ? (
+                            // eslint-disable-next-line @next/next/no-img-element
                             <img
                               src={s.icon}
                               alt=""

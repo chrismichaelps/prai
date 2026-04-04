@@ -1,4 +1,4 @@
-import type { PuertoRicoSearchOptions, DiscoveryCategory } from "../types/search"
+import type { PuertoRicoSearchOptions, DiscoveryCategory, MediaType } from "../types/search"
 import { Timeframes, Languages } from "../types/search"
 import type { ChatMessage } from "@/types/chat"
 import {
@@ -44,7 +44,7 @@ export const buildSearchOptions = (
   overrides?: Partial<PuertoRicoSearchOptions>
 ): PuertoRicoSearchOptions => ({
   query,
-  mediaTypes: DefaultMediaTypes as readonly string[] as any,
+  mediaTypes: DefaultMediaTypes as readonly MediaType[],
   timeframe: Timeframes.Recent,
   language: Languages.Spanish,
   realTime: false,

@@ -351,7 +351,10 @@ export function ProfileClient() {
                       className="w-28 h-28 rounded-full overflow-hidden border-4 border-white/20 shadow-xl bg-white/5 flex items-center justify-center"
                     >
                       {avatarUrl ? (
-                        <img src={avatarUrl} alt={currentDisplayName} className="w-full h-full object-cover" />
+                        <>
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={avatarUrl} alt={currentDisplayName} className="w-full h-full object-cover" />
+                        </>
                       ) : (
                         <UserIcon className="w-12 h-12 text-white/40" />
                       )}

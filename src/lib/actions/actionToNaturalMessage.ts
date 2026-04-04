@@ -35,7 +35,7 @@ const regionTranslations: Record<string, string> = {
 
 export function actionToNaturalMessage(
   action: string,
-  params: Record<string, any> = {}
+  params: Record<string, string | string[]> = {}
 ): string {
   if (Object.keys(params).length === 0) {
     return `Quiero más información sobre ${action.replace(/_/g, " ")}.`;
@@ -44,26 +44,31 @@ export function actionToNaturalMessage(
   const parts: string[] = ["Muéstrame"];
 
   if (params.category) {
-    const cat = categoryTranslations[params.category] || params.category;
-    parts.push(cat);
+    const catVal = Array.isArray(params.category) ? params.category[0] : params.category
+    const cat = catVal ? (categoryTranslations[catVal] || catVal) : ''
+    if (cat) parts.push(cat)
   } else if (params.type) {
-    const typ = categoryTranslations[params.type] || params.type;
-    parts.push(typ);
+    const typeVal = Array.isArray(params.type) ? params.type[0] : params.type
+    const typ = typeVal ? (categoryTranslations[typeVal] || typeVal) : ''
+    if (typ) parts.push(typ)
   }
 
   if (params.region) {
-    const reg = regionTranslations[params.region] || params.region;
-    parts.push(`en la región ${reg}`);
+    const regVal = Array.isArray(params.region) ? params.region[0] : params.region
+    const reg = regVal ? (regionTranslations[regVal] || regVal) : ''
+    if (reg) parts.push(`en la región ${reg}`)
   }
 
   if (params.feature || params.features) {
-    const features = Array.isArray(params.feature || params.features)
-      ? (params.feature || params.features)
-      : [params.feature || params.features];
+    const rawFeatures = params.feature || params.features
+    const features = Array.isArray(rawFeatures)
+      ? rawFeatures
+      : [rawFeatures]
 
     const translatedFeatures = features
-      .map((f: string) => featureTranslations[f] || f.replace(/_/g, " "))
-      .filter(Boolean);
+      .filter((f): f is string => typeof f === 'string')
+      .map((f) => featureTranslations[f] || f.replace(/_/g, " "))
+      .filter(Boolean)
 
     if (translatedFeatures.length > 0) {
       parts.push(`que sean ${translatedFeatures.join(" y ")}`);
@@ -71,12 +76,12 @@ export function actionToNaturalMessage(
   }
 
   if (params.price || params.priceRange) {
-    const price = params.price || params.priceRange;
+    const price = String(params.price ?? params.priceRange);
     parts.push(`en rango de precio ${price}`);
   }
 
   if (params.location) {
-    parts.push(`en ${params.location}`);
+    parts.push(`en ${String(params.location)}`);
   }
 
   if (params.locations && Array.isArray(params.locations) && params.locations.length > 1) {
@@ -84,7 +89,7 @@ export function actionToNaturalMessage(
   }
 
   if (params.from && params.to) {
-    parts.push(`cómo llegar de ${params.from} a ${params.to}`);
+    parts.push(`cómo llegar de ${String(params.from)} a ${String(params.to)}`);
   }
 
   if (parts.length <= 1) {

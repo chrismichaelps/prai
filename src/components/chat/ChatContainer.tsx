@@ -41,6 +41,7 @@ import type { UserUsage } from '@/hooks/useUsage'
 import type { ChatCommand } from '@/lib/commands/types'
 import { CommandService, type CommandFeedback } from '@/lib/effect/services/CommandService'
 import { FB_ERR } from '@/lib/constants/command-figures'
+import type { AdaptiveCardData } from '@/components/chat/AdaptiveCard'
 import { runtime } from '@/lib/effect/runtime'
 
 /** @UI.Chat.AdaptiveCard.Lazy */
@@ -593,7 +594,7 @@ export const ChatContainer: React.FC = () => {
             >
               <AdaptiveCard
                 type={adaptive.type}
-                data={adaptive.data}
+                data={adaptive.data as AdaptiveCardData}
                 onAction={handleSend}
               />
             </div>

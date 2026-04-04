@@ -746,7 +746,7 @@ describe("executor / applyResult", () => {
     expect(dispatched.some((a) => a.type === "chat/updateChatSettings")).toBe(true)
     const action = dispatched.find((a) => a.type === "chat/updateChatSettings") as PayloadAction | undefined
     expect(action?.payload.key).toBe("region")
-    expect(action.payload.value).toBe("norte")
+    expect(action?.payload.value).toBe("norte")
   })
 
   it("system_inject result dispatches addMessage", async () => {
@@ -758,7 +758,7 @@ describe("executor / applyResult", () => {
     expect(dispatched.some((a) => a.type === "chat/addMessage")).toBe(true)
     const action = dispatched.find((a) => a.type === "chat/addMessage") as PayloadAction | undefined
     expect(action?.payload.role).toBe("system")
-    expect(action.payload.content).toBe("Be concise")
+    expect(action?.payload.content).toBe("Be concise")
   })
 
   it("dispatch result dispatches the wrapped action", async () => {
@@ -811,7 +811,7 @@ describe("executor / applyResult", () => {
     await runExecutor(applyResult({ type: "setting", key: "language", value: "es", toast: "Language: Español" }, null), dispatched)
     const action = dispatched.find((a) => a.type === "chat/updateChatSettings") as PayloadAction | undefined
     expect(action?.payload.key).toBe("language")
-    expect(action.payload.value).toBe("es")
+    expect(action?.payload.value).toBe("es")
   })
 })
 

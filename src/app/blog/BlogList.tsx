@@ -41,6 +41,7 @@ function BlogItem({ post }: { post: BlogPost }) {
       {/* Post Image */}
       {post.image && (
         <div className="flex-shrink-0 w-full md:w-48 lg:w-48 aspect-square relative overflow-hidden rounded-xl border border-white/10 shadow-lg shadow-black/20 bg-white/[0.03]">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={post.image}
             alt={post.title}

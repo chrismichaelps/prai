@@ -218,7 +218,7 @@ export const COMMAND_DEFS = {
 } as const
 
 /** @Const.Command.ValueSchemas */
-export const COMMAND_VALUE_SCHEMAS: Record<string, Schema.Schema<unknown, unknown>> = {
+export const COMMAND_VALUE_SCHEMAS = {
   LanguageSchema,
   PersonalitySchema,
   ModeSchema,

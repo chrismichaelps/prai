@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { Header } from '@/components/layout/Header'
 import { ChatContainer } from '@/components/chat/ChatContainer'
@@ -23,14 +23,8 @@ export default function ChatByIdPage() {
   const [isLoading, setIsLoading] = useState(true)
   const chatId = params.id as string
 
-  useEffect(() => {
-    if (user && chatId) {
-      loadChat()
-    }
-  }, [user, chatId])
-
   /** @Logic.UI.Chat.LoadChatById */
-  const loadChat = async () => {
+  const loadChat = useCallback(async () => {
     if (!user || !chatId) return
 
     setIsLoading(true)
@@ -66,7 +60,13 @@ export default function ChatByIdPage() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [user, chatId, dispatch, router])
+
+  useEffect(() => {
+    if (user && chatId) {
+      loadChat()
+    }
+  }, [user, chatId, loadChat])
 
   if (isLoading) {
     return (
