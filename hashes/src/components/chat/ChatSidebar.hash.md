@@ -1,5 +1,5 @@
 ---
-State_ID: BigInt(0x0)
+State_ID: BigInt(0x1)
 Git_SHA: LATEST
 Grammar_Lock: "@root/hashes/grammar/typescript.hash.md"
 ---
@@ -24,7 +24,9 @@ export function ChatSidebar({ isOpen, onClose }: ChatSidebarProps): JSX.Element
 - **State:** `chats`, `currentChatId`, `isLoading`, `archivedChats`, `showArchived`, `activeMenu`.
 - **Auto_Load:** Loads chats when sidebar opens and user is authenticated.
 - **Actions:** Create, select, archive, restore, delete chat operations.
-- **Redux_Actions:** Uses `setChats`, `addChat`, `removeChat`, `setMessages`, `clearHistory`.
+- **Redux_Actions:** Uses `setChats`, `addChat`, `removeChat`, `setMessages`, `clearHistory`, `setChatSettings`.
+- **AbortController_Law:** In-flight `/api/chat/chats/:id` fetches cancelled on unmount or re-trigger via `AbortController`.
+- **Settings_Law:** Dispatches `setChatSettings` after loading a chat's messages to restore per-chat command settings.
 
 ### [State Management]
 | State | Type | Description |

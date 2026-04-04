@@ -1,5 +1,5 @@
 ---
-State_ID: BigInt(0x0)
+State_ID: BigInt(0x1)
 Git_SHA: LATEST
 Grammar_Lock: "@root/hashes/grammar/typescript.hash.md"
 ---
@@ -27,7 +27,7 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
 
 ### [Implementation Notes]
 - **GET:** Retrieves all messages for chat, ordered by `created_at` ASC.
-- **PATCH:** Updates `is_archived` boolean for archive/unarchive functionality.
+- **PATCH:** Updates `is_archived` boolean for archive/unarchive functionality AND `settings` field (`Record<string, unknown>`) for per-chat command settings persistence.
 - **DELETE:** Permanently deletes chat and cascades to messages via FK constraint.
 
 ### [Semantic Hash]

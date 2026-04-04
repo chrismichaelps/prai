@@ -1,5 +1,5 @@
 ---
-State_ID: BigInt(0x0fc98cc)
+State_ID: BigInt(0x0fc98dd)
 Git_SHA: LATEST
 Grammar_Lock: "@root/hashes/grammar/typescript.hash.md"
 ---
@@ -22,7 +22,11 @@ export const I18nLive = Layer.effect(I18n, ...)
 - **Locale_Sync:** Automatically synchronizes with cookie storage `NEXT_LOCALE`.
 
 ### [Semantic Hash]
-Global localization context managing translations for Auth, Profile, Nav, Chat, Legal, Usage, and Personalization domains.
+Global localization context managing translations for Auth, Profile, Nav, Chat, Legal, Usage, Personalization, and Command domains.
+
+### [Change Notes — command integration]
+- Added `command.*` i18n keys for command feedback messages
+- Added `chat.regenerate` key for regenerate response button
 
 ### [Linkage]
 - **Dependencies:** `react`, `js-cookie`

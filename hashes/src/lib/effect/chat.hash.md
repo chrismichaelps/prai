@@ -1,5 +1,5 @@
 ---
-State_ID: BigInt(0x5)
+State_ID: BigInt(0x6)
 Git_SHA: LATEST
 Grammar_Lock: "@root/hashes/grammar/effect.hash.md"
 ---
@@ -59,5 +59,10 @@ const syncSources: () => Effect<void>
 Manages the full chat lifecycle: initialize system prompt, stream SSE from OpenRouter, parse reasoning/content deltas, extract AdaptiveCard JSON blocks, extract and deduplicate URLs with O(n) sliding window, dispatch all state mutations via Redux.
 
 ### [Linkage]
-- **Upstream:** `OpenRouter`, `ConfigService`, `Redux`, `ChatApi`, `chatSlice`, `@/lib/url`
+- **Upstream:** `OpenRouter`, `ConfigService`, `Redux`, `ChatApi`, `chatSlice`, `@/lib/url`, `@/lib/commands/settingsPrompt`
 - **Downstream:** `@root/src/lib/effect/ChatProvider.tsx`
+
+### [Change Notes — session_memory + settings integration]
+- `buildSettingsPrompt(chatSettings)` imported and injected via `splice(1, 0, ...)` after main system prompt (not `push()`)
+- `flushTagBuffer` return type explicitly `string[]` — consistent for both stream-done and mid-stream paths
+- Client-side chat.ts now uses `fetch` + SSE directly (removed OpenRouter service dependency)

@@ -1,5 +1,5 @@
 ---
-State_ID: BigInt(0x0)
+State_ID: BigInt(0x1)
 Git_SHA: LATEST
 Grammar_Lock: "@root/hashes/grammar/typescript.hash.md"
 ---
@@ -15,7 +15,7 @@ export const chatService: {
   getChats: (userId: string) => Effect<Chat[], ChatDbError>
   getArchivedChats: (userId: string) => Effect<Chat[], ChatDbError>
   createChat: (userId: string, title?: string) => Effect<Chat, ChatDbError>
-  updateChat: (chatId: string, updates: { title?: string; is_archived?: boolean }) => Effect<Chat, ChatDbError>
+  updateChat: (chatId: string, updates: { title?: string; is_archived?: boolean; settings?: Record<string, unknown> }) => Effect<Chat, ChatDbError>
   deleteChat: (chatId: string) => Effect<void, ChatDbError>
   deleteAllChats: (userId: string) => Effect<void, ChatDbError>
   archiveAllChats: (userId: string) => Effect<void, ChatDbError>

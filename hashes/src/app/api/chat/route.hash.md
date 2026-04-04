@@ -1,5 +1,5 @@
 ---
-State_ID: BigInt(0x3)
+State_ID: BigInt(0x4)
 Git_SHA: LATEST
 Grammar_Lock: "@root/hashes/grammar/typescript.hash.md"
 ---
@@ -43,3 +43,6 @@ The core AI conduit with tier-based model selection, reasoning effort injection,
 - **Upstream:** `@root/src/lib/effect/constants/SubscriptionConstants.ts`, `@root/src/lib/effect/constants/UsageConstants.ts`, `@root/src/lib/effect/constants/compaction/CompactionConstants.ts`, `@root/src/lib/effect/constants/query/QueryExpansionConstants.ts`, `@root/src/lib/effect/constants/relevance/ToolRelevanceConstants.ts`, `@root/src/lib/effect/constants/filters/SearchFilterConstants.ts`, `@root/src/lib/effect/constants/followup/FollowUpConstants.ts`
 - **Upstream Services:** QueryExpansionService, ToolRelevanceService, SearchFilterService, FollowUpSuggestionsService, SessionMemoryService, CompactionService
 - **Downstream:** UI Chat components via SSE stream
+
+### [Change Notes — usage accounting fix]
+- `increment_user_usage` RPC now fires only inside `} else {` success branch after `result.success` check — prevents quota burn on failed agentic loops

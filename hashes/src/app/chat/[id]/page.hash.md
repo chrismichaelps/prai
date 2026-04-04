@@ -1,5 +1,5 @@
 ---
-State_ID: BigInt(0x0)
+State_ID: BigInt(0x1)
 Git_SHA: LATEST
 Grammar_Lock: "@root/hashes/grammar/next.hash.md"
 ---
@@ -19,6 +19,8 @@ export default function ChatByIdPage(): JSX.Element
 ### [Governance]
 - **Auth_Law:** Protected route - redirects unauthenticated users to home.
 - **Data_Law:** Fetches chat messages on mount via `/api/chat/chats/[id]`.
+- **Clear_Law:** Dispatches `clearHistory()` on mount before loading new chat messages to prevent stale state bleed.
+- **Settings_Law:** Fetches chat `settings` field and dispatches `setChatSettings` to restore per-chat command settings.
 - **Error_Law:** Redirects to `/chat` on error loading chat.
 
 ### [Semantic Hash]

@@ -1,5 +1,5 @@
 ---
-State_ID: BigInt(0x2)
+State_ID: BigInt(0x3)
 Git_SHA: LATEST
 Grammar_Lock: "@root/hashes/grammar/effect.hash.md"
 ---
@@ -46,12 +46,14 @@ export const Chat: {
 | `createNewChat` | Creates new chat via API, dispatches to Redux, navigates to `/chat/:id` |
 | `ensureChatExists` | Returns existing chat or creates new one |
 | `handleSend` | Main message sending handler |
+| `handleCommandExecute` | Runs slash command via CommandService, returns `CommandFeedback` for pipeline display |
 | `handleMicClick` | Voice recording toggle |
 | `scrollToBottom` | Smooth/auto scroll to bottom |
+| `fetchUsage` | Refreshes usage stats post-message via `wasLoadingRef` guard |
 
 ### [Semantic Hash]
 Root chat UI container. Manages message list rendering, auto-scroll, input handling, voice recording, adaptive card display, and automatic chat creation/navigation.
 
 ### [Linkage]
-- **Upstream:** `@/lib/effect/ChatProvider`, `@/store/slices/chatSlice`, `useAuth`, `usePathname`, `@/hooks/useUsage`
-- **Downstream:** `AdaptiveCard`, `MessageBubble`, `Suggestions`, `DiscoveryLoader`, `UsageDisplay`
+- **Upstream:** `@/lib/effect/ChatProvider`, `@/store/slices/chatSlice`, `useAuth`, `usePathname`, `@/hooks/useUsage`, `@/lib/effect/services/CommandService`, `@/lib/chat/greetingMessages`
+- **Downstream:** `AdaptiveCard`, `MessageBubble`, `Suggestions`, `DiscoveryLoader`, `UsageDisplay`, `CommandInput`

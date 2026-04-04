@@ -1,5 +1,5 @@
 ---
-State_ID: BigInt(0x0)
+State_ID: BigInt(0x1)
 Git_SHA: LATEST
 Grammar_Lock: "@root/hashes/grammar/effect.hash.md"
 ---
@@ -13,11 +13,16 @@ export interface AddMessagePayload { chatId: string; role: "user" | "assistant";
 export interface UpdateChatPayload { chatId: string; title?: string; is_archived?: boolean }
 
 export const ChatApi: Context.GenericTag<ChatApi>
+export interface UpdateSettingsPayload { chatId: string; settings: Record<string, unknown> }
+export interface UpdateUserLanguagePayload { language: "es" | "en" }
+
 export interface ChatApi {
   addMessage: (payload: AddMessagePayload) => Effect<Message, ApiError>
   getMessages: (chatId: string) => Effect<Message[], ApiError>
   updateChat: (payload: UpdateChatPayload) => Effect<Chat, ApiError>
   getChat: (chatId: string) => Effect<Chat, ApiError>
+  updateSettings: (payload: UpdateSettingsPayload) => Effect<void, ApiError>
+  updateUserLanguage: (payload: UpdateUserLanguagePayload) => Effect<void, ApiError>
 }
 
 export const ChatApiLayer: Layer<ChatApi>
@@ -37,4 +42,8 @@ Client-side Effect-TS service that calls Next.js API routes for chat operations.
 
 ### [Linkage]
 - **Upstream:** Types from `./Chat`
-- **Downstream:** Components that need chat data via Effect
+- **Downstream:** Components that need chat data via Effect, `@/lib/commands/executor` (updateSettings, updateUserLanguage)
+
+### [Change Notes — command integration]
+- `updateSettings(payload)` → PATCH `/api/chat/chats/:id` with `settings` field
+- `updateUserLanguage(payload)` → PATCH `/api/user/language` — persists language preference to `profiles` table

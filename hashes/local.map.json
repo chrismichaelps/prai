@@ -1,6 +1,6 @@
 {
   "shard_id": "@root/src",
-  "state_anchor": "BigInt:0x1fc98dd",
+  "state_anchor": "BigInt:0x2a0f4c1",
   "parent_bridge": "@root/hashes/local.map.json",
   "git_anchor": "LATEST",
   "cache_integrity": "VERIFIED",
@@ -1276,6 +1276,235 @@
       "dependencies": [
         "ToolParamsSchemas"
       ],
+      "fidelity_level": "Active"
+    },
+    "lib_commands_types": {
+      "file_path": "@root/src/lib/commands/types.ts",
+      "hash_reference": "@root/hashes/src/lib/commands/types.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "@root/src/lib/effect/schemas/CommandSchema.ts",
+        "@root/src/lib/effect/errors.ts"
+      ],
+      "fidelity_level": "Active"
+    },
+    "lib_commands_registry": {
+      "file_path": "@root/src/lib/commands/registry.ts",
+      "hash_reference": "@root/hashes/src/lib/commands/registry.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "@root/src/lib/commands/language.ts",
+        "@root/src/lib/commands/personality.ts",
+        "@root/src/lib/commands/mode.ts",
+        "@root/src/lib/commands/region.ts",
+        "@root/src/lib/commands/budget.ts",
+        "@root/src/lib/commands/trip.ts",
+        "@root/src/lib/commands/system.ts",
+        "@root/src/lib/commands/clear.ts",
+        "@root/src/lib/commands/newChat.ts",
+        "@root/src/lib/commands/help.ts",
+        "@root/src/lib/commands/remember.ts",
+        "@root/src/lib/commands/forget.ts"
+      ],
+      "fidelity_level": "Active"
+    },
+    "lib_commands_executor": {
+      "file_path": "@root/src/lib/commands/executor.ts",
+      "hash_reference": "@root/hashes/src/lib/commands/executor.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "@root/src/lib/effect/schemas/CommandSchema.ts",
+        "@root/src/lib/effect/services/Redux.ts",
+        "@root/src/lib/effect/services/ChatApi.ts",
+        "@root/src/lib/effect/services/MemoryApi.ts"
+      ],
+      "fidelity_level": "Active"
+    },
+    "lib_commands_language": {
+      "file_path": "@root/src/lib/commands/language.ts",
+      "hash_reference": "@root/hashes/src/lib/commands/language.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": ["@root/src/lib/effect/schemas/CommandSchema.ts"],
+      "fidelity_level": "Active"
+    },
+    "lib_commands_personality": {
+      "file_path": "@root/src/lib/commands/personality.ts",
+      "hash_reference": "@root/hashes/src/lib/commands/personality.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": ["@root/src/lib/effect/schemas/CommandSchema.ts"],
+      "fidelity_level": "Active"
+    },
+    "lib_commands_mode": {
+      "file_path": "@root/src/lib/commands/mode.ts",
+      "hash_reference": "@root/hashes/src/lib/commands/mode.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": ["@root/src/lib/effect/schemas/CommandSchema.ts"],
+      "fidelity_level": "Active"
+    },
+    "lib_commands_region": {
+      "file_path": "@root/src/lib/commands/region.ts",
+      "hash_reference": "@root/hashes/src/lib/commands/region.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": ["@root/src/lib/effect/schemas/CommandSchema.ts"],
+      "fidelity_level": "Active"
+    },
+    "lib_commands_budget": {
+      "file_path": "@root/src/lib/commands/budget.ts",
+      "hash_reference": "@root/hashes/src/lib/commands/budget.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": ["@root/src/lib/effect/schemas/CommandSchema.ts"],
+      "fidelity_level": "Active"
+    },
+    "lib_commands_trip": {
+      "file_path": "@root/src/lib/commands/trip.ts",
+      "hash_reference": "@root/hashes/src/lib/commands/trip.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": ["@root/src/lib/effect/schemas/CommandSchema.ts"],
+      "fidelity_level": "Active"
+    },
+    "lib_commands_system": {
+      "file_path": "@root/src/lib/commands/system.ts",
+      "hash_reference": "@root/hashes/src/lib/commands/system.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": ["@root/src/lib/effect/schemas/CommandSchema.ts"],
+      "fidelity_level": "Active"
+    },
+    "lib_commands_clear": {
+      "file_path": "@root/src/lib/commands/clear.ts",
+      "hash_reference": "@root/hashes/src/lib/commands/clear.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": ["@root/src/store/slices/chatSlice.ts"],
+      "fidelity_level": "Active"
+    },
+    "lib_commands_newChat": {
+      "file_path": "@root/src/lib/commands/newChat.ts",
+      "hash_reference": "@root/hashes/src/lib/commands/newChat.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": ["@root/src/lib/effect/schemas/CommandSchema.ts"],
+      "fidelity_level": "Active"
+    },
+    "lib_commands_help": {
+      "file_path": "@root/src/lib/commands/help.ts",
+      "hash_reference": "@root/hashes/src/lib/commands/help.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": ["@root/src/lib/commands/registry.ts"],
+      "fidelity_level": "Active"
+    },
+    "lib_commands_remember": {
+      "file_path": "@root/src/lib/commands/remember.ts",
+      "hash_reference": "@root/hashes/src/lib/commands/remember.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": ["@root/src/lib/effect/schemas/CommandSchema.ts"],
+      "fidelity_level": "Active"
+    },
+    "lib_commands_forget": {
+      "file_path": "@root/src/lib/commands/forget.ts",
+      "hash_reference": "@root/hashes/src/lib/commands/forget.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": ["@root/src/lib/effect/schemas/CommandSchema.ts"],
+      "fidelity_level": "Active"
+    },
+    "lib_commands_settingsPrompt": {
+      "file_path": "@root/src/lib/commands/settingsPrompt.ts",
+      "hash_reference": "@root/hashes/src/lib/commands/settingsPrompt.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": ["@root/src/lib/effect/schemas/CommandSchema.ts"],
+      "fidelity_level": "Active"
+    },
+    "lib_commands_tests_commands_test": {
+      "file_path": "@root/src/lib/commands/__tests__/commands.test.ts",
+      "hash_reference": "@root/hashes/src/lib/commands/__tests__/commands.test.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "@root/src/lib/commands/executor.ts",
+        "@root/src/lib/effect/services/MemoryApi.ts"
+      ],
+      "fidelity_level": "Active"
+    },
+    "lib_effect_schemas_CommandSchema": {
+      "file_path": "@root/src/lib/effect/schemas/CommandSchema.ts",
+      "hash_reference": "@root/hashes/src/lib/effect/schemas/CommandSchema.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": ["effect"],
+      "fidelity_level": "Active"
+    },
+    "lib_effect_services_CommandService": {
+      "file_path": "@root/src/lib/effect/services/CommandService.ts",
+      "hash_reference": "@root/hashes/src/lib/effect/services/CommandService.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "@root/src/lib/commands/registry.ts",
+        "@root/src/lib/commands/executor.ts",
+        "@root/src/lib/constants/command-figures.ts"
+      ],
+      "fidelity_level": "Active"
+    },
+    "lib_effect_services_MemoryApi": {
+      "file_path": "@root/src/lib/effect/services/MemoryApi.ts",
+      "hash_reference": "@root/hashes/src/lib/effect/services/MemoryApi.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "@root/src/lib/constants/app-constants.ts",
+        "@root/src/lib/effect/schemas/memory/SessionMemorySchema.ts"
+      ],
+      "fidelity_level": "Active"
+    },
+    "app_api_memory_route": {
+      "file_path": "@root/src/app/api/memory/route.ts",
+      "hash_reference": "@root/hashes/src/app/api/memory/route.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "@root/src/lib/supabase/server.ts",
+        "@root/src/app/api/_lib/errors/index.ts",
+        "@root/src/app/api/_lib/response/index.ts"
+      ],
+      "fidelity_level": "Active"
+    },
+    "app_api_user_language_route": {
+      "file_path": "@root/src/app/api/user/language/route.ts",
+      "hash_reference": "@root/hashes/src/app/api/user/language/route.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "@root/src/lib/supabase/server.ts",
+        "@root/src/app/api/_lib/errors/index.ts",
+        "@root/src/app/api/_lib/response/index.ts"
+      ],
+      "fidelity_level": "Active"
+    },
+    "components_chat_CommandPalette": {
+      "file_path": "@root/src/components/chat/CommandPalette.tsx",
+      "hash_reference": "@root/hashes/src/components/chat/CommandPalette.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "@root/src/lib/commands/types.ts",
+        "@root/src/lib/constants/command-figures.ts"
+      ],
+      "fidelity_level": "Active"
+    },
+    "components_chat_CommandInput": {
+      "file_path": "@root/src/components/chat/CommandInput.tsx",
+      "hash_reference": "@root/hashes/src/components/chat/CommandInput.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [
+        "@root/src/components/chat/CommandPalette.tsx",
+        "@root/src/lib/commands/registry.ts",
+        "@root/src/lib/constants/command-figures.ts",
+        "@root/src/lib/effect/services/CommandService.ts"
+      ],
+      "fidelity_level": "Active"
+    },
+    "lib_chat_greetingMessages": {
+      "file_path": "@root/src/lib/chat/greetingMessages.ts",
+      "hash_reference": "@root/hashes/src/lib/chat/greetingMessages.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [],
+      "fidelity_level": "Active"
+    },
+    "lib_constants_command_figures": {
+      "file_path": "@root/src/lib/constants/command-figures.ts",
+      "hash_reference": "@root/hashes/src/lib/constants/command-figures.hash.md",
+      "grammar_ref": "@root/hashes/grammar/typescript.hash.md",
+      "dependencies": [],
       "fidelity_level": "Active"
     }
   }
