@@ -66,3 +66,10 @@ Manages the full chat lifecycle: initialize system prompt, stream SSE from OpenR
 - `buildSettingsPrompt(chatSettings)` imported and injected via `splice(1, 0, ...)` after main system prompt (not `push()`)
 - `flushTagBuffer` return type explicitly `string[]` — consistent for both stream-done and mid-stream paths
 - Client-side chat.ts now uses `fetch` + SSE directly (removed OpenRouter service dependency)
+
+### [Change Notes — lint/type fixes + title generation]
+- Fixed type arguments on `generateChatTitle` return type (removed `never, never`)
+- Added `webSearchEnabled` property access for chat settings
+- Refactored `generateChatTitle` to call `/api/chat/title` endpoint with user/assistant messages
+- Added `composeStateMessage` import for ProcessingState
+- Added `setProcessingStage` import and usage

@@ -25,6 +25,7 @@ export const PUERTO_RICO_TOOLS: ToolDefinition[]
 - **Definition_Law:** Each tool follows the `ToolDefinition` interface with name, description, parameters (Schema), readOnly flag, alwaysLoad flag, optional isDestructive, and optional searchHint.
 - **Localization_Law:** All tool descriptions are in Spanish.
 - **New_Tool_Law:** `remember_user_fact` — saves user facts for future reference. Non-destructive, not read-only, always loaded. Description: "Guarda un dato personal del usuario para referencia futura."
+- **WebSearch_Law:** `web_search` — searches the web for updated information on Puerto Rico topics. Read-only, not always loaded, 15s timeout.
 
 ### [Semantic Hash]
 Tool registry for all Puerto Rico tourism tools. Defines 9 tools: search_beaches, search_restaurants, search_events, search_places, search_hotels, search_weather, search_transport, save_favorite, save_itinerary, and remember_user_fact. All descriptions localized to Spanish.

@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-04-05
+
+Fixed lint and TypeScript errors across the codebase. Standardized JSDoc comments to strict `@Type.Name` format — removed all descriptive text after annotations. Added missing i18n keys including `chat.dismiss` for message dismissal and web search toggle labels. Localized `TITLE_SYSTEM_PROMPT` to Spanish/Latino for consistent AI behavior.
+
 ## 2026-04-03
 
 This is the biggest update to the AI engine so far. We completely redesigned how the chat processes requests with a new **preflight pipeline** that runs before every response. The AI now understands search context — it can extract filters like time, location, and budget from your messages and automatically apply them to searches. It also rephrases ambiguous queries into better search terms using your conversation history.

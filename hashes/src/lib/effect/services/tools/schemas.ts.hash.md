@@ -30,6 +30,6 @@ export const ToolParamsSchemas: {
 ### [Semantic Hash]
 Parameter schemas for all Puerto Rico tourism tools. Extended with `RememberUserFactParamsSchema` for the new memory-persistence tool.
 
-### [Linkage]
-- **Used by:** `@root/src/lib/effect/services/tools/types.ts`
-- **Used by:** `@root/src/lib/effect/services/tools/executor.ts`
+### [Change Notes — web search]
+- Added `WebSearchParamsSchema` for `web_search` tool
+- Added `web_search` to `ToolParamsSchemas`
