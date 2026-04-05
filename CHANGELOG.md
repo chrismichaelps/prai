@@ -2,7 +2,11 @@
 
 ## 2026-04-05
 
-Fixed lint and TypeScript errors across the codebase. Standardized JSDoc comments to strict `@Type.Name` format — removed all descriptive text after annotations. Added missing i18n keys including `chat.dismiss` for message dismissal and web search toggle labels. Localized `TITLE_SYSTEM_PROMPT` to Spanish/Latino for consistent AI behavior.
+Big day for search and transparency. We shipped **Jina web search** — the AI can now browse the web in real time when you ask about current events, prices, hours, or anything that needs up-to-date information. There's a new Web toggle in the chat input to enable it per conversation. Usage is tracked per user with daily limits, and you can see your Jina search consumption on the Usage page.
+
+We also shipped **dynamic reasoning and search state** — instead of a generic loading animation, you now see live, context-aware status messages while the AI works: "Buscando restaurantes cerca de Condado…", "Evaluando resultados de búsqueda…", "Generando respuesta…". These messages update in real time as the request moves through the pipeline and are generated from the actual operation in progress — your search query, the tool being used, or your question.
+
+On top of that: added **automatic chat title generation** via a dedicated `/api/chat/title` endpoint so conversations get meaningful names after the first exchange. Fixed lint and TypeScript errors across the codebase, standardized JSDoc comments to strict `@Type.Name` annotation format, added missing i18n keys for web search labels and message dismissal, and localized system prompts to Spanish for more consistent AI behavior.
 
 ## 2026-04-03
 
