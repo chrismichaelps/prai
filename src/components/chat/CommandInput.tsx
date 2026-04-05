@@ -39,7 +39,7 @@ interface PipelineStep {
   elapsed?: number
 }
 
-/** @Logic.Pipeline.RandomVerbs — frozen at spawn, same as claude-src pattern */
+/** @Logic.Pipeline.RandomVerbs */
 function pickVerbs(): { present: string; past: string } {
   const present =
     SPINNER_VERBS[Math.floor(Math.random() * SPINNER_VERBS.length)]!
@@ -48,7 +48,7 @@ function pickVerbs(): { present: string; past: string } {
   return { present, past }
 }
 
-/** @Component.Command.TypewriterText — character-reveal animation matching terminal output */
+/** @Component.Command.TypewriterText */
 const TypewriterText: React.FC<{ text: string; speed?: number }> = ({
   text,
   speed = 22,
@@ -100,7 +100,7 @@ const StepIcon: React.FC<{ state: PipelineState }> = ({ state }) => {
   )
 }
 
-/** @Component.Pipeline.Row — one step in the pipeline */
+/** @Component.Pipeline.Row */
 const PipelineRow: React.FC<{
   step: PipelineStep
   index: number
@@ -176,7 +176,7 @@ export const CommandInput: React.FC<CommandInputProps> = ({
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [cursorVisible, setCursorVisible] = useState(true)
 
-  /** @UI.Pipeline.Steps — replaces textarea content while showing command result */
+  /** @UI.Pipeline.Steps */
   const [pipeline, setPipeline] = useState<PipelineStep[] | null>(null)
 
   /** @UI.Command.Input.SpinnerAnim */
@@ -314,7 +314,7 @@ export const CommandInput: React.FC<CommandInputProps> = ({
     autoResize()
   }, [value, autoResize])
 
-  /** @Logic.Command.Execute — runs the command with pipeline animation */
+  /** @Logic.Command.Execute */
   const executeCommand = useCallback(
     (cmd: ChatCommand, args: string) => {
       onChange('')
@@ -325,7 +325,7 @@ export const CommandInput: React.FC<CommandInputProps> = ({
     [onCommandExecute, onChange, runPipeline],
   )
 
-  /** @Logic.Command.Fill — fill command name + space, cursor to end (Tab behavior) */
+  /** @Logic.Command.Fill */
   const fillCommand = useCallback(
     (cmd: ChatCommand) => {
       const filled = cmd.name + ' '
@@ -342,7 +342,7 @@ export const CommandInput: React.FC<CommandInputProps> = ({
     [onChange],
   )
 
-  /** @Logic.Command.Apply — Enter/click: execute no-arg commands, fill arg commands */
+  /** @Logic.Command.Apply */
   const applyCommand = useCallback(
     (cmd: ChatCommand, inlineArgs?: string) => {
       if (cmd.argumentHint && !inlineArgs) {

@@ -2,13 +2,13 @@
 
 /** @UI.Chat.Bubble */
 
-import React, { useMemo, useState, useCallback, memo } from 'react'
+import React, { useMemo, useState, useCallback, useEffect, memo } from 'react'
 import { useI18n } from '@/lib/effect/I18nProvider'
 import DOMPurify from 'isomorphic-dompurify'
 import MarkdownIt from 'markdown-it'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
-import { useAppDispatch } from '@/store/hooks'
+import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { openSources } from '@/store/slices/chatSlice'
 import { ChatRole } from '@/types/chat'
 import type {
@@ -26,6 +26,7 @@ import {
   Pencil,
   Check,
   X,
+  StopCircle,
 } from 'lucide-react'
 
 /** @Constant.UI.Chat.MarkdownRenderer */
@@ -42,18 +43,39 @@ interface MessageBubbleProps {
   index: number
   onEdit?: (index: number, content: string) => void
   onStop?: () => void
+  isStreaming?: boolean
 }
 
 export const MessageBubble: React.FC<MessageBubbleProps> = memo(
-  ({ message, index, onEdit, onStop }) => {
+  ({ message, index, onEdit, onStop, isStreaming = false }) => {
     const { t } = useI18n()
     const dispatch = useAppDispatch()
+    const processingMessage = useAppSelector(state => state.chat.processingStage?.message)
 
     const [isThoughtOpen, setIsThoughtOpen] = useState(false)
     const [isEditing, setIsEditing] = useState(false)
     const [isCopied, setIsCopied] = useState(false)
     const [editContent, setEditContent] = useState(message.content)
     const [expandedTools, setExpandedTools] = useState(new Set<number>())
+    const [liveSeconds, setLiveSeconds] = useState(0)
+
+    const isThinking = !!message.metadata?.isThinking
+
+    /** @Logic.UI.Chat.ThinkingTimer */
+    useEffect(() => {
+      if (!isThinking) {
+        setLiveSeconds(0)
+        return
+      }
+      setLiveSeconds(0)
+      const interval = setInterval(() => setLiveSeconds((s) => s + 1), 1000)
+      return () => clearInterval(interval)
+    }, [isThinking])
+
+    /** @Logic.UI.Chat.AutoOpenThought */
+    useEffect(() => {
+      if (isThinking) setIsThoughtOpen(true)
+    }, [isThinking])
 
     const isUser = message.role === ChatRole.USER
     const isSystem = message.role === ChatRole.SYSTEM
@@ -231,6 +253,12 @@ export const MessageBubble: React.FC<MessageBubbleProps> = memo(
                       <span>
                         {(() => {
                           const val = message.metadata?.thoughtDuration
+
+                          /** Live ticking counter while model is still reasoning */
+                          if (isThinking && !val?.startsWith('completed:')) {
+                            return `${t('chat.thinking')} ${liveSeconds}s`
+                          }
+
                           if (!val) return t('chat.thinking')
 
                           if (val.startsWith('status:')) {
@@ -492,18 +520,42 @@ export const MessageBubble: React.FC<MessageBubbleProps> = memo(
                 </div>
               )}
 
-              <div
-                className={cn(
-                  'prose prose-p:leading-relaxed prose-pre:bg-black/30 prose-pre:border prose-pre:border-white/[0.05]',
-                  'prose-code:before:content-none prose-code:after:content-none prose-code:text-white/80 prose-code:bg-white/5 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md',
-                  'prose-headings:text-[17px] prose-headings:font-black prose-headings:mb-3 prose-headings:mt-6 prose-headings:text-white/90',
-                  'prose-strong:text-white/90 prose-strong:font-black',
-                  'prose-a:text-orange-400 prose-a:hover:text-orange-300 prose-a:underline prose-a:underline-offset-2 prose-a:transition-colors',
-                  'prose-ul:list-disc prose-ul:pl-5 prose-li:marker:text-white/20',
-                  'font-sans text-[17px] font-normal max-w-none text-white/90 leading-relaxed selection:bg-white/10',
-                )}
-                dangerouslySetInnerHTML={htmlContent}
-              />
+              {/** @UI.Chat.Bubble.TruncatedIndicator */}
+              {message.metadata?.isTruncated && (
+                <div className="flex items-center gap-2 mb-2 text-white/25 text-[12px] font-medium">
+                  <StopCircle className="w-3.5 h-3.5 shrink-0" />
+                  <span>{t('chat.stopped') || 'Respuesta interrumpida'}</span>
+                </div>
+              )}
+
+              {/** @UI.Chat.Bubble.EmptyState */}
+              {isStreaming && !message.content && !isThinking && !message.metadata?.thought && (
+                <div className="flex items-center gap-2 py-2 pl-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-white/30 animate-pulse shrink-0" />
+                  <span className="text-white/40 text-[14px]">{processingMessage ?? "…"}</span>
+                </div>
+              )}
+
+              {message.content && (
+                <div className="relative">
+                  <div
+                    className={cn(
+                      'prose prose-p:leading-relaxed prose-pre:bg-black/30 prose-pre:border prose-pre:border-white/[0.05]',
+                      'prose-code:before:content-none prose-code:after:content-none prose-code:text-white/80 prose-code:bg-white/5 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md',
+                      'prose-headings:text-[17px] prose-headings:font-black prose-headings:mb-3 prose-headings:mt-6 prose-headings:text-white/90',
+                      'prose-strong:text-white/90 prose-strong:font-black',
+                      'prose-a:text-orange-400 prose-a:hover:text-orange-300 prose-a:underline prose-a:underline-offset-2 prose-a:transition-colors',
+                      'prose-ul:list-disc prose-ul:pl-5 prose-li:marker:text-white/20',
+                      'font-sans text-[17px] font-normal max-w-none text-white/90 leading-relaxed selection:bg-white/10',
+                    )}
+                    dangerouslySetInnerHTML={htmlContent}
+                  />
+                  {/** @UI.Chat.Bubble.StreamingCursor */}
+                  {isStreaming && (
+                    <span className="inline-block w-[3px] h-[1.1em] bg-white/60 rounded-sm animate-pulse ml-0.5 align-text-bottom" />
+                  )}
+                </div>
+              )}
             </div>
           )}
         </div>

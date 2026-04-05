@@ -6,7 +6,7 @@ import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { Effect } from 'effect'
 import dynamic from 'next/dynamic'
 import { useAppSelector, useAppDispatch } from '@/store/hooks'
-import { addChat, setCurrentChat, setSuggestions } from '@/store/slices/chatSlice'
+import { addChat, setCurrentChat, setSuggestions, updateChatSettings } from '@/store/slices/chatSlice'
 import { clearApiError } from '@/store/slices/uiSlice'
 import { useChatActions } from '@/lib/effect/ChatProvider'
 import { DiscoveryLoader } from './DiscoveryLoader'
@@ -23,6 +23,7 @@ import {
   ChevronRight,
   RefreshCw,
   AlertCircle,
+  Globe,
 } from 'lucide-react'
 import { getRandomGreeting } from '@/lib/chat/greetingMessages'
 /** @Module.UI.Motion */
@@ -126,6 +127,8 @@ export const Chat = {
     onToggleUsage,
     haptics,
     onCommandExecute,
+    webSearchEnabled,
+    onToggleWebSearch,
   }: {
     value: string
     onChange: (val: string) => void
@@ -146,6 +149,8 @@ export const Chat = {
     onToggleUsage: () => void
     haptics?: { light: () => void; medium: () => void }
     onCommandExecute?: (cmd: ChatCommand, args: string) => Promise<CommandFeedback>
+    webSearchEnabled?: boolean
+    onToggleWebSearch?: () => void
   }) => {
   return (
     <footer className="w-full h-fit flex flex-col items-center z-30 pointer-events-none pb-12 px-6">
@@ -236,7 +241,7 @@ export const Chat = {
               <CommandInput
                 value={value}
                 onChange={onChange}
-                onSubmit={() => { if (!isAtLimit) onSend() }}
+                onSubmit={() => { if (!isAtLimit && !isLoading) onSend() }}
                 onCommandExecute={onCommandExecute}
                 placeholder={
                   isAtLimit
@@ -251,7 +256,7 @@ export const Chat = {
               value={value}
               onChange={(e) => onChange(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey && !isAtLimit) {
+                if (e.key === 'Enter' && !e.shiftKey && !isAtLimit && !isLoading) {
                   e.preventDefault()
                   onSend()
                 }
@@ -273,7 +278,23 @@ export const Chat = {
           </div>
 
           {/* @UI.Chat.Actions */}
-          <div className="flex items-center justify-end px-3 pb-3 pt-2">
+          <div className="flex items-center justify-between px-3 pb-3 pt-2">
+            {/** @UI.Chat.Action.WebSearch */}
+            <button
+              onClick={onToggleWebSearch}
+              aria-label={webSearchEnabled ? t('a11y.disable_web_search') : t('a11y.enable_web_search')}
+              aria-pressed={webSearchEnabled}
+              className={cn(
+                'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-bold transition-all active:scale-95',
+                webSearchEnabled
+                  ? 'bg-primary/15 text-primary border border-primary/30 hover:bg-primary/20'
+                  : 'text-white/20 hover:text-white/50 border border-transparent hover:border-white/10',
+              )}
+            >
+              <Globe className="w-3.5 h-3.5" />
+              <span>{t('chat.web_search_label')}</span>
+            </button>
+
             <div className="flex items-center gap-2">
               {/** @UI.Chat.Action.Mic */}
               <button
@@ -341,8 +362,9 @@ export const Chat = {
 
 /** @UI.Chat.Container.Main */
 export const ChatContainer: React.FC = () => {
-  const { messages, isLoading, error: _error, activeAdaptiveData, currentChatId, suggestions } =
+  const { messages, isLoading, error: _error, activeAdaptiveData, currentChatId, suggestions, chatSettings, chats } =
     useAppSelector((state) => state.chat)
+  const webSearchEnabled = chatSettings?.webSearchEnabled ?? false
   const apiError = useAppSelector((state) => state.ui.apiError)
   /** @UI.Hooks.ChatActions */
   const dispatch = useAppDispatch()
@@ -490,9 +512,32 @@ export const ChatContainer: React.FC = () => {
     if (wasLoadingRef.current && !isLoading) {
       void fetchUsage()
       setIsUsageVisible(true)
+      /** @Logic.Chat.RefocusInput */
+      textareaRef.current?.focus()
     }
     wasLoadingRef.current = isLoading
   }, [isLoading, fetchUsage])
+
+  /** @Logic.Chat.DocumentTitle */
+  useEffect(() => {
+    const currentChat = chats.find((c) => c.id === currentChatId)
+    const title = currentChat?.title
+    document.title = title ? `${title} | PR\\AI` : 'PR\\AI'
+    return () => { document.title = 'PR\\AI' }
+  }, [currentChatId, chats])
+
+  /** @Logic.Chat.VoiceCleanup */
+  useEffect(() => {
+    return () => {
+      if (isRecording) stopVoice()
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const handleToggleWebSearch = useCallback(() => {
+    haptics.light()
+    dispatch(updateChatSettings({ key: 'webSearchEnabled', value: !webSearchEnabled }))
+  }, [webSearchEnabled, dispatch, haptics])
 
   const handleMicClick = useCallback(() => {
     if (isRecording) {
@@ -583,6 +628,11 @@ export const ChatContainer: React.FC = () => {
               editMessage(idx, content, personalization)
             }
             onStop={stopResponse}
+            isStreaming={
+              isLoading &&
+              index === messages.length - 1 &&
+              msg.role === 'assistant'
+            }
           />
         ))}
 
@@ -678,6 +728,8 @@ export const ChatContainer: React.FC = () => {
         haptics={haptics}
         suggestions={suggestions}
         onCommandExecute={handleCommandExecute}
+        webSearchEnabled={webSearchEnabled}
+        onToggleWebSearch={handleToggleWebSearch}
       />
       <SourcesSidebar />
     </Chat.Root>

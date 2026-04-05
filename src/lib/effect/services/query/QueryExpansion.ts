@@ -70,6 +70,7 @@ const callLLM = (
           "HTTP-Referer": process.env.NEXT_PUBLIC_SITE_URL || "",
           "X-Title": "PR\\AI Assistant"
         },
+        signal: AbortSignal.timeout(5_000),
         body: JSON.stringify({
           model: process.env.NEXT_PUBLIC_MODEL_NAME || "",
           messages: [
