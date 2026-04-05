@@ -16,6 +16,7 @@ export const TimeConstants = {
   LOCALE_COOKIE_MAX_AGE: 31536000,
   CACHE_MAX_AGE_SECONDS: 3600,
   RETRY_AFTER_SECONDS: 1000,
+  CHAT_STREAM_TIMEOUT_MS: 90_000,
 } as const
 
 /** @Constant.Limit */
@@ -68,6 +69,17 @@ export const SSEConstants = {
   DATA_DONE: 'data: [DONE]',
   DONE: '[DONE]',
 } as const
+
+/** @Constant.ProcessingState */
+export const ProcessingStateConstants = {
+  ANALYZING: "analyzing",
+  SEARCHING: "searching",
+  EVALUATING: "evaluating",
+  GENERATING: "generating",
+} as const
+
+/** @Type.ProcessingState */
+export type ProcessingStateValue = typeof ProcessingStateConstants[keyof typeof ProcessingStateConstants]
 
 /** @Constant.XML */
 export const XmlConstants = {

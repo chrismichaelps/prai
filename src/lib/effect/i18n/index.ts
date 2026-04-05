@@ -54,6 +54,9 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "a11y.close": "Cerrar",
     "a11y.github": "GitHub",
     "a11y.language_selector": "Selector de idioma",
+    "a11y.enable_web_search": "Activar búsqueda web",
+    "a11y.disable_web_search": "Desactivar búsqueda web",
+    "chat.web_search_label": "Web",
 
     /** @Logic.I18n.Section.Nav */
     "nav.about": "Sobre PR\\AI",
@@ -82,6 +85,7 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "chat.search_context": "Contexto de búsqueda",
     "chat.no_sources": "No se encontraron fuentes adicionales",
     "chat.view_more_results": "Ver más resultados",
+    "chat.stopped": "Respuesta interrumpida",
     "chat.thinking": "Pensando...",
     "chat.no_image": "Sin imagen disponible",
     "chat.no_video": "Sin video disponible",
@@ -98,6 +102,7 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "chat.edit": "Editar",
     "chat.save": "Guardar",
     "chat.cancel": "Cancelar",
+    "chat.dismiss": "Descartar",
     "chat.regenerate": "Regenerar",
     "chat.new_chat": "Nueva Conversación",
     "chat.history": "Historial",
@@ -337,6 +342,12 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "usage.almost_limit": "Casi llegas a tu límite",
     "usage.almost_limit_messages": "Casi llegas a tu límite de mensajes",
     "usage.daily_reset_notice": "Tu cuota se reinicia diariamente.",
+    "usage.web_search_title": "Búsquedas Web",
+    "usage.web_search_description": "Búsquedas web con IA realizadas hoy",
+    "usage.web_searches_used": "Búsquedas utilizadas",
+    "usage.web_searches_remaining": "Búsquedas restantes",
+    "usage.web_searches_limit": "Límite diario",
+    "usage.web_search_reset": "Reinicio:",
 
     /** @Logic.I18n.Section.Personalization */
     "personalization.title": "Personalización",
@@ -500,6 +511,9 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "a11y.close": "Close",
     "a11y.github": "GitHub",
     "a11y.language_selector": "Language selector",
+    "a11y.enable_web_search": "Enable web search",
+    "a11y.disable_web_search": "Disable web search",
+    "chat.web_search_label": "Web",
 
     /** @Logic.I18n.Section.Nav */
     "nav.about": "About PR\\AI",
@@ -528,6 +542,7 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "chat.search_context": "Search context",
     "chat.no_sources": "No additional sources found",
     "chat.view_more_results": "View more results",
+    "chat.stopped": "Response stopped",
     "chat.thinking": "Thinking...",
     "chat.no_image": "No image available",
     "chat.no_video": "No video available",
@@ -544,6 +559,7 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "chat.edit": "Edit",
     "chat.save": "Save",
     "chat.cancel": "Cancel",
+    "chat.dismiss": "Dismiss",
     "chat.regenerate": "Regenerate",
     "chat.new_chat": "New Conversation",
     "chat.history": "History",
@@ -783,6 +799,12 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "usage.almost_limit": "Almost at your limit",
     "usage.almost_limit_messages": "Almost at your message limit",
     "usage.daily_reset_notice": "Your quota resets daily.",
+    "usage.web_search_title": "Web Searches",
+    "usage.web_search_description": "AI-powered web searches performed today",
+    "usage.web_searches_used": "Searches used",
+    "usage.web_searches_remaining": "Searches remaining",
+    "usage.web_searches_limit": "Daily limit",
+    "usage.web_search_reset": "Reset:",
 
     /** @Logic.I18n.Section.Personalization */
     "personalization.title": "Personalization",

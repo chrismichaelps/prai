@@ -79,6 +79,11 @@ export const RememberUserFactParamsSchema = asSchema(Schema.Struct({
   category: Schema.optional(Schema.Literal("preference", "fact", "itinerary", "contact"))
 }))
 
+/** @Schema.WebSearchParams */
+export const WebSearchParamsSchema = asSchema(Schema.Struct({
+  query: Schema.String,
+}))
+
 export const ToolParamsSchemas = {
   search_beaches: SearchBeachesParamsSchema,
   search_restaurants: SearchRestaurantsParamsSchema,
@@ -89,5 +94,6 @@ export const ToolParamsSchemas = {
   search_transport: SearchTransportParamsSchema,
   save_favorite: SaveFavoriteParamsSchema,
   save_itinerary: SaveItineraryParamsSchema,
-  remember_user_fact: RememberUserFactParamsSchema
+  remember_user_fact: RememberUserFactParamsSchema,
+  web_search: WebSearchParamsSchema,
 } as const

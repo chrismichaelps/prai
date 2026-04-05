@@ -2,6 +2,7 @@
 
 import { Schema, Either, pipe, JSONSchema } from "effect"
 import { ToolParamsSchemas } from "./schemas"
+import { JINA_WEB_SEARCH_TOOL_NAME } from "@/lib/effect/constants/JinaConstants"
 
 /** @Schema.ToolInput */
 export const ToolInputSchema = Schema.Struct({
@@ -106,6 +107,14 @@ export const PUERTO_RICO_TOOLS: ToolDefinition[] = [
     readOnly: false,
     alwaysLoad: true,
     isDestructive: false
+  },
+  {
+    name: JINA_WEB_SEARCH_TOOL_NAME,
+    description: "Busca información actualizada en internet sobre lugares, eventos, clima, noticias y cualquier tema relevante para Puerto Rico. Úsalo cuando necesites datos en tiempo real que pueden haber cambiado recientemente.",
+    parameters: ToolParamsSchemas.web_search,
+    readOnly: true,
+    alwaysLoad: false,
+    timeoutMs: 15000,
   }
 ]
 

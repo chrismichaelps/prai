@@ -30,10 +30,11 @@ export const ChatSettingsSchema = Schema.Struct({
   region: Schema.optional(RegionSchema),
   budget: Schema.optional(BudgetSchema),
   tripDate: Schema.optional(Schema.String),
+  webSearchEnabled: Schema.optionalWith(Schema.Boolean, { default: () => false }),
 })
 export type ChatSettings = Schema.Schema.Type<typeof ChatSettingsSchema>
 
-export const DEFAULT_CHAT_SETTINGS: ChatSettings = { language: "es" }
+export const DEFAULT_CHAT_SETTINGS: ChatSettings = { language: "es", webSearchEnabled: false }
 
 /** @Schema.Effect.Command.Result */
 export const CommandResultSchema = Schema.Union(
@@ -55,7 +56,7 @@ export const CommandResultSchema = Schema.Union(
     type: Schema.Literal("dispatch"),
     action: Schema.Unknown,
   }),
-  /** @Schema.Effect.Command.Result.Memory — explicit user memory write */
+  /** @Schema.Effect.Command.Result.Memory */
   Schema.Struct({
     type: Schema.Literal("memory"),
     key: Schema.String,
@@ -63,7 +64,7 @@ export const CommandResultSchema = Schema.Union(
     category: Schema.Literal("preference", "fact", "itinerary", "contact"),
     toast: Schema.String,
   }),
-  /** @Schema.Effect.Command.Result.MemoryDelete — explicit user memory delete */
+  /** @Schema.Effect.Command.Result.MemoryDelete */
   Schema.Struct({
     type: Schema.Literal("memory_delete"),
     key: Schema.String,
