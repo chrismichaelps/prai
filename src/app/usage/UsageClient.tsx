@@ -1,10 +1,11 @@
 'use client'
 
-import React from 'react'
+import React, { useState, useCallback, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import {
   Clock,
   AlertCircle,
+  Globe,
 } from 'lucide-react'
 import Link from 'next/link'
 import { Header } from '@/components/layout/Header'
@@ -14,6 +15,34 @@ import { useI18n } from '@/lib/effect/I18nProvider'
 import { useUsage } from '@/hooks/useUsage'
 import { TierBadge } from '@/components/usage/TierBadge'
 import { cn } from '@/lib/utils'
+import type { JinaUsage } from '@/app/api/user/usage/jina/route'
+
+/** @Hook.Usage.Jina */
+function useJinaUsage(isAuthenticated: boolean) {
+  const [data, setData] = useState<JinaUsage | null>(null)
+  const [loading, setLoading] = useState(false)
+  const fetchedRef = useRef(false)
+
+  const fetch_ = useCallback(async () => {
+    if (!isAuthenticated) return
+    setLoading(true)
+    try {
+      const res = await fetch('/api/user/usage/jina')
+      if (res.ok) setData(await res.json())
+    } finally {
+      setLoading(false)
+    }
+  }, [isAuthenticated])
+
+  useEffect(() => {
+    if (isAuthenticated && !fetchedRef.current) {
+      fetchedRef.current = true
+      void fetch_()
+    }
+  }, [isAuthenticated, fetch_])
+
+  return { data, loading }
+}
 
 /** @UI.Usage.Background */
 function Background() {
@@ -144,10 +173,105 @@ function UsageWarning() {
   )
 }
 
+/** @UI.Usage.JinaCard */
+function JinaUsageCard({ data, loading, locale, t }: {
+  data: JinaUsage | null
+  loading: boolean
+  locale: string
+  t: (key: string) => string
+}) {
+  if (loading && !data) {
+    return (
+      <div className="bg-white/[0.02] border border-white/5 backdrop-blur-xl rounded-3xl p-6 md:p-8 flex items-center justify-center">
+        <div className="w-6 h-6 border-2 border-white/5 border-t-white/30 rounded-full animate-spin" />
+      </div>
+    )
+  }
+
+  if (!data) return null
+
+  const { searches_used, searches_remaining, daily_limit, reset_at } = data
+  const percentage = Math.min((searches_used / daily_limit) * 100, 100)
+  const barColor = percentage >= 90 ? 'bg-red-500' : percentage >= 60 ? 'bg-yellow-400' : 'bg-brand-blue'
+
+  return (
+    <div className="bg-white/[0.02] border border-white/5 backdrop-blur-xl rounded-3xl p-6 md:p-8">
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
+            <Globe className="w-4 h-4 text-white/40" />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold text-white tracking-tight">
+              {t('usage.web_search_title')}
+            </h2>
+            <p className="text-[11px] text-white/20 font-medium mt-0.5">
+              {t('usage.web_search_description')}
+            </p>
+          </div>
+        </div>
+        <span className={cn(
+          "text-[10px] font-black px-2.5 py-1 rounded-lg border",
+          percentage >= 90
+            ? "text-red-400 bg-red-400/10 border-red-400/20"
+            : percentage >= 60
+              ? "text-yellow-400 bg-yellow-400/10 border-yellow-400/20"
+              : "text-white bg-white/5 border-white/10"
+        )}>
+          {percentage.toFixed(0)}%
+        </span>
+      </div>
+
+      <div className="space-y-4">
+        <div className="flex justify-between items-end text-sm">
+          <span className="text-white/40 font-bold uppercase tracking-[0.1em] text-[10px]">
+            {t('usage.web_searches_used')}
+          </span>
+          <div className="flex items-baseline gap-1.5 font-black text-white">
+            <span className="text-lg">{searches_used}</span>
+            <span className="text-white/20 font-medium text-xs">/ {daily_limit}</span>
+          </div>
+        </div>
+        <div className="h-3 bg-white/5 border border-white/5 rounded-full overflow-hidden p-[3px] shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)]">
+          <motion.div
+            initial={{ width: 0 }}
+            animate={{ width: `${percentage}%` }}
+            transition={{ type: "spring", stiffness: 45, damping: 18, mass: 1.2, delay: 0.3 }}
+            className={cn("h-full rounded-full relative shadow-[0_0_15px_rgba(255,255,255,0.05)]", barColor)}
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent w-full animate-shimmer" />
+          </motion.div>
+        </div>
+      </div>
+
+      <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-between text-[11px]">
+        <span className="text-white/20 flex items-center gap-2 font-medium">
+          <Clock className="w-3.5 h-3.5" />
+          {t('usage.web_search_reset')}{' '}
+          <span className="text-white/40">
+            {reset_at
+              ? new Date(reset_at).toLocaleString(locale, {
+                  dateStyle: 'long',
+                  timeStyle: 'short',
+                  hour12: true,
+                })
+              : '-'}
+          </span>
+        </span>
+        <div className="flex items-baseline gap-1 font-black text-white">
+          <span className="text-base">{searches_remaining}</span>
+          <span className="text-white/20 font-medium text-[10px] ml-1">{t('usage.web_searches_remaining')}</span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 /** @UI.Usage.Content */
 function UsageContent() {
   const { locale, t } = useI18n()
   const { usage, loading, isAuthenticated } = useUsage()
+  const { data: jinaData, loading: jinaLoading } = useJinaUsage(isAuthenticated)
   
   if (!isAuthenticated) {
     return (
@@ -253,8 +377,15 @@ function UsageContent() {
         />
       </div>
 
+      <JinaUsageCard
+        data={jinaData}
+        loading={jinaLoading}
+        locale={locale}
+        t={t}
+      />
+
       <div className="text-center pt-8">
-        <Link 
+        <Link
           href="/issues"
           className="inline-flex items-center gap-2 text-white/20 hover:text-white/40 text-[11px] font-bold uppercase tracking-wider transition-colors"
         >

@@ -16,7 +16,7 @@ const DeleteMemoryBodySchema = S.Struct({
   key: S.String.pipe(S.minLength(1)),
 })
 
-/** @Route.Memory.POST — upsert a single memory entry */
+/** @Route.Memory.POST */
 export async function POST(request: NextRequest) {
   const { searchParams } = new URL(request.url)
 
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
   })(program)
 }
 
-/** @Route.Memory.DELETE — remove a memory entry by key */
+/** @Route.Memory.DELETE */
 export async function DELETE(request: NextRequest) {
   const { searchParams } = new URL(request.url)
 

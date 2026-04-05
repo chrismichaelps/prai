@@ -11,7 +11,7 @@ import { UsageDefaults } from "@/lib/effect/constants/UsageConstants"
 import { SubscriptionTier, SubscriptionDefaults, TierModelConfig, WebSearchTool } from "@/lib/effect/constants/SubscriptionConstants"
 import { getUserUsage } from "../user/usage/services/usage"
 import { ChatDbError } from "../_lib/errors/services"
-import { ApiConstants, CacheControlConstants, SSEConstants } from "@/lib/constants/app-constants"
+import { ApiConstants, CacheControlConstants, SSEConstants, ProcessingStateConstants } from "@/lib/constants/app-constants"
 import type { SubscriptionTierType, ReasoningEffortType } from "@/lib/effect/constants/SubscriptionConstants"
 import type { Database } from "@/types/database.types"
 import { toolsToOpenRouter, executeTool, validateToolInput, isReadOnlyTool } from "@/lib/effect/services/tools"
@@ -31,6 +31,10 @@ import {
   COMPACT_SYSTEM_INSTRUCTION
 } from "@/lib/effect/constants/compaction/CompactionConstants"
 import { QUERY_EXPANSION_MIN_LENGTH } from "@/lib/effect/constants/query/QueryExpansionConstants"
+import { searchWeb, formatJinaResults } from "@/lib/effect/services/JinaSearch"
+import { JinaLimits, JinaApi, JinaQuotaReason, JINA_WEB_SEARCH_TOOL_NAME, WEB_SEARCH_ACTIVE_INSTRUCTION } from "@/lib/effect/constants/JinaConstants"
+
+const JINA_API_KEY = process.env.JINA_API_KEY ?? ""
 
 type UserUsage = Database["public"]["Functions"]["get_user_usage"]["Returns"][number]
 
@@ -332,15 +336,48 @@ export async function POST(req: Request) {
     userId: string,
     tier: SubscriptionTierType,
     supabaseClient: SupabaseClient,
-    onChunk: (_chunk: string) => void
+    onChunk: (_chunk: string) => void,
+    webSearchEnabled = false
   ): Promise<{ success: boolean; error?: string }> {
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), AGENTIC_TIMEOUT_MS)
 
+    /** @Logic.Chat.JinaQuotaCheck */
+    let jinaEnabled = webSearchEnabled && !!JINA_API_KEY
+    if (jinaEnabled && userId) {
+      const { data: quotaData, error: quotaError } = await supabaseClient.rpc(
+        JinaApi.QUOTA_RPC,
+        { p_user_id: userId, p_tokens: JinaLimits.ESTIMATED_TOKENS_PER_SEARCH }
+      )
+      if (quotaError || !quotaData?.[0]?.allowed) {
+        const reason = (quotaData?.[0]?.reason ?? "") as string
+        const msg =
+          reason === JinaQuotaReason.GLOBAL_LIMIT_REACHED
+            ? "Búsqueda web no disponible temporalmente."
+            : reason === JinaQuotaReason.DAILY_LIMIT_REACHED
+              ? `Límite diario de búsquedas alcanzado (${JinaLimits.USER_DAILY_SEARCHES}/día).`
+              : "No se pudo activar la búsqueda web."
+        onChunk(
+          SSEConstants.DATA_PREFIX +
+          JSON.stringify({ choices: [{ delta: { content: `\n${msg}\n` }, finish_reason: null }] }) +
+          '\n'
+        )
+        jinaEnabled = false
+      }
+    }
+
     const buildRequestBody = (msgs: typeof initialMessages) => {
+      const allTools = toolsToOpenRouter() as unknown[]
+      /** @Logic.Chat.Tools.FilterWebSearch */
+      const filteredTools = jinaEnabled
+        ? allTools
+        : allTools.filter((t) => {
+          const tool = t as { function?: { name?: string } }
+          return tool?.function?.name !== JINA_WEB_SEARCH_TOOL_NAME
+        })
       const tools = [
         ...(tier === SubscriptionTier.Pro ? [WebSearchTool] : []),
-        ...(toolsToOpenRouter() as unknown[])
+        ...filteredTools,
       ]
       const body = {
         model: getModelConfig(tier).default,
@@ -353,10 +390,33 @@ export async function POST(req: Request) {
       return body
     }
 
+    /** @Logic.Chat.ProcessingState.Emit */
+    const emitProcessingState = (state: string, hint?: string): void => {
+      onChunk(
+        SSEConstants.DATA_PREFIX +
+        JSON.stringify({
+          choices: [{
+            delta: { processingState: { state, hint: hint ? hint.slice(0, 60) : undefined } },
+            finish_reason: null,
+          }],
+        }) +
+        '\n'
+      )
+    }
+
     try {
       let messages = await runFullCompactionIfNeeded([...initialMessages], tier)
       const { systemPromptInsert, filters } = await runPreflight(messages, supabaseClient, userId)
       messages = applyPreflight(messages, systemPromptInsert)
+
+      /** @Logic.Chat.Jina.InjectInstruction */
+      if (jinaEnabled) {
+        messages = applyPreflight(messages, WEB_SEARCH_ACTIVE_INSTRUCTION)
+      }
+
+      /** @Logic.Chat.ProcessingState.Analyzing */
+      const lastUserHint = [...messages].reverse().find(m => m.role === "user")?.content?.slice(0, 40) ?? ""
+      emitProcessingState(ProcessingStateConstants.ANALYZING, lastUserHint || undefined)
 
       for (let i = 0; i < MAX_TOOL_ITERATIONS; i++) {
 
@@ -396,6 +456,7 @@ export async function POST(req: Request) {
         type MergedToolCall = { id: string; type: string; function: { name: string; arguments: string } }
         const toolCallMap = new Map<number, MergedToolCall>()
         let hasToolCalls = false
+        let hasEmittedGenerating = false
 
         while (true) {
           const { done, value } = await reader.read()
@@ -431,7 +492,7 @@ export async function POST(req: Request) {
                   const existing = toolCallMap.get(idx)
                   if (!existing) {
                     toolCallMap.set(idx, {
-                      id: tc.id ?? '',
+                      id: tc.id ?? `call_${idx}_${Date.now()}`,
                       type: tc.type ?? 'function',
                       function: { name: tc.function?.name ?? '', arguments: tc.function?.arguments ?? '' }
                     })
@@ -450,6 +511,10 @@ export async function POST(req: Request) {
 
               const hasAnnotations = Array.isArray(delta?.annotations) && (delta.annotations as unknown[]).length > 0
               if (delta?.content || hasAnnotations) {
+                if (delta?.content && !hasEmittedGenerating) {
+                  hasEmittedGenerating = true
+                  emitProcessingState(ProcessingStateConstants.GENERATING)
+                }
                 onChunk(line + '\n')
               }
 
@@ -488,6 +553,47 @@ export async function POST(req: Request) {
         })
 
         const execStreamingTool = async (toolName: string, args: Record<string, unknown>): Promise<string> => {
+          /** @Logic.Chat.WebSearch.Execute */
+          if (toolName === JINA_WEB_SEARCH_TOOL_NAME && jinaEnabled) {
+            const query = typeof args.query === "string" ? args.query : ""
+            emitProcessingState(ProcessingStateConstants.SEARCHING, query || undefined)
+            const exit = await runtime.runPromiseExit(searchWeb(query, JINA_API_KEY))
+            if (exit._tag === "Success") {
+              const { results, tokensUsed } = exit.value
+
+              /** @Logic.Chat.Jina.EmitSourceAnnotations */
+              if (results.length > 0) {
+                const annotations = results
+                  .filter(r => {
+                    if (!r.url) return false
+                    try { return new URL(r.url).pathname.length > 1 } catch { return false }
+                  })
+                  .map(r => ({ type: "url_citation", url: r.url, title: r.title || r.url }))
+                if (annotations.length > 0) {
+                  onChunk(
+                    SSEConstants.DATA_PREFIX +
+                    JSON.stringify({ choices: [{ delta: { annotations }, finish_reason: null }] }) +
+                    '\n'
+                  )
+                }
+              }
+
+              /** @Logic.Chat.Jina.AdjustTokenCount */
+              if (userId && tokensUsed !== JinaLimits.ESTIMATED_TOKENS_PER_SEARCH) {
+                try {
+                  await supabaseClient.rpc(JinaApi.QUOTA_RPC, {
+                    p_user_id: userId,
+                    p_tokens: tokensUsed - JinaLimits.ESTIMATED_TOKENS_PER_SEARCH,
+                  })
+                } catch { /** @Logic.Chat.SilentFailure */ }
+              }
+
+              return formatJinaResults(results)
+            }
+            return "No se pudo completar la búsqueda web en este momento."
+          }
+
+          emitProcessingState(ProcessingStateConstants.EVALUATING, toolName)
           /** @Logic.Chat.SearchFilter.ExecutorInjection */
           const enrichedArgs = isReadOnlyTool(toolName) && typeof args.query === "string"
             ? { ...args, query: enrichSearchQuery(args.query, filters) }
@@ -518,9 +624,10 @@ export async function POST(req: Request) {
 
         /** @Logic.Chat.ToolRelevance */
         const lastQuery = [...messages].reverse().find(m => m.role === "user")?.content || ""
+
         const rawResults = parsedCalls
-          .filter(p => p.toolName !== '' && p.args !== null && isReadOnlyTool(p.toolName))
-          .map((p, i) => ({ toolName: p.toolName, result: resultMap.get(i) ?? "" }))
+          .map((p, originalIndex) => ({ toolName: p.toolName, result: resultMap.get(originalIndex) ?? "", originalIndex }))
+          .filter(r => r.toolName !== '' && parsedCalls[r.originalIndex]!.args !== null && isReadOnlyTool(r.toolName))
 
         const scoredResults = rawResults.length > 0
           ? await runtime.runPromise(
@@ -531,19 +638,19 @@ export async function POST(req: Request) {
           )
           : rawResults
 
-        const scoredMap = new Map(scoredResults.map((r, i) => [`${rawResults[i]?.toolName ?? ""}${i}`, r.result]))
+        const scoredByIndex = new Map(
+          rawResults.map((r, i) => [r.originalIndex, scoredResults[i]?.result ?? r.result])
+        )
 
-        let readOnlyCounter = 0
         const toolMessages = parsedCalls
-          .filter(p => p.toolName !== '')
-          .map((p, i) => {
+          .map((p, i) => ({ p, i }))
+          .filter(({ p }) => p.toolName !== '')
+          .map(({ p, i }) => {
             let content: string
             if (p.args === null) {
               content = JSON.stringify({ error: "Invalid tool arguments" })
             } else if (isReadOnlyTool(p.toolName)) {
-              const key = p.toolName + readOnlyCounter
-              content = scoredMap.get(key) ?? (resultMap.get(i) ?? JSON.stringify({ error: "Execution error" }))
-              readOnlyCounter++
+              content = scoredByIndex.get(i) ?? resultMap.get(i) ?? JSON.stringify({ error: "Execution error" })
             } else {
               content = resultMap.get(i) ?? JSON.stringify({ error: "Execution error" })
             }
@@ -742,7 +849,10 @@ export async function POST(req: Request) {
           })
         ),
         model: S.optional(S.String),
-        stream: S.optional(S.Boolean)
+        stream: S.optional(S.Boolean),
+        features: S.optional(S.Struct({
+          webSearch: S.optional(S.Boolean),
+        })),
       })
     )(req),
     Effect.flatMap((params) => {
@@ -750,6 +860,7 @@ export async function POST(req: Request) {
       return Effect.tryPromise({
         try: async () => {
           const isStreaming = params.stream ?? true
+          const webSearchEnabled = params.features?.webSearch === true
 
           if (!isStreaming) {
             const result = await runAgenticLoop([...params.messages], auth.userId, auth.tier, auth.supabaseClient)
@@ -781,7 +892,7 @@ export async function POST(req: Request) {
                 const onChunk = (chunk: string) => {
                   try {
                     controller.enqueue(encoder.encode(chunk))
-                  } catch { /*  */ }
+                  } catch { /** @Logic.Chat.SilentFailure */ }
                 }
 
                 const result = await runStreamingAgenticLoop(
@@ -789,7 +900,8 @@ export async function POST(req: Request) {
                   auth.userId,
                   auth.tier,
                   auth.supabaseClient,
-                  onChunk
+                  onChunk,
+                  webSearchEnabled
                 )
 
                 void runPostFlight(auth.supabaseClient, auth.userId)
