@@ -6,7 +6,7 @@ import { runtime } from './runtime'
 import { initChat, sendChatMessage, regenerateResponse } from './chat'
 import { RuntimeError } from './errors'
 import { startSpeechToText, stopSpeechToText } from './services/Voice'
-import { clearHistory as clearChatAction, editMessage as editChatMessageAction } from '@/store/slices/chatSlice'
+import { clearHistory as clearChatAction, editMessage as editChatMessageAction, updateLastMessage, setProcessingStage } from '@/store/slices/chatSlice'
 import { useAppDispatch } from '@/store/hooks'
 import type { Personalization } from './schemas/PersonalizationSchema'
 
@@ -15,7 +15,7 @@ interface ChatContextType {
   sendMessage: (content: string, personalization?: Personalization) => Promise<void>
   regenerateMessage: (personalization?: Personalization) => Promise<void>
   editMessage: (index: number, content: string, personalization?: Personalization) => Promise<void>
-  stopResponse: () => void
+  stopResponse: () => Promise<void>
   clearHistory: () => void
   startVoice: (onResult: (text: string, isFinal: boolean) => void, onError?: () => void) => void
   stopVoice: () => void
@@ -48,9 +48,13 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const regenerateMessage = useCallback(async (personalization?: Personalization) => {
+    if (activeFiber.current) {
+      await runtime.runPromise(Fiber.interrupt(activeFiber.current))
+      activeFiber.current = null
+    }
     const fiber = runtime.runFork(regenerateResponse(personalization))
     activeFiber.current = fiber
-    
+
     runtime.runPromise(Fiber.await(fiber)).then(() => {
       if (activeFiber.current === fiber) {
         activeFiber.current = null
@@ -71,8 +75,10 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     if (activeFiber.current) {
       await runtime.runPromise(Fiber.interrupt(activeFiber.current))
       activeFiber.current = null
+      dispatch(updateLastMessage({ metadata: { isTruncated: true, isThinking: false } }))
+      dispatch(setProcessingStage(null))
     }
-  }, [])
+  }, [dispatch])
 
   const startVoice = useCallback((onResult: (text: string, isFinal: boolean) => void, onError?: () => void) => {
     startSpeechToText({

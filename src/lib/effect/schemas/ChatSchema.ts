@@ -44,6 +44,7 @@ export const ChatMessageMetadataSchema = Schema.Struct({
   searchQuery: Schema.optional(Schema.String),
   edited: Schema.optional(Schema.Boolean),
   tool_calls: Schema.optional(Schema.Array(ToolCallRecordSchema)),
+  isTruncated: Schema.optional(Schema.Boolean),
 })
 
 /** @Type.Effect.Chat.MessageMetadata */

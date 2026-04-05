@@ -6,16 +6,19 @@ import { ChatRole } from "@/types/chat"
 import {
   addMessage,
   updateLastMessage,
+  popLastAssistantMessage,
   setLoading,
   setError,
   setSuggestions,
   clearHistory as clearChatHistory,
-  updateChat
+  updateChat,
+  setProcessingStage,
 } from "@/store/slices/chatSlice"
+import { composeStateMessage } from "@/lib/effect/services/ProcessingState"
 import { setApiError, clearApiError } from "@/store/slices/uiSlice"
 import type { Personalization } from "./schemas/PersonalizationSchema"
 import { I18n } from "./services/I18n"
-import { LimitConstants } from "@/lib/constants/app-constants"
+import { TimeConstants, type ProcessingStateValue } from "@/lib/constants/app-constants"
 import { toSource, deduplicateSources } from "@/lib/url"
 import type { SearchResult } from "@/types/chat"
 import { HttpStatus } from "@/app/api/_lib/constants/status-codes"
@@ -24,13 +27,22 @@ import { shouldShowSuggestion, shouldFilterSuggestion } from "./services/Suggest
 
 /** @Logic.Chat.GenerateTitle */
 const generateChatTitle = (
-  currentMessage: string,
-  _conversationHistory: string[]
-): Effect.Effect<string, never, ConfigService> =>
+  userMessage: string,
+  assistantMessage: string
+): Effect.Effect<string> =>
   Effect.gen(function* () {
-    const firstWords = currentMessage.split(/\s+/).slice(0, 4).join(' ')
-    const title = firstWords.replace(/[^\w\sáéíóúñüÁÉÍÓÚÑÜ]/g, '').trim()
-    return title.slice(0, LimitConstants.CHAT_TITLE_MAX_LENGTH) || "New Chat"
+    const apiUrl = `${process.env.NEXT_PUBLIC_SITE_URL || ''}/api/chat/title`
+    const res = yield* Effect.tryPromise({
+      try: () =>
+        fetch(apiUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userMessage, assistantMessage }),
+          signal: AbortSignal.timeout(10_000),
+        }).then((r) => r.json() as Promise<{ title: string }>),
+      catch: () => ({ title: "New Chat" }),
+    })
+    return res.title || "New Chat"
   }).pipe(
     Effect.catchAll(() => Effect.succeed("New Chat"))
   )
@@ -47,6 +59,8 @@ const generateResponse = (
   _sessionId?: string,
   _personalization?: Personalization
 ): Effect.Effect<void, never, Redux | I18n | ConfigService> => Effect.gen(function* () {
+  const i18n = yield* I18n
+  const locale = yield* i18n.locale
   const state = yield* Redux.getState()
   const messages = state.chat.messages
 
@@ -57,12 +71,21 @@ const generateResponse = (
 
   const settingsBlock = buildSettingsPrompt(state.chat.chatSettings)
   if (settingsBlock) {
-    chatMessages.splice(1, 0, { role: "system", content: settingsBlock })
+    const firstSystem = chatMessages[0]
+    if (firstSystem?.role === "system") {
+      chatMessages[0] = { role: "system", content: `${firstSystem.content}\n\n${settingsBlock}` }
+    } else {
+      chatMessages.unshift({ role: "system", content: settingsBlock })
+    }
   }
 
+  const webSearchEnabled = state.chat.chatSettings.webSearchEnabled ?? false
   const apiUrl = `${process.env.NEXT_PUBLIC_SITE_URL || ''}/api/chat`
 
   yield* Redux.dispatch(addMessage({ role: ChatRole.ASSISTANT, content: "" }))
+
+  const streamAbort = new AbortController()
+  const streamTimeoutId = setTimeout(() => streamAbort.abort(), TimeConstants.CHAT_STREAM_TIMEOUT_MS)
 
   try {
     const response = yield* Effect.promise(() =>
@@ -73,8 +96,10 @@ const generateResponse = (
         },
         body: JSON.stringify({
           messages: chatMessages,
-          stream: true
-        })
+          stream: true,
+          features: { webSearch: webSearchEnabled },
+        }),
+        signal: streamAbort.signal,
       })
     )
 
@@ -105,6 +130,7 @@ const generateResponse = (
     let buffer = ""
     let tagBuffer = ""
     let inNextActions = false
+    let thinkingStartedAt: number | null = null
 
     /** @Logic.Chat.FlushTagBuffer */
     const flushTagBuffer = (buf: string): string[] => {
@@ -112,7 +138,7 @@ const generateResponse = (
       try {
         const actions = JSON.parse(buf)
         if (Array.isArray(actions)) return actions as string[]
-      } catch { /* */ }
+      } catch { /** @Logic.Chat.SilentFailure */ }
       return []
     }
 
@@ -121,6 +147,33 @@ const generateResponse = (
         const { done, value } = yield* Effect.promise(() => reader.read())
 
         if (done) {
+          if (thinkingStartedAt !== null) {
+            const elapsedSeconds = Math.round((Date.now() - thinkingStartedAt) / 1000)
+            yield* Redux.dispatch(updateLastMessage({ metadata: { isThinking: false, thoughtDuration: `completed:${elapsedSeconds}s` } }))
+            thinkingStartedAt = null
+          }
+
+          /** @Logic.Chat.Buffer.Flush */
+          if (buffer.trim()) {
+            const line = buffer.trim()
+            if (line.startsWith("data:")) {
+              const data = line.slice(5).trim()
+              if (data && data !== "[DONE]") {
+                try {
+                  const parsed = JSON.parse(data)
+                  const content = parsed.choices?.[0]?.delta?.content || ""
+                  if (content) {
+                    const currentState = yield* Redux.getState()
+                    const lastMsg = currentState.chat.messages[currentState.chat.messages.length - 1]
+                    if (lastMsg) {
+                      yield* Redux.dispatch(updateLastMessage({ content: lastMsg.content + content }))
+                    }
+                  }
+                } catch { /** @Logic.Chat.SilentFailure */ }
+              }
+            }
+          }
+
           if (inNextActions && tagBuffer) {
             const actions = flushTagBuffer(tagBuffer)
             if (actions && actions.length > 0) {
@@ -170,7 +223,21 @@ const generateResponse = (
             }
 
             if (reasoning) {
+              if (thinkingStartedAt === null) thinkingStartedAt = Date.now()
               yield* Redux.dispatch(updateLastMessage({ metadata: { thought: reasoning, isThinking: true } }))
+            }
+
+            /** @Logic.Chat.ProcessingState.Parse */
+            const ps = parsed.choices?.[0]?.delta?.processingState as
+              | { state: string; hint?: string }
+              | undefined
+            if (ps?.state) {
+              const message = composeStateMessage(
+                ps.state as ProcessingStateValue,
+                ps.hint,
+                locale
+              )
+              yield* Redux.dispatch(setProcessingStage({ state: ps.state as ProcessingStateValue, message }))
             }
 
             /** @Logic.Chat.Annotations.Sources */
@@ -219,7 +286,7 @@ const generateResponse = (
                           }
                         }
                       }
-                    } catch { /*  */ }
+                    } catch { /** @Logic.Chat.SilentFailure */ }
                     tagBuffer = ""
                   } else {
                     tagBuffer += remaining
@@ -247,15 +314,29 @@ const generateResponse = (
                 }
               }
             }
-          } catch { /*  */ }
+          } catch { /** @Logic.Chat.SilentFailure */ }
         }
       }
     } finally {
+      clearTimeout(streamTimeoutId)
+      streamAbort.abort()
       reader.releaseLock()
     }
 
-  } catch {
-    yield* Redux.dispatch(setApiError({ code: HttpStatus.INTERNAL_SERVER_ERROR, message: "Connection error" }))
+  } catch (err) {
+    /** @Logic.Chat.ErrorCleanup */
+    const errState = yield* Redux.getState()
+    const lastMsg = errState.chat.messages[errState.chat.messages.length - 1]
+    if (lastMsg?.role === ChatRole.ASSISTANT && !lastMsg.content) {
+      yield* Redux.dispatch(popLastAssistantMessage())
+    } else {
+      yield* Redux.dispatch(updateLastMessage({ metadata: { isThinking: false } }))
+    }
+    const isTimeout = err instanceof DOMException && err.name === "AbortError"
+    yield* Redux.dispatch(setApiError({
+      code: HttpStatus.INTERNAL_SERVER_ERROR,
+      message: isTimeout ? "La respuesta tardó demasiado. Intenta de nuevo." : "Connection error"
+    }))
   }
 })
 
@@ -289,34 +370,18 @@ export const sendChatMessage = (
           () => Effect.sync(() => { })
         )
       )
-
-      const chatState = yield* Redux.getState()
-      const chat = chatState.chat.chats.find(c => c.id === currentChatId)
-      const defaultTitles = ['New Chat', 'Nueva Conversación', 'Nuevo Chat', 'New Conversation']
-      const needsTitle = !chat?.title || defaultTitles.includes(chat.title)
-
-      if (needsTitle) {
-        const userMessages = state.chat.messages
-          .filter(m => m.role === ChatRole.USER)
-          .map(m => m.content)
-        const title = yield* generateChatTitle(content, userMessages.slice(0, -1))
-        yield* Redux.dispatch(updateChat({ id: currentChatId, updates: { title } }))
-        yield* Effect.asVoid(
-          Effect.catchAll(
-            chatApi.updateChat({ chatId: currentChatId, title }),
-            () => Effect.sync(() => { })
-          )
-        )
-      }
     }
 
     yield* generateResponse(currentChatId ?? undefined, _personalization)
 
     if (currentChatId) {
-      const state = yield* Redux.getState()
-      const lastMessage = state.chat.messages[state.chat.messages.length - 1]
+      const afterState = yield* Redux.getState()
+      const lastMessage = afterState.chat.messages[afterState.chat.messages.length - 1]
+
       if (lastMessage && lastMessage.role === ChatRole.ASSISTANT) {
         const chatApi = yield* ChatApi
+
+        /** @Logic.Chat.PersistAssistantMessage */
         const filteredMetadata = lastMessage.metadata
           ? Object.fromEntries(
             Object.entries(lastMessage.metadata).filter(([, v]) => v !== undefined)
@@ -334,21 +399,39 @@ export const sendChatMessage = (
           )
         )
 
-        const userMessages = state.chat.messages
-          .filter(m => m.role === ChatRole.USER)
-          .map(m => m.content)
-        const title = yield* generateChatTitle(lastMessage.content, userMessages)
-        yield* Redux.dispatch(updateChat({ id: currentChatId, updates: { title } }))
-        yield* Effect.asVoid(
-          Effect.catchAll(
-            chatApi.updateChat({ chatId: currentChatId, title }),
-            () => Effect.sync(() => { })
+        /** @Logic.Chat.Title.FirstExchangeOnly */
+        const titleState = yield* Redux.getState()
+        const currentChat = titleState.chat.chats.find(c => c.id === currentChatId)
+        const defaultTitles = ['New Chat', 'Nueva Conversación', 'Nuevo Chat', 'New Conversation']
+        const isFirstExchange = titleState.chat.messages
+          .filter(m => m.role === ChatRole.USER).length === 1
+        const needsTitle =
+          isFirstExchange &&
+          (!currentChat?.title || defaultTitles.includes(currentChat.title))
+
+        if (needsTitle) {
+          yield* Effect.forkDaemon(
+            Effect.gen(function* () {
+              const title = yield* generateChatTitle(content, lastMessage.content)
+              yield* Redux.dispatch(updateChat({ id: currentChatId, updates: { title } }))
+              yield* Effect.asVoid(
+                Effect.catchAll(
+                  chatApi.updateChat({ chatId: currentChatId, title }),
+                  () => Effect.sync(() => { })
+                )
+              )
+            }).pipe(Effect.catchAll(() => Effect.void))
           )
-        )
+        }
       }
     }
   }).pipe(
-    Effect.ensuring(Redux.dispatch(setLoading(false))),
+    Effect.ensuring(
+      Effect.all([
+        Redux.dispatch(setLoading(false)),
+        Redux.dispatch(setProcessingStage(null)),
+      ])
+    ),
     Effect.catchAll(() =>
       Effect.gen(function* () {
         yield* Redux.dispatch(setApiError({ code: HttpStatus.INTERNAL_SERVER_ERROR, message: "Connection error" }))
@@ -366,11 +449,19 @@ export const regenerateResponse = (
     yield* Redux.dispatch(clearApiError())
     yield* Redux.dispatch(setSuggestions([]))
 
+    /** @Logic.Chat.Regenerate.Replace */
+    yield* Redux.dispatch(popLastAssistantMessage())
+
     const state = yield* Redux.getState()
     const currentChatId = state.chat.currentChatId
     yield* generateResponse(currentChatId ?? undefined, _personalization)
   }).pipe(
-    Effect.ensuring(Redux.dispatch(setLoading(false))),
+    Effect.ensuring(
+      Effect.all([
+        Redux.dispatch(setLoading(false)),
+        Redux.dispatch(setProcessingStage(null)),
+      ])
+    ),
     Effect.catchAll(() =>
       Effect.gen(function* () {
         yield* Redux.dispatch(setApiError({ code: HttpStatus.INTERNAL_SERVER_ERROR, message: "Connection error" }))

@@ -5,9 +5,16 @@ import type { ChatMessage, AdaptiveData, Suggestion, SearchResult } from '@/type
 import { ChatRole } from '@/types/chat';
 import type { ChatSettings } from '@/lib/effect/schemas/CommandSchema';
 import { DEFAULT_CHAT_SETTINGS } from '@/lib/effect/schemas/CommandSchema';
+import type { ProcessingStateValue } from '@/lib/constants/app-constants';
 
 /** @Type.Chat.RichMessage */
 export type RichChatMessage = ChatMessage & { _key: string }
+
+/** @Type.Chat.ProcessingStage */
+export interface ProcessingStage {
+  state: ProcessingStateValue
+  message: string
+}
 
 /** @Type.Chat */
 export interface Chat {
@@ -35,6 +42,7 @@ export interface ChatState {
     sources: SearchResult[];
   } | null;
   chatSettings: ChatSettings;
+  processingStage: ProcessingStage | null;
 }
 
 const initialState: ChatState = {
@@ -48,6 +56,7 @@ const initialState: ChatState = {
   isSourcesOpen: false,
   selectedSources: null,
   chatSettings: DEFAULT_CHAT_SETTINGS,
+  processingStage: null,
 };
 
 /** @Store.Slice.Chat */
@@ -152,6 +161,14 @@ export const chatSlice = createSlice({
       state.isLoading = false;
       state.error = null;
       state.chatSettings = DEFAULT_CHAT_SETTINGS;
+      state.processingStage = null;
+    },
+    /** @Store.Action.Chat.PopLastAssistantMessage */
+    popLastAssistantMessage: (state) => {
+      const last = state.messages[state.messages.length - 1]
+      if (last?.role === ChatRole.ASSISTANT) {
+        state.messages.pop()
+      }
     },
     /** @Store.Action.Chat.EditMessage */
     editMessage: (state, action: PayloadAction<{ index: number; content: string }>) => {
@@ -182,6 +199,10 @@ export const chatSlice = createSlice({
     setChatSettings: (state, action: PayloadAction<ChatSettings>) => {
       state.chatSettings = action.payload;
     },
+    /** @Store.Action.Chat.SetProcessingStage */
+    setProcessingStage: (state, action: PayloadAction<ProcessingStage | null>) => {
+      state.processingStage = action.payload;
+    },
   },
 });
 
@@ -194,6 +215,7 @@ export const {
   setMessages,
   addMessage,
   updateLastMessage,
+  popLastAssistantMessage,
   setLoading,
   setError,
   setSuggestions,
@@ -206,6 +228,7 @@ export const {
   updateChatSettings,
   clearChatSettings,
   setChatSettings,
+  setProcessingStage,
 } = chatSlice.actions;
 
 export default chatSlice.reducer;
