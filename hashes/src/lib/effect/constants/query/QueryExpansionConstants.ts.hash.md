@@ -25,6 +25,11 @@ export const KEYWORD_EXPANSION_SYSTEM_PROMPT: string
 ### [Semantic Hash]
 Configuration constants for the query expansion system. Defines token budgets, context window sizes, and system prompts for semantic rephrasing and keyword extraction specialized for Puerto Rico tourism.
 
+### [Change Notes — date awareness]
+- SEMANTIC_REPHRASE_SYSTEM_PROMPT now includes current date via `new Date().toLocaleDateString('es-ES')`
+- KEYWORD_EXPANSION_SYSTEM_PROMPT now includes current date
+- AI now uses correct date for queries like "noticias de hoy" instead of guessing
+
 ### [Linkage]
 - **Used by:** `@root/src/lib/effect/services/query/QueryExpansion.ts`
 - **Used by:** `@root/src/app/api/chat/route.ts` (QUERY_EXPANSION_MIN_LENGTH gate)
