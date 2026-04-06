@@ -29,6 +29,73 @@ import {
   StopCircle,
 } from 'lucide-react'
 
+/** @UI.Chat.Bubble.SingleSource */
+const SingleSource = ({ source }: { source: SearchResult }) => {
+  const domain = (() => {
+    try { return new URL(source.url).hostname.replace('www.', '') }
+    catch { return source.source || source.url }
+  })()
+  return (
+    <a
+      href={source.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex items-center gap-2 px-3 py-2 bg-white/[0.04] border border-white/[0.08] hover:border-white/20 hover:bg-white/[0.07] rounded-xl transition-all duration-200 active:scale-95 max-w-[200px] group/src"
+    >
+      <div className="w-4 h-4 rounded-full shrink-0 bg-white/10 flex items-center justify-center overflow-hidden">
+        {source.icon ? (
+          <img src={source.icon} alt="" className="w-full h-full object-contain" />
+        ) : (
+          <Globe className="w-2.5 h-2.5 text-white/40" />
+        )}
+      </div>
+      <span className="text-[12px] font-medium text-white/50 group-hover/src:text-white/80 transition-colors truncate">
+        {source.title ? source.title.slice(0, 28) : domain}
+      </span>
+    </a>
+  )
+}
+
+/** @UI.Chat.Bubble.SourcesPill */
+const SourcesPill = ({ sources, message, dispatch, t }: {
+  sources: SearchResult[]
+  message: ChatMessage
+  dispatch: React.Dispatch<unknown>
+  t: (key: string) => string
+}) => (
+  <button
+    onClick={() =>
+      dispatch(
+        openSources({
+          query: message.metadata?.searchQuery || message.content.slice(0, 50),
+          sources,
+        }),
+      )
+    }
+    className="flex items-center gap-2 px-3 py-2 bg-white/[0.04] border border-white/[0.08] hover:border-white/20 rounded-xl transition-all duration-200 active:scale-95 group/src"
+  >
+    <div className="flex -space-x-1.5">
+      {sources.slice(0, 3).map((s, i) => (
+        <div key={i} className="w-5 h-5 rounded-full bg-white/10 border border-black/20 flex items-center justify-center overflow-hidden shrink-0">
+          {s.icon ? (
+            <img src={s.icon} alt="" className="w-full h-full object-contain" />
+          ) : (
+            <Globe className="w-2.5 h-2.5 text-white/40" />
+          )}
+        </div>
+      ))}
+      {sources.length > 3 && (
+        <div className="w-5 h-5 rounded-full bg-white/10 border border-black/20 flex items-center justify-center shrink-0">
+          <span className="text-[9px] font-bold text-white/50">+{sources.length - 3}</span>
+        </div>
+      )}
+    </div>
+    <span className="text-[12px] font-medium text-white/40 group-hover/src:text-white/70 transition-colors">
+      {sources.length} {t('chat.sources')}
+    </span>
+  </button>
+)
+
 /** @Constant.UI.Chat.MarkdownRenderer */
 const md = new MarkdownIt({
   html: true,
@@ -462,60 +529,10 @@ export const MessageBubble: React.FC<MessageBubbleProps> = memo(
 
               {visibleSources.length > 0 && (
                 <div className="flex flex-wrap gap-2 pb-3 mb-1">
-                  {visibleSources.slice(0, 4).map((s, i) => {
-                    const domain = (() => {
-                      try {
-                        return new URL(s.url).hostname.replace('www.', '')
-                      } catch {
-                        return s.source || s.url
-                      }
-                    })()
-                    return (
-                      <a
-                        key={i}
-                        href={s.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2 px-3 py-2 bg-white/[0.04] border border-white/[0.08] hover:border-white/20 hover:bg-white/[0.07] rounded-xl transition-all duration-200 active:scale-95 max-w-[200px] group/src"
-                      >
-                        <div className="w-4 h-4 rounded-full shrink-0 bg-white/10 flex items-center justify-center overflow-hidden">
-                          {s.icon ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
-                              src={s.icon}
-                              alt=""
-                              className="w-full h-full object-contain"
-                              onError={(e) => {
-                                ;(e.target as HTMLImageElement).style.display =
-                                  'none'
-                              }}
-                            />
-                          ) : (
-                            <Globe className="w-2.5 h-2.5 text-white/40" />
-                          )}
-                        </div>
-                        <span className="text-[12px] font-medium text-white/50 group-hover/src:text-white/80 transition-colors truncate">
-                          {s.title ? s.title.slice(0, 28) : domain}
-                        </span>
-                      </a>
-                    )
-                  })}
-                  {visibleSources.length > 4 && (
-                    <button
-                      onClick={() =>
-                        dispatch(
-                          openSources({
-                            query:
-                              message.metadata?.searchQuery ||
-                              message.content.slice(0, 50),
-                            sources: visibleSources,
-                          }),
-                        )
-                      }
-                      className="flex items-center gap-1.5 px-3 py-2 bg-white/[0.04] border border-white/[0.08] hover:border-white/20 rounded-xl text-[12px] font-medium text-white/40 hover:text-white/70 transition-all"
-                    >
-                      +{visibleSources.length - 4} {t('chat.sources')}
-                    </button>
+                  {visibleSources.length === 1 && visibleSources[0] ? (
+                    <SingleSource source={visibleSources[0]} />
+                  ) : (
+                    <SourcesPill sources={visibleSources} message={message} dispatch={dispatch} t={t} />
                   )}
                 </div>
               )}
@@ -546,6 +563,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = memo(
                       'prose-strong:text-white/90 prose-strong:font-black',
                       'prose-a:text-orange-400 prose-a:hover:text-orange-300 prose-a:underline prose-a:underline-offset-2 prose-a:transition-colors',
                       'prose-ul:list-disc prose-ul:pl-5 prose-li:marker:text-white/20',
+                      'prose-blockquote:border-l-2 prose-blockquote:border-white/20 prose-blockquote:pl-4 prose-blockquote:font-normal prose-blockquote:text-white/60 prose-blockquote:not-italic',
                       'font-sans text-[17px] font-normal max-w-none text-white/90 leading-relaxed selection:bg-white/10',
                     )}
                     dangerouslySetInnerHTML={htmlContent}
