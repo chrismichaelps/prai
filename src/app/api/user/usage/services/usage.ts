@@ -26,7 +26,11 @@ export const getUserUsage = (userId: string): Effect.Effect<UserUsage, UsageServ
         }
 
         if (!data || data.length === 0) {
-          return { ...UsageDefaults } as UserUsage
+          return {
+            ...UsageDefaults,
+            reset_interval: "daily",
+            subscription_tier: "free"
+          } as UserUsage
         }
 
         const usage = { ...data[0] } as UserUsage & { next_reset_date?: string }
@@ -53,7 +57,7 @@ export const incrementUserUsage = (
     Effect.tryPromise({
       try: async () => {
         const supabase = await createClient()
-        
+
         /** @Logic.Usage.IncrementMessageCount */
         const { data, error } = await supabase.rpc("increment_user_usage", {
           p_user_id: userId,

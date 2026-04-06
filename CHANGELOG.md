@@ -1,81 +1,89 @@
 # Changelog
 
+## 2026-04-06
+
+Mejoramos significativamente la estabilidad del servicio. Reestructuramos la gestión de uso y costos de la API para garantizar disponibilidad continua, incluso en horas de alta demanda.
+
+Los usuarios del plan Pro ahora pueden consultar su consumo diario desde la página de Uso, con total visibilidad sobre su presupuesto. También optimizamos la presentación de fuentes: en lugar de mostrar múltiples enlaces individuales, ahora se agrupan en un solo elemento que abre el panel completo al interactuar con él.
+
+Un ajuste importante: la inteligencia artificial ahora conoce la fecha actual al realizar búsquedas, lo que elimina respuestas con fechas incorrectas cuando se consulta por eventos del día.
+
+A nivel interno, implementamos protecciones automáticas para que las conversaciones extensas se compacten en el momento adecuado y el servicio pueda escalar sin interrupciones.
+
 ## 2026-04-05
 
-Big day for search and transparency. We shipped **Jina web search** — the AI can now browse the web in real time when you ask about current events, prices, hours, or anything that needs up-to-date information. There's a new Web toggle in the chat input to enable it per conversation. Usage is tracked per user with daily limits, and you can see your Jina search consumption on the Usage page.
+Incorporamos la búsqueda web en tiempo real. La inteligencia artificial ahora puede consultar internet cuando se trata de eventos actuales, precios, horarios o cualquier información que requiera datos actualizados. Existe un nuevo botón en el chat para activar esta función según sea necesario.
 
-We also shipped **dynamic reasoning and search state** — instead of a generic loading animation, you now see live, context-aware status messages while the AI works: "Buscando restaurantes cerca de Condado…", "Evaluando resultados de búsqueda…", "Generando respuesta…". These messages update in real time as the request moves through the pipeline and are generated from the actual operation in progress — your search query, the tool being used, or your question.
+También mejoramos la experiencia visual durante el procesamiento: en lugar de una animación genérica, ahora se muestran mensajes descriptivos en tiempo real que indican qué operación se está ejecutando.
 
-On top of that: added **automatic chat title generation** via a dedicated `/api/chat/title` endpoint so conversations get meaningful names after the first exchange. Fixed lint and TypeScript errors across the codebase, standardized JSDoc comments to strict `@Type.Name` annotation format, added missing i18n keys for web search labels and message dismissal, and localized system prompts to Spanish for more consistent AI behavior.
+Las conversaciones ahora generan títulos automáticos después del primer intercambio, y realizamos correcciones internas para optimizar el rendimiento general.
 
 ## 2026-04-03
 
-This is the biggest update to the AI engine so far. We completely redesigned how the chat processes requests with a new **preflight pipeline** that runs before every response. The AI now understands search context — it can extract filters like time, location, and budget from your messages and automatically apply them to searches. It also rephrases ambiguous queries into better search terms using your conversation history.
+La actualización más significativa del motor de inteligencia artificial hasta la fecha. Rediseñamos el procesamiento de solicitudes con un nuevo flujo de análisis previo que se ejecuta antes de cada respuesta. El sistema ahora comprende el contexto de búsqueda: puede extraer filtros como fecha, ubicación y presupuesto de tus mensajes y aplicarlos automáticamente. También reformula consultas ambiguas utilizando el historial de conversación.
 
-We added a **relevance scoring system** that evaluates tool results and filters out irrelevant ones, so you only see useful information. After each response, the AI now generates **follow-up suggestion pills** with natural, topic-style actions you can tap to continue exploring.
+Agregamos un sistema de puntuación de relevancia que evalúa los resultados y descarta información irrelevante. Después de cada respuesta, la IA genera sugerencias de seguimiento con acciones naturales para continuar explorando.
 
-Long conversations now auto-compact into concise summaries so the AI never loses context. Your preferences and facts shared during chats are now **remembered across sessions** — tell the AI about allergies, dietary restrictions, budget, or travel companions once, and it'll remember next time.
+Las conversaciones extensas ahora se compactan automáticamente en resúmenes concisos para que la IA nunca pierda el contexto. Las preferencias y datos compartidos durante las conversaciones se recuerdan entre sesiones: menciona una alergia, restricción alimentaria, presupuesto o compañeros de viaje una vez, y el sistema lo recordará la próxima vez.
 
-We also added a new `remember_user_fact` tool so the AI can explicitly save important details you share, and localized all tool descriptions to Spanish for more consistent behavior.
+También incorporamos una herramienta para que la IA guarde explícitamente información importante que compartas, y localizamos todas las descripciones de herramientas al español para un comportamiento más consistente.
 
 ## 2026-04-02
 
-Stabilized the agentic loop with fetch retry logic for API rate limits. Migrated exception handling and suggestion display to Redux state for consistency. Expanded memory extraction regex patterns to catch more edge cases like "soy alérgico a los mariscos". Pointed the OpenRouter client to the secure internal gateway.
+Estabilizamos el ciclo de procesamiento con lógica de reintentos para límites de tasa de la API. Migramos el manejo de excepciones y la visualización de sugerencias al estado de Redux para mayor consistencia. Ampliamos los patrones de extracción de memoria para capturar más casos como "soy alérgico a los mariscos". Apuntamos el cliente de OpenRouter a la puerta de enlace interna segura.
 
 ## 2026-04-01
 
-A massive foundation day. We shipped **tool calling** so the AI can search for beaches, restaurants, hotels, events, weather, and transport in Puerto Rico. Added **token estimation and cost tracking** services behind the scenes. Built the **context compaction** system for long conversations. Laid the groundwork for **session memory** and **skill extraction**. Added a **coordinator and proactive alert** system. Wired up the full Effect runtime with proper dependency injection across all services. Started implementing **SessionMemory persistence** in Supabase with improved prompt guidelines.
+Un día fundacional. Implementamos la capacidad de ejecutar herramientas para que la IA pueda buscar playas, restaurantes, hoteles, eventos, clima y transporte en Puerto Rico. Agregamos servicios de estimación de tokens y seguimiento de costos. Construimos el sistema de compactación de contexto para conversaciones largas. Sentamos las bases para la memoria de sesión y la extracción de habilidades. Incorporamos un sistema de coordinación y alertas proactivas. Conectamos el entorno de ejecución Effect con inyección de dependencias en todos los servicios. Iniciamos la persistencia de memoria en Supabase con directrices mejoradas.
 
 ## 2026-03-31
 
-Added **prompt suggestions** — the AI now generates follow-up questions you can tap to continue the conversation. This includes the core logic, React hook, and UI integration.
+Agregamos sugerencias de seguimiento: la IA ahora genera preguntas que puedes seleccionar para continuar la conversación. Esto incluye la lógica principal, el hook de React y la integración visual.
 
 ## 2026-03-30
 
-We added haptic feedback for mobile interactions, so tapping buttons like Send, the microphone, suggestions, and sidebar items now feels more responsive and satisfying. We also standardized all code comments into clean JSDoc format and moved a lot of scattered magic values and constants into a central file to make the codebase cleaner and more maintainable.
+Incorporamos retroalimentación háptica para interacciones móviles, de modo que tocar botones como Enviar, el micrófono, sugerencias y elementos de la barra lateral se siente más receptivo. También estandarizamos los comentarios del código en formato JSDoc y consolidamos valores dispersos en un archivo central para mantener el código limpio y mantenible.
 
 ## 2026-03-28
 
-This was a big day for stability and user experience. We fixed duplicate API calls in development, added proper rate limiting, and created a Health Status page where you can check the status of our main services. We also made meaningful accessibility improvements, strengthened security with better XSS protection, and smoothed out session handling for real-time features.
+Un día importante para la estabilidad y la experiencia de usuario. Resolvimos llamadas duplicadas de la API en desarrollo, agregamos limitación de tasa apropiada y creamos una página de estado donde puedes verificar el funcionamiento de nuestros servicios principales. También realizamos mejoras significativas en accesibilidad, fortalecimos la seguridad con mejor protección contra ataques XSS y optimizamos el manejo de sesiones para funciones en tiempo real.
 
-On the features side, we introduced usage tracking with Free and Pro tiers, including daily and monthly limits with nice progress bars. Even better, we launched the full **Personalization** system. You can now customize how the AI communicates with you — choosing styles like Professional, Friendly, Quirky, or Cynical, and adjusting warmth, enthusiasm, emoji usage, and more. There’s now a dedicated Personalization page to make the AI feel truly yours.
+En cuanto a funcionalidades, introdujimos el seguimiento de uso con planes Gratuito y Pro, incluyendo límites diarios y mensuales con barras de progreso. Además, lanzamos el sistema completo de Personalización. Ahora puedes ajustar cómo se comunica la IA contigo: eligiendo estilos como Profesional, Amigable, Peculiar o Cínico, y ajustando calidez, entusiasmo, uso de emojis y más. Hay una página dedicada de Personalización para que la IA se sienta verdaderamente tuya.
 
 ## 2026-03-27
 
-Focused on improving the AI’s accuracy, especially for Puerto Rico tourism topics. We also fixed a few small usability issues that sometimes appeared while messages were streaming.
+Nos enfocamos en mejorar la precisión de la IA, especialmente en temas de turismo en Puerto Rico. También resolvimos algunos problemas menores de usabilidad que aparecían durante la transmisión de mensajes.
 
 ## 2026-03-26
 
-Fixed a frustrating bug that caused message loss when archiving or restoring chats. We also added better internal monitoring and tracing to keep things running smoothly.
+Resolvimos un problema frustrante que causaba la pérdida de mensajes al archivar o restaurar conversaciones. También agregamos mejor monitoreo interno y rastreo para mantener todo funcionando sin problemas.
 
 ## 2026-03-25
 
-We launched the complete Issue Tracker, a full notification system with unread badges, user search functionality, and some admin tools. Reporting bugs and suggesting features is now much easier and better organized.
+Lanzamos el sistema completo de Reportes de Problemas, un sistema de notificaciones con indicadores de no leídos, búsqueda de usuarios y herramientas de administración. Reportar errores y sugerir funciones ahora es más sencillo y mejor organizado.
 
 ## 2026-03-24
 
-Added a proper Release Notes section (this page!) and fixed several issues with Google sign-in to make logging in more reliable across different flows.
+Agregamos una sección de Notas de Versión adecuada y resolvimos varios problemas con el inicio de sesión de Google para que sea más confiable en todos los flujos.
 
 ## 2026-03-23
 
-A major behind-the-scenes cleanup. We improved validation, error handling, and overall architecture across the app. Many API behaviors are now cleaner and more consistent, and we added several important security and reliability improvements.
+Una limpieza importante detrás de escena. Mejoramos la validación, el manejo de errores y la arquitectura general en toda la aplicación. Muchos comportamientos de la API son ahora más limpios y consistentes, y agregamos mejoras importantes en seguridad y confiabilidad.
 
 ## 2026-03-22
 
-Significantly improved error messages with friendlier toast notifications. We added a dynamic sitemap and robots.txt for better SEO, fixed multiple security vulnerabilities, and removed a lot of old unused code and dependencies.
+Mejoramos significativamente los mensajes de error con notificaciones más amigables. Agregamos un sitemap dinámico y robots.txt para mejor posicionamiento en buscadores, resolvimos múltiples vulnerabilidades de seguridad y eliminamos código y dependencias antiguas sin uso.
 
 ## 2026-03-21
 
-Two features I’m really excited about landed today. You can now edit previous messages in a chat and have the AI continue from the edited version (time-travel style). We also added a working Stop button during streaming responses.
+Dos funcionalidades que nos entusiasman mucho. Ahora puedes editar mensajes anteriores en una conversación y hacer que la IA continúe desde la versión editada, estilo viaje en el tiempo. También agregamos un botón de detener funcional durante las respuestas en transmisión.
 
-We also introduced the Sources Sidebar, which shows references and links in real time as the AI answers — making it easier to verify information.
+También introdujimos el Panel de Fuentes, que muestra referencias y enlaces en tiempo real mientras la IA responde, facilitando la verificación de información.
 
 ## 2026-03-20
 
-Gave the app a fresh new look with a deep black background and warm amber accents. Improved mobile navigation, scrolling, and overall smoothness. We also restructured our internal prompts for higher quality, safer, and more consistent answers.
+Renovamos la apariencia de la aplicación con un fondo negro profundo y acentos en ámbar cálido. Mejoramos la navegación móvil, el desplazamiento y la fluidez general. También reestructuramos nuestras instrucciones internas para respuestas de mayor calidad, más seguras y consistentes.
 
 ## 2026-03-19
 
-**Official Launch!**
-
-Released **PR/AI** — the world’s first AI-powered Puerto Rico tourism assistant. A smart, bilingual (English & Spanish), media-rich experience built to help people explore and enjoy the island.
+Lanzamiento oficial de PR/AI, el primer asistente de turismo de Puerto Rico impulsado por inteligencia artificial. Una experiencia inteligente, bilingüe (español e inglés) y enriquecida con medios, diseñada para ayudar a explorar y disfrutar la isla.
