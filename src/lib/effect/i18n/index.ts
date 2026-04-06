@@ -348,6 +348,11 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "usage.web_searches_remaining": "Búsquedas restantes",
     "usage.web_searches_limit": "Límite diario",
     "usage.web_search_reset": "Reinicio:",
+    "usage.daily_cost_title": "Costo Diario",
+    "usage.daily_cost_description": "Costo acumulado hoy",
+    "usage.daily_cost_used": "Usado",
+    "usage.daily_cost_budget": "Presupuesto",
+    "usage.daily_cost_reset": "Se renueva",
 
     /** @Logic.I18n.Section.Personalization */
     "personalization.title": "Personalización",
@@ -805,6 +810,11 @@ const dictionary: Record<Locale, Record<string, string>> = {
     "usage.web_searches_remaining": "Searches remaining",
     "usage.web_searches_limit": "Daily limit",
     "usage.web_search_reset": "Reset:",
+    "usage.daily_cost_title": "Daily Cost",
+    "usage.daily_cost_description": "Cost accumulated today",
+    "usage.daily_cost_used": "Used",
+    "usage.daily_cost_budget": "Budget",
+    "usage.daily_cost_reset": "Resets",
 
     /** @Logic.I18n.Section.Personalization */
     "personalization.title": "Personalization",
