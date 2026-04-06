@@ -1,5 +1,8 @@
 /** @Constant.Effect.Compaction */
 
+import type { TierKey } from "../tier/TierPolicy"
+import { getSafeContextThreshold } from "../tier/TierPolicy"
+
 /** @Constant.Compaction.AutoThreshold */
 export const AUTO_COMPACT_THRESHOLD = 100_000
 
@@ -31,3 +34,7 @@ export const COMPACT_SUMMARY_PROMPT = `Resume la conversación hasta ahora en un
 Formatea como un resumen estructurado que el asistente pueda usar para continuar la conversación sin problemas.
 NO incluyas resultados de herramientas o datos crudos — solo el contexto significativo.
 Responde en el mismo idioma que ha estado usando el usuario.`
+
+/** @Logic.Compaction.GetTierContextThreshold */
+export const getTierContextThreshold = (tier: TierKey): number =>
+  getSafeContextThreshold(tier)

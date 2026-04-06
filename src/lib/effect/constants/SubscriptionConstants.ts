@@ -1,5 +1,7 @@
 /** @Constant.Effect.Subscription */
 
+import { TierPolicies } from "./tier/TierPolicy"
+
 export const SubscriptionTier = {
   Free: 'free',
   Pro: 'pro'
@@ -36,7 +38,7 @@ export const SubscriptionDefaults = {
   tier: SubscriptionTier.Free,
   status: SubscriptionStatus.Inactive,
   resetInterval: ResetInterval.Daily,
-  messagesLimit: 100
+  messagesLimit: TierPolicies.free.dailyMessages
 } as const
 
 export const TierModelConfig = {

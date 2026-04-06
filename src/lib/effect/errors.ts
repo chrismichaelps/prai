@@ -124,3 +124,9 @@ export class CommandError extends Data.TaggedError("CommandError")<{
   readonly message: string
   readonly cause?: unknown
 }> {}
+
+/** @Error.Effect.UsageEngine */
+export class UsageEngineError extends Data.TaggedError("UsageEngineError")<{
+  readonly message: string
+  readonly cause?: unknown
+}> {}

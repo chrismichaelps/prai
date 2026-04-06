@@ -17,7 +17,6 @@ import type { Database } from "@/types/database.types"
 import { toolsToOpenRouter, executeTool, validateToolInput, isReadOnlyTool } from "@/lib/effect/services/tools"
 import { runtime } from "@/lib/effect/runtime"
 import { CompactionService } from "@/lib/effect/services/compaction"
-import { COMPACT_MAX_OUTPUT_TOKENS } from "@/lib/effect/constants/compaction/CompactionConstants"
 import { SessionMemoryService } from "@/lib/effect/services/memory"
 import { SkillsService } from "@/lib/effect/services/skills"
 import { CostTrackerService } from "@/lib/effect/services/token"
@@ -26,11 +25,9 @@ import { ToolRelevanceService } from "@/lib/effect/services/relevance"
 import { SearchFilterService, enrichSearchQuery, hasFilters } from "@/lib/effect/services/filters"
 import type { SearchFilters } from "@/lib/effect/services/filters"
 import { FollowUpSuggestionsService } from "@/lib/effect/services/followup"
-import {
-  FULL_COMPACT_MIN_MESSAGES,
-  COMPACT_SYSTEM_INSTRUCTION
-} from "@/lib/effect/constants/compaction/CompactionConstants"
+
 import { QUERY_EXPANSION_MIN_LENGTH } from "@/lib/effect/constants/query/QueryExpansionConstants"
+import { canSend, usageErrorMessage, checkAndCompact } from "@/lib/effect/services/usage"
 import { searchWeb, formatJinaResults } from "@/lib/effect/services/JinaSearch"
 import { JinaLimits, JinaApi, JinaQuotaReason, JINA_WEB_SEARCH_TOOL_NAME, WEB_SEARCH_ACTIVE_INSTRUCTION } from "@/lib/effect/constants/JinaConstants"
 
@@ -119,10 +116,19 @@ export async function POST(req: Request) {
 
   const auth = authExit.value
 
-  if (!auth.canSend) {
+  const usageCheck = auth.userId
+    ? await Effect.runPromise(
+      canSend(auth.userId, auth.tier, auth.supabaseClient).pipe(
+        Effect.orElse(() => Effect.succeed({ allowed: true as const }))
+      )
+    )
+    : { allowed: true as const }
+
+  if (!usageCheck.allowed) {
     return NextResponse.json(
       {
-        error: "Message limit reached",
+        error: usageErrorMessage(usageCheck.reason),
+        reason: usageCheck.reason,
         usage: auth.usage
       },
       { status: HttpStatus.FORBIDDEN }
@@ -219,58 +225,19 @@ export async function POST(req: Request) {
       })
     )
 
-  /** @Logic.Chat.FullCompaction */
-  const runFullCompactionIfNeeded = async (
+  /** @Logic.Chat.ContextGuard */
+  const runContextGuard = async (
     messages: AgentMessage[],
     tier: SubscriptionTierType
   ): Promise<AgentMessage[]> => {
-    const nonSystemCount = messages.filter(m => m.role !== "system").length
-    if (nonSystemCount < FULL_COMPACT_MIN_MESSAGES) return messages
-
-    return runtime.runPromise(
-      Effect.gen(function* () {
-        const compaction = yield* CompactionService
-        const prompt = compaction.buildCompactPrompt(messages)
-
-        const response = yield* Effect.tryPromise({
-          try: () => fetch(ApiConstants.OPENROUTER_CHAT_COMPLETIONS, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
-              "HTTP-Referer": process.env.NEXT_PUBLIC_SITE_URL || "",
-              "X-Title": "PR\\AI Assistant"
-            },
-            body: JSON.stringify({
-              model: getModelConfig(tier).default,
-              messages: [
-                { role: "system", content: COMPACT_SYSTEM_INSTRUCTION },
-                { role: "user", content: prompt }
-              ],
-              stream: false,
-              max_tokens: COMPACT_MAX_OUTPUT_TOKENS
-            })
-          }),
-          catch: () => null as Response | null
-        })
-
-        if (!response?.ok) return messages
-
-        const data = yield* Effect.tryPromise({
-          try: () => response.json() as Promise<{ choices?: Array<{ message?: { content?: string } }> }>,
-          catch: () => null
-        })
-
-        const summary = data?.choices?.[0]?.message?.content?.trim()
-        if (!summary) return messages
-
-        const { messages: compacted } = yield* compaction.fullCompact(messages, summary)
-        const systemMsg = messages.find(m => m.role === "system")
-        return systemMsg ? [systemMsg, ...compacted] : compacted
-      }).pipe(
+    const result = await runtime.runPromise(
+      checkAndCompact(messages, tier).pipe(
         Effect.catchAll(() => Effect.succeed(messages))
       )
     )
+    const systemMsg = messages.find(m => m.role === "system")
+    const hasSystem = result.some(m => m.role === "system")
+    return systemMsg && !hasSystem ? [systemMsg, ...result] : result
   }
 
   /** @Logic.Chat.PostFlight.Memory */
@@ -405,7 +372,7 @@ export async function POST(req: Request) {
     }
 
     try {
-      let messages = await runFullCompactionIfNeeded([...initialMessages], tier)
+      let messages = await runContextGuard([...initialMessages], tier)
       const { systemPromptInsert, filters } = await runPreflight(messages, supabaseClient, userId)
       messages = applyPreflight(messages, systemPromptInsert)
 
@@ -419,6 +386,9 @@ export async function POST(req: Request) {
       emitProcessingState(ProcessingStateConstants.ANALYZING, lastUserHint || undefined)
 
       for (let i = 0; i < MAX_TOOL_ITERATIONS; i++) {
+
+        /** @Logic.Chat.ContextGuard.PerIteration */
+        messages = await runContextGuard(messages, tier)
 
         /** @Logic.Chat.MicroCompaction */
         const compacted = await runtime.runPromise(
@@ -697,11 +667,14 @@ export async function POST(req: Request) {
         ]
       })
 
-      let messages = await runFullCompactionIfNeeded([...initialMessages], tier)
+      let messages = await runContextGuard([...initialMessages], tier)
       const { systemPromptInsert, filters } = await runPreflight(messages, supabaseClient, userId)
       messages = applyPreflight(messages, systemPromptInsert)
 
       for (let i = 0; i < MAX_TOOL_ITERATIONS; i++) {
+
+        /** @Logic.Chat.ContextGuard.PerIteration */
+        messages = await runContextGuard(messages, tier)
 
         /** @Logic.Chat.MicroCompaction */
         const compacted = await runtime.runPromise(
