@@ -39,6 +39,7 @@ type AuthResult = {
   userId: string
   canSend: boolean
   tier: SubscriptionTierType
+  isAdmin: boolean
   usage: Pick<UserUsage, 'messages_used' | 'messages_limit' | 'messages_remaining' | 'usage_percentage' | 'can_send'>
   supabaseClient: SupabaseClient
 }
@@ -79,25 +80,39 @@ const getAuthAndUsage = (): Effect.Effect<AuthResult, UnauthorizedError | ChatDb
           userId: "",
           canSend: true,
           tier: SubscriptionDefaults.tier,
+          isAdmin: false,
           usage: { ...UsageDefaults },
           supabaseClient
         })
       }
       return pipe(
         getUserUsage(user.id),
-        Effect.map((usage) => ({
-          userId: user.id,
-          canSend: usage.can_send,
-          tier: (usage.subscription_tier as SubscriptionTierType) || SubscriptionDefaults.tier,
-          usage: {
-            messages_used: usage.messages_used,
-            messages_limit: usage.messages_limit,
-            messages_remaining: usage.messages_remaining,
-            usage_percentage: usage.usage_percentage,
-            can_send: usage.can_send
-          },
-          supabaseClient
-        }))
+        Effect.flatMap((usage) =>
+          Effect.tryPromise({
+            try: async () => {
+              const { data: profileData } = await supabaseClient
+                .from('profiles')
+                .select('is_admin')
+                .eq('id', user.id)
+                .single()
+              return {
+                userId: user.id,
+                canSend: usage.can_send,
+                tier: (usage.subscription_tier as SubscriptionTierType) || SubscriptionDefaults.tier,
+                isAdmin: profileData?.is_admin ?? false,
+                usage: {
+                  messages_used: usage.messages_used,
+                  messages_limit: usage.messages_limit,
+                  messages_remaining: usage.messages_remaining,
+                  usage_percentage: usage.usage_percentage,
+                  can_send: usage.can_send
+                },
+                supabaseClient
+              }
+            },
+            catch: () => new ChatDbError({ error: "Failed to fetch admin status" })
+          })
+        )
       )
     })
   )
@@ -304,7 +319,8 @@ export async function POST(req: Request) {
     tier: SubscriptionTierType,
     supabaseClient: SupabaseClient,
     onChunk: (_chunk: string) => void,
-    webSearchEnabled = false
+    webSearchEnabled = false,
+    isAdmin = false
   ): Promise<{ success: boolean; error?: string }> {
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), AGENTIC_TIMEOUT_MS)
@@ -343,7 +359,7 @@ export async function POST(req: Request) {
           return tool?.function?.name !== JINA_WEB_SEARCH_TOOL_NAME
         })
       const tools = [
-        ...(tier === SubscriptionTier.Pro ? [WebSearchTool] : []),
+        ...(isAdmin || tier === SubscriptionTier.Pro ? [WebSearchTool] : []),
         ...filteredTools,
       ]
       const body = {
@@ -647,7 +663,8 @@ export async function POST(req: Request) {
     initialMessages: AgentMessage[],
     userId: string,
     tier: SubscriptionTierType,
-    supabaseClient: SupabaseClient
+    supabaseClient: SupabaseClient,
+    isAdmin = false
   ): Promise<{ success: boolean; data?: unknown; error?: string }> => {
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), AGENTIC_TIMEOUT_MS)
@@ -662,7 +679,7 @@ export async function POST(req: Request) {
           effort: getModelConfig(tier).reasoning.reasoningEffort
         },
         tools: [
-          ...(tier === SubscriptionTier.Pro ? [WebSearchTool] : []),
+          ...(isAdmin || tier === SubscriptionTier.Pro ? [WebSearchTool] : []),
           ...(toolsToOpenRouter() as unknown[])
         ]
       })
@@ -836,7 +853,7 @@ export async function POST(req: Request) {
           const webSearchEnabled = params.features?.webSearch === true
 
           if (!isStreaming) {
-            const result = await runAgenticLoop([...params.messages], auth.userId, auth.tier, auth.supabaseClient)
+            const result = await runAgenticLoop([...params.messages], auth.userId, auth.tier, auth.supabaseClient, auth.isAdmin)
             void runPostFlight(auth.supabaseClient, auth.userId)
             const usageData = result.data && typeof result.data === 'object' ? (result.data as { usage?: { total_tokens?: number; cost?: number } }).usage || {} : {}
             const totalTokens = usageData.total_tokens || 0
@@ -874,7 +891,8 @@ export async function POST(req: Request) {
                   auth.tier,
                   auth.supabaseClient,
                   onChunk,
-                  webSearchEnabled
+                  webSearchEnabled,
+                  auth.isAdmin
                 )
 
                 void runPostFlight(auth.supabaseClient, auth.userId)
