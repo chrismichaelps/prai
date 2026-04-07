@@ -322,6 +322,8 @@ export type Database = {
           created_at: string | null
           daily_cost_usd: number
           display_name: string | null
+          gifted_tier: string | null
+          gifted_until: string | null
           handle: string
           id: string
           is_admin: boolean
@@ -348,6 +350,8 @@ export type Database = {
           created_at?: string | null
           daily_cost_usd?: number
           display_name?: string | null
+          gifted_tier?: string | null
+          gifted_until?: string | null
           handle: string
           id: string
           is_admin?: boolean
@@ -374,6 +378,8 @@ export type Database = {
           created_at?: string | null
           daily_cost_usd?: number
           display_name?: string | null
+          gifted_tier?: string | null
+          gifted_until?: string | null
           handle?: string
           id?: string
           is_admin?: boolean
@@ -486,6 +492,10 @@ export type Database = {
           usage_percentage: number
         }[]
       }
+      grant_gifted_tier: {
+        Args: { p_days?: number; p_tier: string; p_user_id: string }
+        Returns: undefined
+      }
       increment_token_usage: {
         Args: { p_cost?: number; p_tokens?: number; p_user_id: string }
         Returns: undefined
@@ -508,6 +518,7 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: undefined
       }
+      revoke_gifted_tier: { Args: { p_user_id: string }; Returns: undefined }
       search_users: {
         Args: {
           requesting_user_id: string

@@ -124,6 +124,10 @@ export async function GET(request: NextRequest) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
     
+    const adminEmails = (process.env.ADMIN_EMAILS ?? '')
+      .split(',').map(e => e.trim().toLowerCase()).filter(Boolean)
+    const isAdmin = adminEmails.includes((user.email ?? '').toLowerCase())
+
     const { error: profileError } = await supabaseAdmin.from('profiles').upsert({
       id: user.id,
       display_name: displayName,
@@ -134,6 +138,7 @@ export async function GET(request: NextRequest) {
       messages_limit: 100,
       reset_interval: 'daily',
       last_reset_date: new Date().toISOString(),
+      ...(isAdmin ? { is_admin: true } : {}),
     }, { onConflict: 'id' })
     
     if (profileError) {
